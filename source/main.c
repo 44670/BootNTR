@@ -213,6 +213,26 @@ void bnInitParamsByFirmware() {
 			ntrConfig->KProcessCodesetOffset = 0xB0;
 			
 		}
+		if (kernelVersion == SYSTEM_VERSION(2, 50, 1)) {
+			// old3ds 9.6.0
+			ntrConfig->firmVersion = SYSTEM_VERSION(9, 6, 0);
+			ntrConfig->PMSvcRunAddr = 0x00103184;
+			ntrConfig->ControlMemoryPatchAddr1 = 0xdff882D8;
+			ntrConfig->ControlMemoryPatchAddr2 = 0xdff882DC;
+			
+			bnConfig->SvcPatchAddr = 0xDFF82284;
+			bnConfig->FSPatchAddr = 0x0010EFAC;
+			bnConfig->SMPatchAddr = 0x0010189C;
+			
+			ntrConfig->IoBasePad = 0xfffc6000;
+			ntrConfig->IoBaseLcd = 0xfffc8000;
+			ntrConfig->IoBasePdc = 0xfffc0000;
+			ntrConfig->KMMUHaxAddr = 0xfffbe000;
+			ntrConfig->KMMUHaxSize = 0x00010000;
+			ntrConfig->KProcessHandleDataOffset = 0xD4;
+			ntrConfig->KProcessPIDOffset = 0xB4;
+			ntrConfig->KProcessCodesetOffset = 0xB0;
+		}
 	} else {
 		ntrConfig->IoBasePad = 0xfffc2000;
 		ntrConfig->IoBaseLcd = 0xfffc4000;
