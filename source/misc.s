@@ -20,3 +20,14 @@ InvalidateEntireDataCache:
 	mov r0, #0
 	mcr p15, 0, r0, c7, c10, 0
 	bx lr
+	
+.global FlushAllCache
+.type FlushAllCache, %function
+FlushAllCache:
+mov r0, #0
+mcr p15, 0, r0, c7, c14, 0 @Clean and Invalidate Entire Data Cache
+mcr p15, 0, r0, c7, c5, 0 @Invalidate Entire Instruction Cache. Also flushes the branch target cache
+mcr p15, 0, R0,c7,c10, 4 @Data Synchronization Barrier
+mcr p15, 0, R0,c7,c5, 4 @Flush Prefetch Buffer
+bx lr
+

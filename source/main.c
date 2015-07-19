@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <3ds.h>
-#include <khax.h>
 #include "ntr_config.h"
 #include "mysvcs.h"
 #pragma GCC diagnostic ignored "-Wformat"
@@ -364,6 +363,16 @@ Result bnInitParamsByHomeMenu() {
 		ntrConfig->HomeFSUHandleAddr = 0x313f7c;
 		ntrConfig->HomeAptStartAppletAddr = 0x12ec88;
 	}
+	if (t == 0xe2053001 ) {
+		// USA 9.9.0
+		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 9, 0);
+		ntrConfig->HomeMenuInjectAddr = 0x12ddc4;
+		ntrConfig->HomeFSReadAddr = 0x12c090;
+		ntrConfig->HomeCardUpdateInitAddr = 0x118cc0;
+		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
+		ntrConfig->HomeAptStartAppletAddr = 0x12e8fc;
+	}
+
 	return 0;
 }
 
@@ -378,6 +387,25 @@ void flushDataCache() {
 
 u32 kernelParams[32];
 
+
+void doFlushCache() {
+		FlushAllCache();
+		InvalidateEntireInstructionCache();
+		InvalidateEntireDataCache();
+		flushDataCache();
+		FlushAllCache();
+		InvalidateEntireInstructionCache();
+		InvalidateEntireDataCache();
+}
+
+
+void doStallCpu() {
+	vu32 i;
+	for (i = 0; i < 0x00100000; i++) {
+		
+	}
+}
+
 void kernelCallback() {
 	u32 svc_patch_addr = g_bnConfig.SvcPatchAddr;
 	vu32 i;
@@ -386,21 +414,24 @@ void kernelCallback() {
 		
 		InvalidateEntireInstructionCache();
 		InvalidateEntireDataCache();
-
+		
+		
 		*(int *)(svc_patch_addr+8) = 0xE1A00000; //NOP
+		doFlushCache();
+		doStallCpu();
 		*(int *)(svc_patch_addr) = 0xE1A00000; //NOP
-		InvalidateEntireInstructionCache();
-		InvalidateEntireDataCache();
-		flushDataCache();
-		InvalidateEntireInstructionCache();
-		InvalidateEntireDataCache();
+		doFlushCache();
+
+
 	}
 }
 
 void testSvcBackdoor() {
 	kernelParams[0] = 0;
-	svcBackdoor((void*) backdoorHandler);
+	svc_backDoor((void*) backdoorHandler);
 }
+
+
 
 Result bnPatchAccessCheck() {
 	Result ret;
@@ -408,7 +439,7 @@ Result bnPatchAccessCheck() {
 	svc_sleepThread(3000000000);
 	showMsgPaused("patching svc check");
 	kernelParams[0] = 1;
-	svcBackdoor((void*) backdoorHandler);
+	svc_backDoor((void*) backdoorHandler);
 	svc_sleepThread(1000000000);
 	showMsgPaused("svc check patched");
 
@@ -543,6 +574,8 @@ Result bnBootNTR() {
 	
 
 	
+	/*
+	
 	if (bnConfig->requireKernelHax) {
 		ret = khaxInit();
 		if (ret != 0) {
@@ -551,12 +584,13 @@ Result bnBootNTR() {
 		}
 		showMsgPaused("khaxInit OK");
 	}
+	*/
 
 	
 
 
 	
-	showMsg("testing svcBackdoor");
+	showMsg("testing svc_backDoor");
 	testSvcBackdoor();
 	showMsgPaused("testSvcBackdoor OK");
 	
