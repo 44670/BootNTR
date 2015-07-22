@@ -372,6 +372,16 @@ Result bnInitParamsByHomeMenu() {
 		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
 		ntrConfig->HomeAptStartAppletAddr = 0x12e8fc;
 	}
+	
+	if (t == 0xe1a00000 ) {
+		// TW 9.8.0
+		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 8, 0);
+		ntrConfig->HomeMenuInjectAddr = 0x13ba60;
+		ntrConfig->HomeFSReadAddr = 0x1188e0;
+		ntrConfig->HomeCardUpdateInitAddr = 0x13434c;
+		ntrConfig->HomeFSUHandleAddr = 0x2240d4;
+		ntrConfig->HomeAptStartAppletAddr = 0x128480;
+	}
 
 	return 0;
 }
