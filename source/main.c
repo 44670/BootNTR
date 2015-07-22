@@ -402,6 +402,17 @@ Result bnInitParamsByHomeMenu() {
 		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
 		ntrConfig->HomeAptStartAppletAddr = 0x12e8fc;
 	}
+	
+	if (t == 0xe1a02004 ) {
+		// USA 9.4.0
+		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 4, 0);
+		ntrConfig->HomeMenuInjectAddr = 0x12e204;
+		ntrConfig->HomeFSReadAddr = 0x12c630;
+		ntrConfig->HomeCardUpdateInitAddr = 0x136a98;
+		ntrConfig->HomeFSUHandleAddr = 0x313f7c;
+		ntrConfig->HomeAptStartAppletAddr = 0x12ec94;
+	}
+
 
 	
 
