@@ -298,7 +298,7 @@ Result bnInitParamsByHomeMenu() {
 	}
 	svc_closeHandle(hProcess);
 	t = *(u32*)(tmpBuffer);
-	printf("0x0020000 in HomeMenu: %08x\n", t);
+	printf("0x00200000 in HomeMenu: %08x\n", t);
 	if (t == 0xe59f80f4) {
 		// new3ds 9.2.0
 		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 2, 0);;
@@ -697,12 +697,13 @@ int main() {
 	bnConfig = &g_bnConfig;
 	ret = bnBootNTR();
 	if (ret == 0) {
-		printf("NTR CFW loaded successfully\nExiting...\n(Hold SELECT to prevent auto-exit) \n");
+		printf("NTR CFW loaded successfully\n");
 		svcSleepThread(1000000000);
 		isSuccess = 1;
 	} else {
-		printf("bnBootNTR failed, press START to exit.\n");
+		printf("bnBootNTR failed\n");
 	}
+	printf("Press Home button to return to the menu.\n");
 
 	// Main loop
 	while (aptMainLoop())
@@ -710,12 +711,7 @@ int main() {
 		hidScanInput();
 
 		u32 kDown = hidKeysDown();
-		if (kDown & KEY_SELECT) {
-			isSuccess = 0;
-		}
-		if (isSuccess) {
-			break;
-		}
+
 		if (kDown & KEY_START) {
 			break; // break in order to return to hbmenu
 		}

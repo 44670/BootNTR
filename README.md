@@ -17,4 +17,4 @@ Please send us the result.txt along with your console's firmware version (both e
 
 # Latest Build
 
-https://github.com/44670/BootNTR/raw/master/output/BootNTR.cia
+https://github.com/44670/BootNTR/raw/master/release/BootNTR.cia
