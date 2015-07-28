@@ -403,6 +403,16 @@ Result bnInitParamsByHomeMenu() {
 		ntrConfig->HomeAptStartAppletAddr = 0x12e8fc;
 	}
 	
+	if (t == 0xe1530005 ) {
+		// JP 9.6.0
+		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 6, 0);
+		ntrConfig->HomeMenuInjectAddr = 0x12ddf4;
+		ntrConfig->HomeFSReadAddr = 0x12c0c0;
+		ntrConfig->HomeCardUpdateInitAddr = 0x118cf0;
+		ntrConfig->HomeFSUHandleAddr = 0x32efac;
+		ntrConfig->HomeAptStartAppletAddr = 0x12e92c;
+	}
+	
 	if (t == 0xe1a02004 ) {
 		// USA 9.4.0
 		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 4, 0);
