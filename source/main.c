@@ -422,6 +422,16 @@ Result bnInitParamsByHomeMenu() {
 		ntrConfig->HomeFSUHandleAddr = 0x313f7c;
 		ntrConfig->HomeAptStartAppletAddr = 0x12ec94;
 	}
+	
+		if (t == 0xe1966009 ) {
+		//europe 9.7.0
+		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 7, 0);
+		ntrConfig->HomeMenuInjectAddr = 0x12dd98;
+		ntrConfig->HomeFSReadAddr = 0x12c064;
+		ntrConfig->HomeCardUpdateInitAddr = 0x118c94;
+		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
+		ntrConfig->HomeAptStartAppletAddr = 0x12e8d0;
+	}
 
 
 	
@@ -459,23 +469,87 @@ void doStallCpu() {
 	}
 }
 
+typedef struct{
+	void (*invalidateDataCache)(void *, u32);
+	void (*storeDataCache)(void *, u32);
+	void (*flushDataCache)(void *, u32);
+	void (*flushInstructionCache)(void *, u32);
+} dbgKernelCacheInterface;
+
+void kFlushDataCache(void*, u32);
+
+dbgKernelCacheInterface cacheInterface_NEW81 = {
+	//for new 3ds 8.1
+	(void*)0xFFF24C9C,
+	(void*)0xFFF1CF7C,
+	(void*)0xFFF1CCA0,
+	(void*)0xFFF1F04C
+};
+
+dbgKernelCacheInterface cacheInterface_NEW92 = {
+	//for new 3ds 9.2
+	(void*)0xFFF25768,
+	(void*)0xFFF1D9D4,
+	(void*)0xFFF1D67C,
+	(void*)0xFFF1FEEC
+};
+
+dbgKernelCacheInterface cacheInterface_NEW95 = {
+	//for new 3ds 9.5
+	(void*)0xFFF25BD8,
+	(void*)0xFFF1D9AC,
+	(void*)0xFFF1D654,
+	(void*)0xFFF1FCE8
+};
+
+dbgKernelCacheInterface cacheInterface_Old96 = {
+	//for old 3ds 9.6
+	(void*)0xFFF24FF0,
+	(void*)0xFFF1CF98,
+	(void*)0xFFF1CD30,
+	(void*)0xFFF1F748
+};
+
+dbgKernelCacheInterface cacheInterface_Old90 = {
+	//for old 3ds 9.0
+	(void*)0xFFF24B54,
+	(void*)0xFFF1CC5C,
+	(void*)0xFFF1C9F4,
+	(void*)0xFFF1F47C
+};
+
 void kernelCallback() {
 	u32 svc_patch_addr = g_bnConfig.SvcPatchAddr;
 	vu32 i;
 	
 	if (kernelParams[0] == 1) {
-		
-		InvalidateEntireInstructionCache();
-		InvalidateEntireDataCache();
-		
-		
-		*(int *)(svc_patch_addr+8) = 0xE1A00000; //NOP
-		doFlushCache();
-		doStallCpu();
+		u32 firmVersion = ntrConfig->firmVersion;
+		u32 isNew3DS = ntrConfig->isNew3DS;
+		dbgKernelCacheInterface * cache = (void*)0;
+		if (isNew3DS)
+		{
+			if (firmVersion == SYSTEM_VERSION(8, 1, 0))
+				cache = &cacheInterface_NEW81;
+			else if (firmVersion == SYSTEM_VERSION(9, 2, 0))
+				cache = &cacheInterface_NEW92;
+			else if (firmVersion == SYSTEM_VERSION(9, 5, 0))
+				cache = &cacheInterface_NEW95;
+		}
+		else
+		{
+			if (firmVersion == SYSTEM_VERSION(9, 0, 0))
+				cache = &cacheInterface_Old90;
+			else if (firmVersion == SYSTEM_VERSION(9, 6, 0))
+				cache = &cacheInterface_Old96;
+		}
+		*(int *)(svc_patch_addr + 8) = 0xE1A00000; //NOP
 		*(int *)(svc_patch_addr) = 0xE1A00000; //NOP
-		doFlushCache();
-
-
+		kFlushDataCache(svc_patch_addr, 0x10);//
+		if (cache)
+		{
+			cache->invalidateDataCache(svc_patch_addr, 0x10);//
+			cache->flushInstructionCache(svc_patch_addr - 0xDFF80000 + 0xFFF00000, 0x10);//
+		}
 	}
 }
 
