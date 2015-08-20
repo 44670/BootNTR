@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <3ds.h>
-#include <khax.h>
 #include "ntr_config.h"
 #include "mysvcs.h"
 #pragma GCC diagnostic ignored "-Wformat"
@@ -213,6 +212,26 @@ void bnInitParamsByFirmware() {
 			ntrConfig->KProcessCodesetOffset = 0xB0;
 			
 		}
+		if (kernelVersion == SYSTEM_VERSION(2, 50, 1)) {
+			// old3ds 9.6.0
+			ntrConfig->firmVersion = SYSTEM_VERSION(9, 6, 0);
+			ntrConfig->PMSvcRunAddr = 0x00103184;
+			ntrConfig->ControlMemoryPatchAddr1 = 0xdff882D8;
+			ntrConfig->ControlMemoryPatchAddr2 = 0xdff882DC;
+			
+			bnConfig->SvcPatchAddr = 0xDFF82284;
+			bnConfig->FSPatchAddr = 0x0010EFAC;
+			bnConfig->SMPatchAddr = 0x0010189C;
+			
+			ntrConfig->IoBasePad = 0xfffc6000;
+			ntrConfig->IoBaseLcd = 0xfffc8000;
+			ntrConfig->IoBasePdc = 0xfffc0000;
+			ntrConfig->KMMUHaxAddr = 0xfffbe000;
+			ntrConfig->KMMUHaxSize = 0x00010000;
+			ntrConfig->KProcessHandleDataOffset = 0xD4;
+			ntrConfig->KProcessPIDOffset = 0xB4;
+			ntrConfig->KProcessCodesetOffset = 0xB0;
+		}
 	} else {
 		ntrConfig->IoBasePad = 0xfffc2000;
 		ntrConfig->IoBaseLcd = 0xfffc4000;
@@ -279,7 +298,7 @@ Result bnInitParamsByHomeMenu() {
 	}
 	svc_closeHandle(hProcess);
 	t = *(u32*)(tmpBuffer);
-	printf("0x0020000 in HomeMenu: %08x\n", t);
+	printf("0x00200000 in HomeMenu: %08x\n", t);
 	if (t == 0xe59f80f4) {
 		// new3ds 9.2.0
 		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 2, 0);;
@@ -344,6 +363,69 @@ Result bnInitParamsByHomeMenu() {
 		ntrConfig->HomeFSUHandleAddr = 0x313f7c;
 		ntrConfig->HomeAptStartAppletAddr = 0x12ec88;
 	}
+	if (t == 0xe2053001 ) {
+		// USA 9.9.0
+		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 9, 0);
+		ntrConfig->HomeMenuInjectAddr = 0x12ddc4;
+		ntrConfig->HomeFSReadAddr = 0x12c090;
+		ntrConfig->HomeCardUpdateInitAddr = 0x118cc0;
+		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
+		ntrConfig->HomeAptStartAppletAddr = 0x12e8fc;
+	}
+	
+	if (t == 0xe1a00000 ) {
+		// TW 9.8.0
+		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 8, 0);
+		ntrConfig->HomeMenuInjectAddr = 0x13ba60;
+		ntrConfig->HomeFSReadAddr = 0x1188e0;
+		ntrConfig->HomeCardUpdateInitAddr = 0x13434c;
+		ntrConfig->HomeFSUHandleAddr = 0x2240d4;
+		ntrConfig->HomeAptStartAppletAddr = 0x128480;
+	}
+	
+	if (t == 0xe12fff1e ) {
+		// TW 9.9.0
+		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 9, 0);
+		ntrConfig->HomeMenuInjectAddr = 0x13c0ac;
+		ntrConfig->HomeFSReadAddr = 0x118c04;
+		ntrConfig->HomeCardUpdateInitAddr = 0x134794;
+		ntrConfig->HomeFSUHandleAddr = 0x2250e4;
+		ntrConfig->HomeAptStartAppletAddr = 0x1288c8;
+	}
+	
+	if (t == 0x0032dde8 ) {
+		// JP 9.9.0
+		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 9, 0);
+		ntrConfig->HomeMenuInjectAddr = 0x12ddc4;
+		ntrConfig->HomeFSReadAddr = 0x12c090;
+		ntrConfig->HomeCardUpdateInitAddr = 0x118cc0;
+		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
+		ntrConfig->HomeAptStartAppletAddr = 0x12e8fc;
+	}
+	
+	if (t == 0xe1530005 ) {
+		// JP 9.6.0
+		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 6, 0);
+		ntrConfig->HomeMenuInjectAddr = 0x12ddf4;
+		ntrConfig->HomeFSReadAddr = 0x12c0c0;
+		ntrConfig->HomeCardUpdateInitAddr = 0x118cf0;
+		ntrConfig->HomeFSUHandleAddr = 0x32efac;
+		ntrConfig->HomeAptStartAppletAddr = 0x12e92c;
+	}
+	
+	if (t == 0xe1a02004 ) {
+		// USA 9.4.0
+		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 4, 0);
+		ntrConfig->HomeMenuInjectAddr = 0x12e204;
+		ntrConfig->HomeFSReadAddr = 0x12c630;
+		ntrConfig->HomeCardUpdateInitAddr = 0x136a98;
+		ntrConfig->HomeFSUHandleAddr = 0x313f7c;
+		ntrConfig->HomeAptStartAppletAddr = 0x12ec94;
+	}
+
+
+	
+
 	return 0;
 }
 
@@ -358,6 +440,25 @@ void flushDataCache() {
 
 u32 kernelParams[32];
 
+
+void doFlushCache() {
+		FlushAllCache();
+		InvalidateEntireInstructionCache();
+		InvalidateEntireDataCache();
+		flushDataCache();
+		FlushAllCache();
+		InvalidateEntireInstructionCache();
+		InvalidateEntireDataCache();
+}
+
+
+void doStallCpu() {
+	vu32 i;
+	for (i = 0; i < 0x00100000; i++) {
+		
+	}
+}
+
 void kernelCallback() {
 	u32 svc_patch_addr = g_bnConfig.SvcPatchAddr;
 	vu32 i;
@@ -366,21 +467,24 @@ void kernelCallback() {
 		
 		InvalidateEntireInstructionCache();
 		InvalidateEntireDataCache();
-
+		
+		
 		*(int *)(svc_patch_addr+8) = 0xE1A00000; //NOP
+		doFlushCache();
+		doStallCpu();
 		*(int *)(svc_patch_addr) = 0xE1A00000; //NOP
-		InvalidateEntireInstructionCache();
-		InvalidateEntireDataCache();
-		flushDataCache();
-		InvalidateEntireInstructionCache();
-		InvalidateEntireDataCache();
+		doFlushCache();
+
+
 	}
 }
 
 void testSvcBackdoor() {
 	kernelParams[0] = 0;
-	svcBackdoor((void*) backdoorHandler);
+	svc_backDoor((void*) backdoorHandler);
 }
+
+
 
 Result bnPatchAccessCheck() {
 	Result ret;
@@ -388,7 +492,7 @@ Result bnPatchAccessCheck() {
 	svc_sleepThread(3000000000);
 	showMsgPaused("patching svc check");
 	kernelParams[0] = 1;
-	svcBackdoor((void*) backdoorHandler);
+	svc_backDoor((void*) backdoorHandler);
 	svc_sleepThread(1000000000);
 	showMsgPaused("svc check patched");
 
@@ -523,6 +627,8 @@ Result bnBootNTR() {
 	
 
 	
+	/*
+	
 	if (bnConfig->requireKernelHax) {
 		ret = khaxInit();
 		if (ret != 0) {
@@ -531,12 +637,13 @@ Result bnBootNTR() {
 		}
 		showMsgPaused("khaxInit OK");
 	}
+	*/
 
 	
 
 
 	
-	showMsg("testing svcBackdoor");
+	showMsg("testing svc_backDoor");
 	testSvcBackdoor();
 	showMsgPaused("testSvcBackdoor OK");
 	
@@ -600,12 +707,13 @@ int main() {
 	bnConfig = &g_bnConfig;
 	ret = bnBootNTR();
 	if (ret == 0) {
-		printf("NTR CFW loaded successfully\nExiting...\n(Hold SELECT to prevent auto-exit) \n");
+		printf("NTR CFW loaded successfully\n");
 		svcSleepThread(1000000000);
 		isSuccess = 1;
 	} else {
-		printf("bnBootNTR failed, press START to exit.\n");
+		printf("bnBootNTR failed\n");
 	}
+	printf("Press Home button to return to the menu.\n");
 
 	// Main loop
 	while (aptMainLoop())
@@ -613,12 +721,7 @@ int main() {
 		hidScanInput();
 
 		u32 kDown = hidKeysDown();
-		if (kDown & KEY_SELECT) {
-			isSuccess = 0;
-		}
-		if (isSuccess) {
-			break;
-		}
+
 		if (kDown & KEY_START) {
 			break; // break in order to return to hbmenu
 		}

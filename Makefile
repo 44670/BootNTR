@@ -175,22 +175,15 @@ stripped.elf: $(OUTPUT).elf
 	@cp $(OUTPUT).elf stripped.elf
 	@$(PREFIX)strip stripped.elf
 
-$(OUTPUT).3dsx: stripped.elf
-
-$(OUTPUT).3ds: stripped.elf banner.bnr icon.icn
-	@$(MAKEROM) -f cci -o $(OUTPUT).3ds -rsf $(RSF_3DS) -target d -exefslogo -elf stripped.elf -icon icon.icn -banner banner.bnr -DAPP_TITLE="$(APP_TITLE)" -DAPP_PRODUCT_CODE="$(APP_PRODUCT_CODE)" -DAPP_UNIQUE_ID="$(APP_UNIQUE_ID)"
-	@echo "built ... $(notdir $@)"
 
 $(OUTPUT).cia: stripped.elf banner.bnr icon.icn
 	@$(MAKEROM) -f cia -o $(OUTPUT).cia -rsf $(RSF_CIA) -target t -exefslogo -elf stripped.elf -icon icon.icn -banner banner.bnr -DAPP_TITLE="$(APP_TITLE)" -DAPP_PRODUCT_CODE="$(APP_PRODUCT_CODE)" -DAPP_UNIQUE_ID="$(APP_UNIQUE_ID)"
 	@echo "built ... $(notdir $@)"
 
-$(OUTPUT).zip: $(OUTPUT_D) $(OUTPUT).elf $(OUTPUT).3dsx $(OUTPUT).smdh $(OUTPUT).3ds $(OUTPUT).cia
+$(OUTPUT).zip: $(OUTPUT_D) $(OUTPUT).elf  $(OUTPUT).smdh  $(OUTPUT).cia
 	@cd $(OUTPUT_D); \
 	mkdir -p 3ds/$(OUTPUT_N); \
-	cp $(OUTPUT_N).3dsx 3ds/$(OUTPUT_N); \
-	cp $(OUTPUT_N).smdh 3ds/$(OUTPUT_N); \
-	zip -r $(OUTPUT_N).zip $(OUTPUT_N).elf $(OUTPUT_N).3ds $(OUTPUT_N).cia 3ds > /dev/null; \
+	zip -r $(OUTPUT_N).zip  $(OUTPUT_N).cia  > /dev/null; \
 	rm -r 3ds
 	@echo "built ... $(notdir $@)"
 
