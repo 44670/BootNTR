@@ -423,7 +423,7 @@ Result bnInitParamsByHomeMenu() {
 		ntrConfig->HomeAptStartAppletAddr = 0x12ec94;
 	}
 	
-		if (t == 0xe1966009 ) {
+	if (t == 0xe1966009 ) {
 		//europe 9.7.0
 		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 7, 0);
 		ntrConfig->HomeMenuInjectAddr = 0x12dd98;
@@ -434,7 +434,26 @@ Result bnInitParamsByHomeMenu() {
 	}
 
 
-	
+	if (t == 0xe28f3fde ) {
+		// USA 8.1.0-9U
+		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(8,1,0);
+		ntrConfig->HomeMenuInjectAddr = 0x13f2d8;
+		ntrConfig->HomeFSReadAddr = 0x11a994;
+		ntrConfig->HomeCardUpdateInitAddr = 0x13719c;
+		ntrConfig->HomeFSUHandleAddr = 0x238df4;
+		ntrConfig->HomeAptStartAppletAddr = 0x12aac0;
+	}
+
+
+	if (t == 0xe1a0231c ) {
+		// Korea 9.9.0
+		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 9, 0);
+		ntrConfig->HomeMenuInjectAddr = 0x12dd98;
+		ntrConfig->HomeFSReadAddr = 0x12c064;
+		ntrConfig->HomeCardUpdateInitAddr = 0x118c94;
+		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
+		ntrConfig->HomeAptStartAppletAddr = 0x12e8d0;
+	}
 
 	return 0;
 }
