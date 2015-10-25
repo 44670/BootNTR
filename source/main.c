@@ -319,6 +319,16 @@ Result bnInitParamsByHomeMenu() {
 		ntrConfig->HomeAptStartAppletAddr = 0x12e8fc;
 	}
 	
+	if (t == 0xe5943088 ) {
+	// old 3ds 6.1 eur
+	ntrConfig->HomeMenuVersion = SYSTEM_VERSION(6, 1, 0);
+	ntrConfig->HomeMenuInjectAddr = 0x13cc40;
+	ntrConfig->HomeFSReadAddr = 0x119b3c;
+	ntrConfig->HomeCardUpdateInitAddr = 0x135584;
+	ntrConfig->HomeFSUHandleAddr = 0x2331d4;
+	ntrConfig->HomeAptStartAppletAddr = 0x1295d4;
+	}
+	
 	if (t == 0xe59f80f4) {
 		// new3ds 9.2.0
 		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 2, 0);;
