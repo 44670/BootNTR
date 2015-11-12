@@ -300,14 +300,24 @@ Result bnInitParamsByHomeMenu() {
 	t = *(u32*)(tmpBuffer);
 	printf("0x00200000 in HomeMenu: %08x\n", t);
 	
+	if (t == 0xe8960140 ) {
+		// old 3ds 10.3 usa
+		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(10, 3, 0);
+		ntrConfig->HomeMenuInjectAddr = 0x12ddc4;
+		ntrConfig->HomeFSReadAddr = 0x12c090;
+		ntrConfig->HomeCardUpdateInitAddr = 0x118cc0;
+		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
+		ntrConfig->HomeAptStartAppletAddr = 0x12e8fc;
+	}
+	
 	if (t == 0xe5c580f5 ) {
-	// old 3ds 10.3 eur
-	ntrConfig->HomeMenuVersion = SYSTEM_VERSION(10, 3, 0);
-	ntrConfig->HomeMenuInjectAddr = 0x12ddc4;
-	ntrConfig->HomeFSReadAddr = 0x12c090;
-	ntrConfig->HomeCardUpdateInitAddr = 0x118cc0;
-	ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
-	ntrConfig->HomeAptStartAppletAddr = 0x12e8fc;
+		// old 3ds 10.3 eur
+		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(10, 3, 0);
+		ntrConfig->HomeMenuInjectAddr = 0x12ddc4;
+		ntrConfig->HomeFSReadAddr = 0x12c090;
+		ntrConfig->HomeCardUpdateInitAddr = 0x118cc0;
+		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
+		ntrConfig->HomeAptStartAppletAddr = 0x12e8fc;
 	}
 	
         if (t == 0x0a000004 ) {
