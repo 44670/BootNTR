@@ -83,6 +83,7 @@ AccessControlInfo:
    # - CreateSeed
    # - UseCardSpi
 
+  SystemMode: 3
   IdealProcessor                : 0
   AffinityMask                  : 1
   
