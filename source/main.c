@@ -299,6 +299,47 @@ Result bnInitParamsByHomeMenu() {
 	svc_closeHandle(hProcess);
 	t = *(u32*)(tmpBuffer);
 	printf("0x00200000 in HomeMenu: %08x\n", t);
+	
+	if (t == 0xe8960140 ) {
+		// old 3ds 10.3 usa
+		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(10, 3, 0);
+		ntrConfig->HomeMenuInjectAddr = 0x12ddc4;
+		ntrConfig->HomeFSReadAddr = 0x12c090;
+		ntrConfig->HomeCardUpdateInitAddr = 0x118cc0;
+		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
+		ntrConfig->HomeAptStartAppletAddr = 0x12e8fc;
+	}
+	
+	if (t == 0xe5c580f5 ) {
+		// old 3ds 10.3 eur
+		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(10, 3, 0);
+		ntrConfig->HomeMenuInjectAddr = 0x12ddc4;
+		ntrConfig->HomeFSReadAddr = 0x12c090;
+		ntrConfig->HomeCardUpdateInitAddr = 0x118cc0;
+		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
+		ntrConfig->HomeAptStartAppletAddr = 0x12e8fc;
+	}
+	
+        if (t == 0x0a000004 ) {
+		// old 3ds 10.1 eur
+		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(10, 1, 0);
+		ntrConfig->HomeMenuInjectAddr = 0x12ddc4;
+		ntrConfig->HomeFSReadAddr = 0x12c090;
+		ntrConfig->HomeCardUpdateInitAddr = 0x118cc0;
+		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
+		ntrConfig->HomeAptStartAppletAddr = 0x12e8fc;
+	}
+	
+	if (t == 0xe1530721 ) {
+		// old 3ds 10.1 usa
+		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(10, 1, 0);
+		ntrConfig->HomeMenuInjectAddr = 0x12ddc4;
+		ntrConfig->HomeFSReadAddr = 0x12c090;
+		ntrConfig->HomeCardUpdateInitAddr = 0x118cc0;
+		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
+		ntrConfig->HomeAptStartAppletAddr = 0x12e8fc;
+	}
+	
 	if (t == 0xe59f80f4) {
 		// new3ds 9.2.0
 		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 2, 0);;
@@ -423,7 +464,7 @@ Result bnInitParamsByHomeMenu() {
 		ntrConfig->HomeAptStartAppletAddr = 0x12ec94;
 	}
 	
-		if (t == 0xe1966009 ) {
+	if (t == 0xe1966009 ) {
 		//europe 9.7.0
 		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 7, 0);
 		ntrConfig->HomeMenuInjectAddr = 0x12dd98;
@@ -434,7 +475,26 @@ Result bnInitParamsByHomeMenu() {
 	}
 
 
-	
+	if (t == 0xe28f3fde ) {
+		// USA 8.1.0-9U
+		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(8,1,0);
+		ntrConfig->HomeMenuInjectAddr = 0x13f2d8;
+		ntrConfig->HomeFSReadAddr = 0x11a994;
+		ntrConfig->HomeCardUpdateInitAddr = 0x13719c;
+		ntrConfig->HomeFSUHandleAddr = 0x238df4;
+		ntrConfig->HomeAptStartAppletAddr = 0x12aac0;
+	}
+
+
+	if (t == 0xe1a0231c ) {
+		// Korea 9.9.0
+		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 9, 0);
+		ntrConfig->HomeMenuInjectAddr = 0x12dd98;
+		ntrConfig->HomeFSReadAddr = 0x12c064;
+		ntrConfig->HomeCardUpdateInitAddr = 0x118c94;
+		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
+		ntrConfig->HomeAptStartAppletAddr = 0x12e8d0;
+	}
 
 	return 0;
 }
