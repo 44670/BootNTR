@@ -21,21 +21,6 @@ Option:
   EnableCrypt             : false # Enables encryption for NCCH and CIA
   EnableCompress          : true # Compresses exefs code
 
-ExeFs: # these are the program segments from the ELF, check your elf for the appropriate segment names
-  ReadOnly: 
-   - .rodata
-   - RO
-  ReadWrite: 
-   - .data
-   - RO
-  Text: 
-   - .init
-   - .text
-   - STUP_ENTRY
-   
-PlainRegion: # only used with SDK ELFs 
-  #- .module_id
-
 #Rom:
   # Specifies the root path of the file system to include in the ROM.
   # HostRoot                : "romfs"
@@ -83,7 +68,7 @@ AccessControlInfo:
    # - CreateSeed
    # - UseCardSpi
 
-  SystemMode: 3
+  SystemMode: 80MB
   IdealProcessor                : 0
   AffinityMask                  : 1
   
