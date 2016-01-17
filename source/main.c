@@ -171,7 +171,7 @@ void bnInitParamsByFirmware() {
 	{
 		u8 tmp;
 		
-		Result ret = APT_CheckNew3DS(0, &tmp);;
+		Result ret = APT_CheckNew3DS(&tmp);;
 		if (ret == 0)
 		{
 			if (tmp) {
@@ -275,6 +275,36 @@ void bnInitParamsByFirmware() {
 			bnConfig->SvcPatchAddr = 0xDFF8226c;
 			bnConfig->FSPatchAddr = 0x0010ED64;
 			bnConfig->SMPatchAddr = 0x00101838 ;
+		}
+		
+		if (kernelVersion == SYSTEM_VERSION(2, 50, 1)) {
+			//new3ds 9.6
+			ntrConfig->firmVersion = SYSTEM_VERSION(9, 6, 0);
+			ntrConfig->PMSvcRunAddr = 0x001030D8;
+			ntrConfig->ControlMemoryPatchAddr1 = 0xdff8850C;
+			ntrConfig->ControlMemoryPatchAddr2 = 0xdff88510;
+			
+			bnConfig->SvcPatchAddr = 0xDFF82268;
+			bnConfig->FSPatchAddr = 0x0010EFAC;
+			bnConfig->SMPatchAddr = 0x0010189C;
+		}
+		
+		if (kernelVersion == SYSTEM_VERSION(2, 50, 7)) {
+			// new3ds 10.0
+			//TODO: add new3ds 10.0 firmware support
+			ntrConfig->firmVersion = SYSTEM_VERSION(10, 0, 0);
+		}
+		
+		if (kernelVersion == SYSTEM_VERSION(2, 50, 9)) {
+			// new3ds 10.2
+			ntrConfig->firmVersion = SYSTEM_VERSION(10, 2, 0);
+			ntrConfig->PMSvcRunAddr = 0x001031E4;
+			ntrConfig->ControlMemoryPatchAddr1 = 0xdff884E4;
+			ntrConfig->ControlMemoryPatchAddr2 = 0xdff884E8;
+			
+			bnConfig->SvcPatchAddr = 0xDFF82270;
+			bnConfig->FSPatchAddr = 0x0010EED4;
+			bnConfig->SMPatchAddr = 0x0010189C;
 		}
 	}
 	bnConfig->requireKernelHax = 0;
@@ -562,6 +592,22 @@ dbgKernelCacheInterface cacheInterface_NEW95 = {
 	(void*)0xFFF1FCE8
 };
 
+dbgKernelCacheInterface cacheInterface_NEW96 = {
+	//for new3ds 9.6
+	(void*)0xFFF25C24,
+	(void*)0xFFF1D9D4,
+	(void*)0xFFF1D67C,
+	(void*)0xFFF1FD10
+};
+
+dbgKernelCacheInterface cacheInterface_NEW102 = {
+	//for new3ds 10.2
+	(void*)0xFFF25BFC,
+	(void*)0xFFF1D9AC,
+	(void*)0xFFF1D654,
+	(void*)0xFFF1FCE8
+};
+
 dbgKernelCacheInterface cacheInterface_Old96 = {
 	//for old 3ds 9.6
 	(void*)0xFFF24FF0,
@@ -594,6 +640,10 @@ void kernelCallback() {
 				cache = &cacheInterface_NEW92;
 			else if (firmVersion == SYSTEM_VERSION(9, 5, 0))
 				cache = &cacheInterface_NEW95;
+			else if (firmVersion == SYSTEM_VERSION(9, 6, 0))
+				cache = &cacheInterface_NEW96;
+			else if (firmVersion == SYSTEM_VERSION(10, 2, 0))
+				cache = &cacheInterface_NEW102;
 		}
 		else
 		{
@@ -664,8 +714,8 @@ Result bnLoadAndExecuteNTR() {
 	u32 ret;
 	
 	
-	fsInit();
-	FILE *file = fopen("ntr.bin","rb");
+//	fsInit();
+	FILE *file = fopen("sdmc:/ntr.bin","rb");
 	if (file == 0) {
 		printf("open ntr.bin failed\n");
 		return RESULT_ERROR;
@@ -681,22 +731,24 @@ Result bnLoadAndExecuteNTR() {
 	ntrConfig->arm11BinSize = rtAlignToPageSize(size);
 	u32 outAddr;
 	u32 totalSize = (ntrConfig->arm11BinSize) * 2;
-	ret = svc_controlMemory((u32*)&outAddr, 0, 0, totalSize, 0x10003, 3);
-	if (ret != 0) {
-		printf("svc_controlMemory failed: %08x\n", ret);
+	// use linearMemAlign instead of svc_controlMemory
+	outAddr = (u32)linearMemAlign(totalSize, 0x1000);
+	if (outAddr == 0) {
+		printf("linearMemAlign failed\n");
 		return RESULT_ERROR;
 	}
+	
 	ntrConfig->arm11BinStart = (outAddr + ntrConfig->arm11BinSize);
 	rtCheckRemoteMemoryRegionSafeForWrite(getCurrentProcessHandle(), outAddr, totalSize);
 	printf("outAddr: %08x\n", outAddr);
 	memset((void*) outAddr, 0, totalSize);
 	fread((void*) outAddr, size, 1, file);
 	memcpy((void*) (outAddr +(ntrConfig->arm11BinSize)), (void*) outAddr, size);
-	fsExit();
+//	fsExit();
 	
-	Handle fsUserHandle;
+	Handle fsUserHandle = 0;
 	ret=srvGetServiceHandle(&fsUserHandle, "fs:USER");
-	FSUSER_Initialize(&fsUserHandle);
+	FSUSER_Initialize(fsUserHandle);
 	ntrConfig->fsUserHandle = fsUserHandle;
 	
 	u32* bootArgs = outAddr + 4;
@@ -743,11 +795,13 @@ Result bnBootNTR() {
 	
 
 	// allocate the tmpBuffer
-	ret = svc_controlMemory((u32*)&tmpBuffer, 0, 0, TMPBUFFER_SIZE, 0x10003, 3);
-	if (ret != 0) {
-		printf("svc_controlMemory failed: %08x\n", ret);
+	// use linearMemAlign instead of svc_controlMemory
+	tmpBuffer = (u32)linearMemAlign(TMPBUFFER_SIZE, 0x1000);
+	if (tmpBuffer == 0) {
+		printf("linearMemAlign failed\n");
 		return RESULT_ERROR;
 	}
+
 	printf("tmpBuffer: %08x\n", tmpBuffer);
 	
 	bnInitParamsByFirmware();
