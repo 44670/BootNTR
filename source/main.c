@@ -322,6 +322,9 @@ Result bnInitParamsByHomeMenu() {
 	flushDataCache();
 	*(u32*)(tmpBuffer) = 0;
 	ret = copyRemoteMemory(CURRENT_PROCESS_HANDLE, tmpBuffer, hProcess, (void*)0x00200000, 4);
+	svc_sleepThread(500000000);
+	ret = copyRemoteMemory(CURRENT_PROCESS_HANDLE, tmpBuffer, hProcess, (void*)0x00200000, 4);
+	svc_sleepThread(500000000);
 	if (ret != 0) {
 		printf("copyRemoteMemory failed:%08x\n", ret);
 		return ret;
@@ -524,6 +527,16 @@ Result bnInitParamsByHomeMenu() {
 		ntrConfig->HomeCardUpdateInitAddr = 0x118c94;
 		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
 		ntrConfig->HomeAptStartAppletAddr = 0x12e8d0;
+	}
+	
+	if (t == 0xea00001f ) {
+		//  10.4.0-29J
+		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(10,4,0);
+		ntrConfig->HomeMenuInjectAddr = 0x12ded0;
+		ntrConfig->HomeFSReadAddr = 0x12c19c;
+		ntrConfig->HomeCardUpdateInitAddr = 0x118d78;
+		ntrConfig->HomeFSUHandleAddr = 0x32efa4;
+		ntrConfig->HomeAptStartAppletAddr = 0x12ea08;
 	}
 
 	return 0;
