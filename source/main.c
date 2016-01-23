@@ -191,6 +191,7 @@ void bnInitParamsByFirmware() {
 			ntrConfig->firmVersion = SYSTEM_VERSION(8, 0, 0);
 			bnConfig->SvcPatchAddr = 0xDFF82294;
 		}
+
 		if (kernelVersion == SYSTEM_VERSION(2, 46, 0)) {
 			// old3ds 9.0.0
 			ntrConfig->firmVersion = SYSTEM_VERSION(9, 0, 0);
@@ -212,6 +213,7 @@ void bnInitParamsByFirmware() {
 			ntrConfig->KProcessCodesetOffset = 0xB0;
 			
 		}
+
 		if (kernelVersion == SYSTEM_VERSION(2, 50, 1)) {
 			// old3ds 9.6.0
 			ntrConfig->firmVersion = SYSTEM_VERSION(9, 6, 0);
@@ -313,7 +315,7 @@ void bnInitParamsByFirmware() {
 Result bnInitParamsByHomeMenu() {
 	u32 hProcess = 0, ret;
 	vu32 t = 0x11111111;
-	
+
 	ret = svc_openProcess(&hProcess, ntrConfig->HomeMenuPid);
 	if (ret != 0) {
 		printf("openProcess failed:%08x\n", ret);
@@ -332,7 +334,7 @@ Result bnInitParamsByHomeMenu() {
 	svc_closeHandle(hProcess);
 	t = *(u32*)(tmpBuffer);
 	printf("0x00200000 in HomeMenu: %08x\n", t);
-	
+
 	if (t == 0xe8960140 ) {
 		// old 3ds 10.3 usa
 		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(10, 3, 0);
@@ -342,7 +344,7 @@ Result bnInitParamsByHomeMenu() {
 		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
 		ntrConfig->HomeAptStartAppletAddr = 0x12e8fc;
 	}
-	
+
 	if (t == 0xe5c580f5 ) {
 		// old 3ds 10.3 eur
 		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(10, 3, 0);
@@ -352,7 +354,7 @@ Result bnInitParamsByHomeMenu() {
 		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
 		ntrConfig->HomeAptStartAppletAddr = 0x12e8fc;
 	}
-	
+
         if (t == 0x0a000004 ) {
 		// old 3ds 10.1 eur
 		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(10, 1, 0);
@@ -362,7 +364,7 @@ Result bnInitParamsByHomeMenu() {
 		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
 		ntrConfig->HomeAptStartAppletAddr = 0x12e8fc;
 	}
-	
+
 	if (t == 0xe1530721 ) {
 		// old 3ds 10.1 usa
 		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(10, 1, 0);
@@ -372,7 +374,7 @@ Result bnInitParamsByHomeMenu() {
 		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
 		ntrConfig->HomeAptStartAppletAddr = 0x12e8fc;
 	}
-	
+
 	if (t == 0xe59f80f4) {
 		// new3ds 9.2.0
 		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 2, 0);;
@@ -383,6 +385,7 @@ Result bnInitParamsByHomeMenu() {
 		ntrConfig->HomeAptStartAppletAddr = 0x00131C98;
 
 	} 
+
 	if (t == 0xE28DD008) {
 		// new3ds 9.1.0
 		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 1, 0);;
@@ -392,6 +395,7 @@ Result bnInitParamsByHomeMenu() {
 		ntrConfig->HomeFSUHandleAddr = 0x002F1EFC;
 		ntrConfig->HomeAptStartAppletAddr = 0x00131C98;
 	}
+
 	if (t == 0xE1B03F02) {
 		// new3ds 9.0.0
 		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 0, 0);;
@@ -401,6 +405,7 @@ Result bnInitParamsByHomeMenu() {
 		ntrConfig->HomeFSUHandleAddr = 0x002EFEFC;
 		ntrConfig->HomeAptStartAppletAddr = 0x0013178C;
 	}
+
 	if (t == 0xE28F2E19) {
 		// new3ds 8.1.0
 		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(8, 1, 0);;
@@ -410,6 +415,7 @@ Result bnInitParamsByHomeMenu() {
 		ntrConfig->HomeFSUHandleAddr = 0x00278E4C;
 		ntrConfig->HomeAptStartAppletAddr = 0x00129BFC;
 	}
+
 	if (t == 0xe59f201c ) {
 		// iQue 9.3.0
 		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 3, 0);
@@ -419,6 +425,7 @@ Result bnInitParamsByHomeMenu() {
 		ntrConfig->HomeFSUHandleAddr = 0x2240d4;
 		ntrConfig->HomeAptStartAppletAddr = 0x128480;
 	}
+
 	if (t == 0xe3a06001 ) {
 		// iQue 4.4.0
 		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(4, 4, 0);
@@ -428,6 +435,7 @@ Result bnInitParamsByHomeMenu() {
 		ntrConfig->HomeFSUHandleAddr = 0x2210cc;
 		ntrConfig->HomeAptStartAppletAddr = 0x12844c;
 	}
+
 	if (t == 0xeb0083b3 ) {
 		// new3ds 9.5.0
 		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 5, 0);
@@ -437,6 +445,7 @@ Result bnInitParamsByHomeMenu() {
 		ntrConfig->HomeFSUHandleAddr = 0x313f7c;
 		ntrConfig->HomeAptStartAppletAddr = 0x12ec88;
 	}
+
 	if (t == 0xe2053001 ) {
 		// USA 9.9.0
 		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 9, 0);
@@ -507,7 +516,6 @@ Result bnInitParamsByHomeMenu() {
 		ntrConfig->HomeAptStartAppletAddr = 0x12e8d0;
 	}
 
-
 	if (t == 0xe28f3fde ) {
 		// USA 8.1.0-9U
 		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(8,1,0);
@@ -517,7 +525,6 @@ Result bnInitParamsByHomeMenu() {
 		ntrConfig->HomeFSUHandleAddr = 0x238df4;
 		ntrConfig->HomeAptStartAppletAddr = 0x12aac0;
 	}
-
 
 	if (t == 0xe1a0231c ) {
 		// Korea 9.9.0
@@ -693,7 +700,6 @@ Result bnPatchAccessCheck() {
 	svc_sleepThread(1000000000);
 	showMsgPaused("svc check patched");
 
-	
 	// do a dma copy to get the finish state value on current console
 	ret = copyRemoteMemory(CURRENT_PROCESS_HANDLE, tmpBuffer, CURRENT_PROCESS_HANDLE, tmpBuffer + 0x10, 0x10);
 	if (ret != 0) {
@@ -725,9 +731,8 @@ Result bnPatchAccessCheck() {
 
 Result bnLoadAndExecuteNTR() {
 	u32 ret;
-	
-	
-//	fsInit();
+
+	//fsInit();
 	FILE *file = fopen("sdmc:/ntr.bin","rb");
 	if (file == 0) {
 		printf("open ntr.bin failed\n");
@@ -750,20 +755,19 @@ Result bnLoadAndExecuteNTR() {
 		printf("linearMemAlign failed\n");
 		return RESULT_ERROR;
 	}
-	
+
 	ntrConfig->arm11BinStart = (outAddr + ntrConfig->arm11BinSize);
 	rtCheckRemoteMemoryRegionSafeForWrite(getCurrentProcessHandle(), outAddr, totalSize);
 	printf("outAddr: %08x\n", outAddr);
 	memset((void*) outAddr, 0, totalSize);
 	fread((void*) outAddr, size, 1, file);
 	memcpy((void*) (outAddr +(ntrConfig->arm11BinSize)), (void*) outAddr, size);
-//	fsExit();
-	
+	//fsExit();
 	Handle fsUserHandle = 0;
 	ret=srvGetServiceHandle(&fsUserHandle, "fs:USER");
 	FSUSER_Initialize(fsUserHandle);
 	ntrConfig->fsUserHandle = fsUserHandle;
-	
+
 	u32* bootArgs = outAddr + 4;
 	bootArgs[0] = 0;
 	bootArgs[1] = 0xb00d;
@@ -805,7 +809,6 @@ Result validateHomeMenuParams() {
 
 Result bnBootNTR() {	
 	Result ret;
-	
 
 	// allocate the tmpBuffer
 	// use linearMemAlign instead of svc_controlMemory
@@ -816,7 +819,7 @@ Result bnBootNTR() {
 	}
 
 	printf("tmpBuffer: %08x\n", tmpBuffer);
-	
+
 	bnInitParamsByFirmware();
 	printf("IsNew3DS: %d\n", ntrConfig->isNew3DS);
 	printf("firmVersion: %08x\n", ntrConfig->firmVersion);
@@ -825,11 +828,8 @@ Result bnBootNTR() {
 		ntrConfig->firmVersion = 0;
 	}
 	ntrConfig->ShowDbgFunc = (void*) showMsg;
-	
 
-	
 	/*
-	
 	if (bnConfig->requireKernelHax) {
 		ret = khaxInit();
 		if (ret != 0) {
@@ -840,15 +840,10 @@ Result bnBootNTR() {
 	}
 	*/
 
-	
-
-
-	
 	showMsg("testing svc_backDoor");
 	testSvcBackdoor();
 	showMsgPaused("testSvcBackdoor OK");
-	
-	
+
 	if (ntrConfig->firmVersion) {
 
 		ret = bnPatchAccessCheck(bnConfig);
@@ -870,8 +865,6 @@ Result bnBootNTR() {
 	}
 	rtCheckRemoteMemoryRegionSafeForWrite(getCurrentProcessHandle(), tmpBuffer, TMPBUFFER_SIZE);
 	showMsgPaused("copyRemoteMemory/controlProcessMemory OK");
-	
-
 
 	bnInitParamsByHomeMenu();
 	if (validateHomeMenuParams() != 0) {
@@ -881,8 +874,8 @@ Result bnBootNTR() {
 	if (ntrConfig->HomeMenuVersion == 0) {
 		showMsgPaused("unknown Home Menu");
 	} 
-	
-	
+
+
 	// load and execute ntr.bin, if firmware/home menu is unsupported, it will start ram dumping
 	ret = bnLoadAndExecuteNTR();
 	
@@ -894,39 +887,35 @@ Result bnBootNTR() {
 
 int main() {
 	Result ret;
-	int isSuccess = 0;
-	
+	int exit = 0;
+
 	// Initialize services
 	gfxInitDefault();
 
 	// Init console for text output
 	consoleInit(GFX_BOTTOM, NULL);
 
-
 	printf("BootNTR 2.4\n");
 	ntrConfig = &g_ntrConfig;
 	bnConfig = &g_bnConfig;
 	ret = bnBootNTR();
 	if (ret == 0) {
-		printf("NTR CFW loaded successfully\n");
-		svcSleepThread(1000000000);
-		isSuccess = 1;
+		printf("NTR CFW loaded successfully!\n");
 	} else {
-		printf("bnBootNTR failed\n");
+		printf("bnBootNTR failed.\n");
 	}
-	printf("Press Home button to return to the menu.\n");
+	printf("Returning to the menu in 5 seconds...\n");
+	svcSleepThread(5000000000);
+	exit = 1;
 
 	// Main loop
 	while (aptMainLoop())
 	{
-		hidScanInput();
 
-		u32 kDown = hidKeysDown();
-
-		if (kDown & KEY_START) {
-			break; // break in order to return to hbmenu
+		if (exit) {
+			break; // break in order to return to menu
 		}
-		
+
 		// Flush and swap framebuffers
 		gfxFlushBuffers();
 		gfxSwapBuffers();
