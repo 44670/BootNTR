@@ -538,6 +538,15 @@ Result bnInitParamsByHomeMenu() {
 		ntrConfig->HomeFSUHandleAddr = 0x32efa4;
 		ntrConfig->HomeAptStartAppletAddr = 0x12ea08;
 	}
+	if (t == 0xe1a00006 ) {
+		// new3ds 10.5.0U
+		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(10, 5, 0);
+		ntrConfig->HomeMenuInjectAddr = 0x12ded0;
+		ntrConfig->HomeFSReadAddr = 0x12c19c;
+		ntrConfig->HomeCardUpdateInitAddr = 0x118d78;
+		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
+		ntrConfig->HomeAptStartAppletAddr = 0x12ea08;
+	}
 
 	return 0;
 }
