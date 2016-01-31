@@ -1,0 +1,3 @@
+[submodule "lib/ctrcommon"]
+	path = lib/ctrcommon
+	url = https://github.com/Steveice10/ctrcommon.git
