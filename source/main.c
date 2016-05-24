@@ -313,7 +313,8 @@ void bnInitParamsByFirmware() {
 Result bnInitParamsByHomeMenu() {
 	u32 hProcess = 0, ret;
 	vu32 t = 0x11111111;
-	
+	u8 region;
+
 	ret = svc_openProcess(&hProcess, ntrConfig->HomeMenuPid);
 	if (ret != 0) {
 		printf("openProcess failed:%08x\n", ret);
@@ -332,7 +333,23 @@ Result bnInitParamsByHomeMenu() {
 	svc_closeHandle(hProcess);
 	t = *(u32*)(tmpBuffer);
 	printf("0x00200000 in HomeMenu: %08x\n", t);
-	
+
+	ret = cfguInit();
+	if (ret != 0) {
+		printf("cfg:u init failed:%08x\n", ret);
+		return ret;
+	}
+	ret = CFGU_SecureInfoGetRegion(&region);
+	if (ret != 0) {
+		printf("CFGU_SecureInfoGetRegion failed:%08x\n", ret);
+		return ret;
+	}
+	if (region >= 7) {
+		printf("Wrong region:%d\n", region);
+		return -9;
+	}
+	cfguExit();
+
 	if (t == 0xe3a08001 ) {
 		// old 3ds 10.6.0-27K
 		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(10, 6, 0);
@@ -468,13 +485,23 @@ Result bnInitParamsByHomeMenu() {
 	}
 	
 	if (t == 0xe12fff1e ) {
-		// TW 9.9.0
-		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 9, 0);
-		ntrConfig->HomeMenuInjectAddr = 0x13c0ac;
-		ntrConfig->HomeFSReadAddr = 0x118c04;
-		ntrConfig->HomeCardUpdateInitAddr = 0x134794;
-		ntrConfig->HomeFSUHandleAddr = 0x2250e4;
-		ntrConfig->HomeAptStartAppletAddr = 0x1288c8;
+		if (region == 5) {
+			// KR 10.1.0-23
+			ntrConfig->HomeMenuVersion = SYSTEM_VERSION(10, 1, 0);
+			ntrConfig->HomeMenuInjectAddr = 0x12ddc4;
+			ntrConfig->HomeFSReadAddr = 0x12c090;
+			ntrConfig->HomeCardUpdateInitAddr = 0x118cc0;
+			ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
+			ntrConfig->HomeAptStartAppletAddr = 0x12e8fc;
+		} else {
+			// TW 9.9.0
+			ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 9, 0);
+			ntrConfig->HomeMenuInjectAddr = 0x13c0ac;
+			ntrConfig->HomeFSReadAddr = 0x118c04;
+			ntrConfig->HomeCardUpdateInitAddr = 0x134794;
+			ntrConfig->HomeFSUHandleAddr = 0x2250e4;
+			ntrConfig->HomeAptStartAppletAddr = 0x1288c8;
+		}
 	}
 	
 	if (t == 0x0032dde8 ) {
