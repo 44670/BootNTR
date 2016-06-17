@@ -1009,28 +1009,26 @@ int main() {
 		printf("NTR CFW loaded successfully\n");
 		svcSleepThread(1000000000);
 		isSuccess = 1;
+		printf("Exit...\n");
 	} else {
 		printf("bnBootNTR failed\n");
-	}
-	printf("Press Home button to return to the menu.\n");
+		printf("Press Home Button to return to the menu.\n");
 
-	// Main loop
-	while (aptMainLoop())
-	{
-		hidScanInput();
+		while (aptMainLoop())
+		{
+			hidScanInput();
 
-		u32 kDown = hidKeysDown();
+			u32 kDown = hidKeysDown();
 
-		if (kDown & KEY_START) {
-			break; // break in order to return to hbmenu
+			if (kDown & KEY_START) {
+				break;
+			}
+
+			gfxFlushBuffers();
+			gfxSwapBuffers();
+			gspWaitForVBlank();
 		}
-		
-		// Flush and swap framebuffers
-		gfxFlushBuffers();
-		gfxSwapBuffers();
-		gspWaitForVBlank();
 	}
-
 
 	gfxExit();
 	return 0;
