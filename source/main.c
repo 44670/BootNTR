@@ -232,6 +232,26 @@ void bnInitParamsByFirmware() {
 			ntrConfig->KProcessPIDOffset = 0xB4;
 			ntrConfig->KProcessCodesetOffset = 0xB0;
 		}
+		if (kernelVersion == SYSTEM_VERSION(2, 51, 0)) {
+			// old3ds 11.0.0
+			ntrConfig->firmVersion = SYSTEM_VERSION(11, 0, 0);
+			ntrConfig->PMSvcRunAddr = 0x00103154;
+			ntrConfig->ControlMemoryPatchAddr1 = 0xDFF88468;
+			ntrConfig->ControlMemoryPatchAddr2 = 0xDFF8846C;
+			
+			bnConfig->SvcPatchAddr = 0xDFF82288;
+			bnConfig->FSPatchAddr = 0x0010EED4;
+			bnConfig->SMPatchAddr = 0x0010189C;
+			
+			ntrConfig->IoBasePad = 0xfffc6000;
+			ntrConfig->IoBaseLcd = 0xfffc8000;
+			ntrConfig->IoBasePdc = 0xfffc0000;
+			ntrConfig->KMMUHaxAddr = 0xfffbe000;
+			ntrConfig->KMMUHaxSize = 0x00010000;
+			ntrConfig->KProcessHandleDataOffset = 0xD4;
+			ntrConfig->KProcessPIDOffset = 0xB4;
+			ntrConfig->KProcessCodesetOffset = 0xB0;
+		}
 	} else {
 		ntrConfig->IoBasePad = 0xfffc2000;
 		ntrConfig->IoBaseLcd = 0xfffc4000;
@@ -303,6 +323,18 @@ void bnInitParamsByFirmware() {
 			ntrConfig->ControlMemoryPatchAddr2 = 0xdff884E8;
 			
 			bnConfig->SvcPatchAddr = 0xDFF82270;
+			bnConfig->FSPatchAddr = 0x0010EED4;
+			bnConfig->SMPatchAddr = 0x0010189C;
+		}
+
+		if (kernelVersion == SYSTEM_VERSION(2, 51, 0)) {
+			// new3ds 11.0
+			ntrConfig->firmVersion = SYSTEM_VERSION(11, 0, 0);
+			ntrConfig->PMSvcRunAddr = 0x00103150;
+			ntrConfig->ControlMemoryPatchAddr1 = 0xDFF88598;
+			ntrConfig->ControlMemoryPatchAddr2 = 0xDFF8859C;
+			
+			bnConfig->SvcPatchAddr = 0xDFF8226C;
 			bnConfig->FSPatchAddr = 0x0010EED4;
 			bnConfig->SMPatchAddr = 0x0010189C;
 		}
@@ -667,12 +699,12 @@ dbgKernelCacheInterface cacheInterface_NEW102 = {
 	(void*)0xFFF1FCE8
 };
 
-dbgKernelCacheInterface cacheInterface_Old96 = {
-	//for old 3ds 9.6
-	(void*)0xFFF24FF0,
-	(void*)0xFFF1CF98,
-	(void*)0xFFF1CD30,
-	(void*)0xFFF1F748
+dbgKernelCacheInterface cacheInterface_NEW110 = {
+	//for new 3ds 11.0
+	(void*)0xFFF26174,
+	(void*)0xFFF1DEF0,
+	(void*)0xFFF1DB98,
+	(void*)0xFFF2022C
 };
 
 dbgKernelCacheInterface cacheInterface_Old90 = {
@@ -681,6 +713,22 @@ dbgKernelCacheInterface cacheInterface_Old90 = {
 	(void*)0xFFF1CC5C,
 	(void*)0xFFF1C9F4,
 	(void*)0xFFF1F47C
+};
+
+dbgKernelCacheInterface cacheInterface_Old96 = {
+	//for old 3ds 9.6
+	(void*)0xFFF24FF0,
+	(void*)0xFFF1CF98,
+	(void*)0xFFF1CD30,
+	(void*)0xFFF1F748
+};
+
+dbgKernelCacheInterface cacheInterface_Old110 = {
+	//for old 3ds 11.0
+	(void*)0xFFF2552C,
+	(void*)0xFFF1D758,
+	(void*)0xFFF1D4F0,
+	(void*)0xFFF1FC50
 };
 
 void kernelCallback() {
@@ -703,6 +751,8 @@ void kernelCallback() {
 				cache = &cacheInterface_NEW96;
 			else if (firmVersion == SYSTEM_VERSION(10, 2, 0))
 				cache = &cacheInterface_NEW102;
+			else if (firmVersion == SYSTEM_VERSION(11, 0, 0))
+				cache = &cacheInterface_NEW110;
 		}
 		else
 		{
@@ -710,6 +760,8 @@ void kernelCallback() {
 				cache = &cacheInterface_Old90;
 			else if (firmVersion == SYSTEM_VERSION(9, 6, 0))
 				cache = &cacheInterface_Old96;
+			else if (firmVersion == SYSTEM_VERSION(11, 0, 0))
+				cache = &cacheInterface_Old110;
 		}
 		*(int *)(svc_patch_addr + 8) = 0xE1A00000; //NOP
 		*(int *)(svc_patch_addr) = 0xE1A00000; //NOP
