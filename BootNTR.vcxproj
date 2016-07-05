@@ -1,0 +1,156 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{B2F0601F-BEC5-4653-A44F-BB9617A02F2C}</ProjectGuid>
+    <RootNamespace>BootNTR</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>C:\Users\Nath\Desktop\prog\BootNTR\source;C:\devkitPro\libctru\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <None Include="lib\ctrcommon\data\ctrcommon_font.bin" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="lib\ctrcommon\include\ctrcommon\app.hpp" />
+    <ClInclude Include="lib\ctrcommon\include\ctrcommon\fs.hpp" />
+    <ClInclude Include="lib\ctrcommon\include\ctrcommon\gpu.hpp" />
+    <ClInclude Include="lib\ctrcommon\include\ctrcommon\input.hpp" />
+    <ClInclude Include="lib\ctrcommon\include\ctrcommon\ir.hpp" />
+    <ClInclude Include="lib\ctrcommon\include\ctrcommon\nor.hpp" />
+    <ClInclude Include="lib\ctrcommon\include\ctrcommon\platform.hpp" />
+    <ClInclude Include="lib\ctrcommon\include\ctrcommon\socket.hpp" />
+    <ClInclude Include="lib\ctrcommon\include\ctrcommon\sound.hpp" />
+    <ClInclude Include="lib\ctrcommon\include\ctrcommon\types.hpp" />
+    <ClInclude Include="lib\ctrcommon\include\ctrcommon\ui.hpp" />
+    <ClInclude Include="lib\ctrcommon\include\ctrcommon_font_bin.h" />
+    <ClInclude Include="lib\ctrcommon\include\ctrcommon_shader_vsh_shbin.h" />
+    <ClInclude Include="lib\ctrcommon\source\ctrcommon\service.hpp" />
+    <ClInclude Include="source\mysvcs.h" />
+    <ClInclude Include="source\ns.h" />
+    <ClInclude Include="source\ntr_config.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="lib\ctrcommon\source\ctrcommon\app.cpp" />
+    <ClCompile Include="lib\ctrcommon\source\ctrcommon\fs.cpp" />
+    <ClCompile Include="lib\ctrcommon\source\ctrcommon\gpu.cpp" />
+    <ClCompile Include="lib\ctrcommon\source\ctrcommon\gput.cpp" />
+    <ClCompile Include="lib\ctrcommon\source\ctrcommon\input.cpp" />
+    <ClCompile Include="lib\ctrcommon\source\ctrcommon\ir.cpp" />
+    <ClCompile Include="lib\ctrcommon\source\ctrcommon\nor.cpp" />
+    <ClCompile Include="lib\ctrcommon\source\ctrcommon\platform.cpp" />
+    <ClCompile Include="lib\ctrcommon\source\ctrcommon\service.cpp" />
+    <ClCompile Include="lib\ctrcommon\source\ctrcommon\socket.cpp" />
+    <ClCompile Include="lib\ctrcommon\source\ctrcommon\sound.cpp" />
+    <ClCompile Include="lib\ctrcommon\source\ctrcommon\ui.cpp" />
+    <ClCompile Include="source\files.c" />
+    <ClCompile Include="source\main.c" />
+    <ClCompile Include="source\ntr_launcher.c" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
