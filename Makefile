@@ -75,13 +75,6 @@ else
 	endif
 endif
 
-ifneq ("$(wildcard $(TOPDIR)/resources/banner.cgfx)","")
-	BANNER_IMAGE := $(TOPDIR)/resources/banner.cgfx
-	BANNER_IMAGE_ARG := -ci $(BANNER_IMAGE)
-else
-	BANNER_IMAGE := $(TOPDIR)/resources/banner.png
-	BANNER_IMAGE_ARG := -i $(BANNER_IMAGE)
-endif
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
@@ -173,7 +166,7 @@ stripped.elf: $(OUTPUT).elf
 	@$(PREFIX)strip stripped.elf
 
 
-$(OUTPUT).cia: stripped.elf banner.bnr icon.icn
+$(OUTPUT).cia: stripped.elf icon.icn
 	@$(MAKEROM) -f cia -o $(OUTPUT).cia -rsf $(RSF_CIA) -target t -exefslogo -elf stripped.elf -icon icon.icn -banner banner.bnr -DAPP_TITLE="$(APP_TITLE)" -DAPP_PRODUCT_CODE="$(APP_PRODUCT_CODE)" -DAPP_UNIQUE_ID="$(APP_UNIQUE_ID)"
 	@echo "built ... $(notdir $@)"
 
