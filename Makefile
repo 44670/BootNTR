@@ -163,9 +163,6 @@ all: $(OUTPUT).zip
 $(OUTPUT_D):
 	@[ -d $@ ] || mkdir -p $@
 
-banner.bnr: $(BANNER_IMAGE) $(TOPDIR)/resources/audio.wav
-	@$(BANNERTOOL) makebanner $(BANNER_IMAGE_ARG) -a $(TOPDIR)/resources/audio.wav -o banner.bnr > /dev/null
-
 icon.icn: $(TOPDIR)/resources/icon.png
 	@$(BANNERTOOL) makesmdh -s "$(APP_TITLE)" -l "$(APP_TITLE)" -p "$(APP_AUTHOR)" -i $(TOPDIR)/resources/icon.png -o icon.icn > /dev/null
 
