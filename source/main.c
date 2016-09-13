@@ -169,7 +169,7 @@ void bnInitParamsByFirmware() {
 	u32 isNew3DS = 0;
 	if (kernelVersion >= SYSTEM_VERSION(2, 44, 6))
 	{
-		u8 tmp;
+		bool tmp;
 		
 		Result ret = APT_CheckNew3DS(&tmp);;
 		if (ret == 0)
