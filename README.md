@@ -8,6 +8,7 @@ Current consoles supported on this version are:
 
 * n3ds EUR
 * n3ds USA
+* n3ds JPN
 * o3ds EUR
 
 If your console isn't in this region, run the latest CIA and send me the resulting pidf.dmp.
