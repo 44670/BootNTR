@@ -628,7 +628,7 @@ Result bnInitParamsByHomeMenu() {
 	}
 
 	if (t == 0xe0811101) {
-		// old3ds 11.1.0E
+		// old/new3ds 11.1.0E
 		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(11, 1, 0);
 		ntrConfig->HomeMenuInjectAddr = 0x12ded0;
 		ntrConfig->HomeFSReadAddr = 0x12c19c;
