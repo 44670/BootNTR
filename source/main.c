@@ -627,6 +627,16 @@ Result bnInitParamsByHomeMenu() {
 		ntrConfig->HomeAptStartAppletAddr = 0x12ea08;
 	}
 
+	if (t == 0xe0811101) {
+		// old3ds 11.1.0E
+		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(11, 1, 0);
+		ntrConfig->HomeMenuInjectAddr = 0x12ded0;
+		ntrConfig->HomeFSReadAddr = 0x12c19c;
+		ntrConfig->HomeCardUpdateInitAddr = 0x118d78;
+		ntrConfig->HomeFSUHandleAddr = 0x32efa4;
+		ntrConfig->HomeAptStartAppletAddr = 0x12ea08;
+	}
+
 	return 0;
 }
 
