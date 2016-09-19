@@ -186,6 +186,15 @@ void bnInitParamsByFirmware() {
 	bnConfig->FSPid = 0;
 	
 	if (!isNew3DS) {
+		ntrConfig->IoBasePad = 0xfffc6000;
+		ntrConfig->IoBaseLcd = 0xfffc8000;
+		ntrConfig->IoBasePdc = 0xfffc0000;
+		ntrConfig->KMMUHaxAddr = 0xfffbe000;
+		ntrConfig->KMMUHaxSize = 0x00010000;
+		ntrConfig->KProcessHandleDataOffset = 0xD4;
+		ntrConfig->KProcessPIDOffset = 0xB4;
+		ntrConfig->KProcessCodesetOffset = 0xB0;
+
 		if (kernelVersion == SYSTEM_VERSION(2, 44, 6)) {
 			//TODO: add old3ds 8.0.0 firmware support 
 			ntrConfig->firmVersion = SYSTEM_VERSION(8, 0, 0);
@@ -201,16 +210,6 @@ void bnInitParamsByFirmware() {
 			bnConfig->SvcPatchAddr = 0xDFF82290;
 			bnConfig->FSPatchAddr = 0x0010ED64;
 			bnConfig->SMPatchAddr = 0x00101838;
-			
-			ntrConfig->IoBasePad = 0xfffc6000;
-			ntrConfig->IoBaseLcd = 0xfffc8000;
-			ntrConfig->IoBasePdc = 0xfffc0000;
-			ntrConfig->KMMUHaxAddr = 0xfffbe000;
-			ntrConfig->KMMUHaxSize = 0x00010000;
-			ntrConfig->KProcessHandleDataOffset = 0xD4;
-			ntrConfig->KProcessPIDOffset = 0xB4;
-			ntrConfig->KProcessCodesetOffset = 0xB0;
-			
 		}
 		if (kernelVersion == SYSTEM_VERSION(2, 50, 1)) {
 			// old3ds 9.6.0
@@ -222,15 +221,6 @@ void bnInitParamsByFirmware() {
 			bnConfig->SvcPatchAddr = 0xDFF82284;
 			bnConfig->FSPatchAddr = 0x0010EFAC;
 			bnConfig->SMPatchAddr = 0x0010189C;
-			
-			ntrConfig->IoBasePad = 0xfffc6000;
-			ntrConfig->IoBaseLcd = 0xfffc8000;
-			ntrConfig->IoBasePdc = 0xfffc0000;
-			ntrConfig->KMMUHaxAddr = 0xfffbe000;
-			ntrConfig->KMMUHaxSize = 0x00010000;
-			ntrConfig->KProcessHandleDataOffset = 0xD4;
-			ntrConfig->KProcessPIDOffset = 0xB4;
-			ntrConfig->KProcessCodesetOffset = 0xB0;
 		}
 		if (kernelVersion == SYSTEM_VERSION(2, 51, 0)) {
 			// old3ds 11.0.0
@@ -242,15 +232,17 @@ void bnInitParamsByFirmware() {
 			bnConfig->SvcPatchAddr = 0xDFF82288;
 			bnConfig->FSPatchAddr = 0x0010EED4;
 			bnConfig->SMPatchAddr = 0x0010189C;
+		}
+		if (kernelVersion == SYSTEM_VERSION(2, 51, 2)) {
+			// old3ds 11.1.0
+			ntrConfig->firmVersion = SYSTEM_VERSION(11, 1, 0);
+			ntrConfig->PMSvcRunAddr = 0x00103154;
+			ntrConfig->ControlMemoryPatchAddr1 = 0xDFF88468;
+			ntrConfig->ControlMemoryPatchAddr2 = 0xDFF8846C;
 			
-			ntrConfig->IoBasePad = 0xfffc6000;
-			ntrConfig->IoBaseLcd = 0xfffc8000;
-			ntrConfig->IoBasePdc = 0xfffc0000;
-			ntrConfig->KMMUHaxAddr = 0xfffbe000;
-			ntrConfig->KMMUHaxSize = 0x00010000;
-			ntrConfig->KProcessHandleDataOffset = 0xD4;
-			ntrConfig->KProcessPIDOffset = 0xB4;
-			ntrConfig->KProcessCodesetOffset = 0xB0;
+			bnConfig->SvcPatchAddr = 0xDFF82288;
+			bnConfig->FSPatchAddr = 0x0010F024;
+			bnConfig->SMPatchAddr = 0x0010189C;
 		}
 	} else {
 		ntrConfig->IoBasePad = 0xfffc2000;
@@ -336,6 +328,18 @@ void bnInitParamsByFirmware() {
 			
 			bnConfig->SvcPatchAddr = 0xDFF8226C;
 			bnConfig->FSPatchAddr = 0x0010EED4;
+			bnConfig->SMPatchAddr = 0x0010189C;
+		}
+
+		if (kernelVersion == SYSTEM_VERSION(2, 51, 2)) {
+			// new3ds 11.1
+			ntrConfig->firmVersion = SYSTEM_VERSION(11, 1, 0);
+                        ntrConfig->PMSvcRunAddr = 0x00103150;
+			ntrConfig->ControlMemoryPatchAddr1 = 0xDFF88598;
+			ntrConfig->ControlMemoryPatchAddr2 = 0xDFF8859C;
+			
+			bnConfig->SvcPatchAddr = 0xDFF8226C;
+			bnConfig->FSPatchAddr = 0x0010F024;
 			bnConfig->SMPatchAddr = 0x0010189C;
 		}
 	}
@@ -617,6 +621,26 @@ Result bnInitParamsByHomeMenu() {
 		ntrConfig->HomeAptStartAppletAddr = 0x12ea08;
 	}
 
+	if (t == 0xe7941100) {
+		// new3ds 11.1.0U
+		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(11, 1, 0);
+		ntrConfig->HomeMenuInjectAddr = 0x12ded0;
+		ntrConfig->HomeFSReadAddr = 0x12c19c;
+		ntrConfig->HomeCardUpdateInitAddr = 0x118d78;
+		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
+		ntrConfig->HomeAptStartAppletAddr = 0x12ea08;
+	}
+
+	if (t == 0xe0811101) {
+		// old/new3ds 11.1.0E and new3ds 11.1.0J
+		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(11, 1, 0);
+		ntrConfig->HomeMenuInjectAddr = 0x12ded0;
+		ntrConfig->HomeFSReadAddr = 0x12c19c;
+		ntrConfig->HomeCardUpdateInitAddr = 0x118d78;
+		ntrConfig->HomeFSUHandleAddr = 0x32efa4;
+		ntrConfig->HomeAptStartAppletAddr = 0x12ea08;
+	}
+
 	return 0;
 }
 
@@ -707,6 +731,14 @@ dbgKernelCacheInterface cacheInterface_NEW110 = {
 	(void*)0xFFF2022C
 };
 
+dbgKernelCacheInterface cacheInterface_NEW111 = {
+	//for new 3ds 11.1
+	(void*)0xFFF261F0,
+	(void*)0xFFF1DF6C,
+	(void*)0xFFF1DC14,
+	(void*)0xFFF202A8
+};
+
 dbgKernelCacheInterface cacheInterface_Old90 = {
 	//for old 3ds 9.0
 	(void*)0xFFF24B54,
@@ -731,6 +763,14 @@ dbgKernelCacheInterface cacheInterface_Old110 = {
 	(void*)0xFFF1FC50
 };
 
+dbgKernelCacheInterface cacheInterface_Old111 = {
+	//for old 3ds 11.1
+	(void*)0xFFF255A8,
+	(void*)0xFFF1D7D4,
+	(void*)0xFFF1D56C,
+	(void*)0xFFF1FCCC
+};
+
 void kernelCallback() {
 	u32 svc_patch_addr = g_bnConfig.SvcPatchAddr;
 	vu32 i;
@@ -753,6 +793,8 @@ void kernelCallback() {
 				cache = &cacheInterface_NEW102;
 			else if (firmVersion == SYSTEM_VERSION(11, 0, 0))
 				cache = &cacheInterface_NEW110;
+			else if (firmVersion == SYSTEM_VERSION(11, 1, 0))
+				cache = &cacheInterface_NEW111;
 		}
 		else
 		{
@@ -762,6 +804,8 @@ void kernelCallback() {
 				cache = &cacheInterface_Old96;
 			else if (firmVersion == SYSTEM_VERSION(11, 0, 0))
 				cache = &cacheInterface_Old110;
+			else if (firmVersion == SYSTEM_VERSION(11, 1, 0))
+				cache = &cacheInterface_Old111;
 		}
 		*(int *)(svc_patch_addr + 8) = 0xE1A00000; //NOP
 		*(int *)(svc_patch_addr) = 0xE1A00000; //NOP
@@ -1009,28 +1053,26 @@ int main() {
 		printf("NTR CFW loaded successfully\n");
 		svcSleepThread(1000000000);
 		isSuccess = 1;
+		printf("Exit...\n");
 	} else {
 		printf("bnBootNTR failed\n");
-	}
-	printf("Press Home button to return to the menu.\n");
+		printf("Press Home Button to return to the menu.\n");
 
-	// Main loop
-	while (aptMainLoop())
-	{
-		hidScanInput();
+		while (aptMainLoop())
+		{
+			hidScanInput();
 
-		u32 kDown = hidKeysDown();
+			u32 kDown = hidKeysDown();
 
-		if (kDown & KEY_START) {
-			break; // break in order to return to hbmenu
+			if (kDown & KEY_START) {
+				break;
+			}
+
+			gfxFlushBuffers();
+			gfxSwapBuffers();
+			gspWaitForVBlank();
 		}
-		
-		// Flush and swap framebuffers
-		gfxFlushBuffers();
-		gfxSwapBuffers();
-		gspWaitForVBlank();
 	}
-
 
 	gfxExit();
 	return 0;
