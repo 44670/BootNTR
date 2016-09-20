@@ -129,6 +129,7 @@
     <ClInclude Include="lib\ctrcommon\include\ctrcommon_font_bin.h" />
     <ClInclude Include="lib\ctrcommon\include\ctrcommon_shader_vsh_shbin.h" />
     <ClInclude Include="lib\ctrcommon\source\ctrcommon\service.hpp" />
+    <ClInclude Include="source\main.h" />
     <ClInclude Include="source\mysvcs.h" />
     <ClInclude Include="source\ns.h" />
     <ClInclude Include="source\ntr_config.h" />
@@ -146,8 +147,13 @@
     <ClCompile Include="lib\ctrcommon\source\ctrcommon\socket.cpp" />
     <ClCompile Include="lib\ctrcommon\source\ctrcommon\sound.cpp" />
     <ClCompile Include="lib\ctrcommon\source\ctrcommon\ui.cpp" />
+    <ClCompile Include="source\common_functions.c" />
     <ClCompile Include="source\files.c" />
+    <ClCompile Include="source\firmware.c" />
+    <ClCompile Include="source\homemenu.c" />
+    <ClCompile Include="source\kernel.c" />
     <ClCompile Include="source\main.c" />
+    <ClCompile Include="source\memory_functions.c" />
     <ClCompile Include="source\ntr_launcher.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

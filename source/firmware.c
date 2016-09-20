@@ -28,6 +28,14 @@ void	bnInitParamsByFirmware(void)
 	bnConfig->FSPid = 0;
 	if (!isNew3DS)
 	{
+		ntrConfig->IoBasePad = 0xfffc6000;
+		ntrConfig->IoBaseLcd = 0xfffc8000;
+		ntrConfig->IoBasePdc = 0xfffc0000;
+		ntrConfig->KMMUHaxAddr = 0xfffbe000;
+		ntrConfig->KMMUHaxSize = 0x00010000;
+		ntrConfig->KProcessHandleDataOffset = 0xD4;
+		ntrConfig->KProcessPIDOffset = 0xB4;
+		ntrConfig->KProcessCodesetOffset = 0xB0;
 		if (kernelVersion == SYSTEM_VERSION(2, 44, 6))
 		{
 			//TODO: add old3ds 8.0.0 firmware support 
@@ -44,14 +52,6 @@ void	bnInitParamsByFirmware(void)
 			bnConfig->SvcPatchAddr = 0xDFF82290;
 			bnConfig->FSPatchAddr = 0x0010ED64;
 			bnConfig->SMPatchAddr = 0x00101838;
-			ntrConfig->IoBasePad = 0xfffc6000;
-			ntrConfig->IoBaseLcd = 0xfffc8000;
-			ntrConfig->IoBasePdc = 0xfffc0000;
-			ntrConfig->KMMUHaxAddr = 0xfffbe000;
-			ntrConfig->KMMUHaxSize = 0x00010000;
-			ntrConfig->KProcessHandleDataOffset = 0xD4;
-			ntrConfig->KProcessPIDOffset = 0xB4;
-			ntrConfig->KProcessCodesetOffset = 0xB0;
 		}
 		if (kernelVersion == SYSTEM_VERSION(2, 50, 1))
 		{
@@ -63,14 +63,6 @@ void	bnInitParamsByFirmware(void)
 			bnConfig->SvcPatchAddr = 0xDFF82284;
 			bnConfig->FSPatchAddr = 0x0010EFAC;
 			bnConfig->SMPatchAddr = 0x0010189C;
-			ntrConfig->IoBasePad = 0xfffc6000;
-			ntrConfig->IoBaseLcd = 0xfffc8000;
-			ntrConfig->IoBasePdc = 0xfffc0000;
-			ntrConfig->KMMUHaxAddr = 0xfffbe000;
-			ntrConfig->KMMUHaxSize = 0x00010000;
-			ntrConfig->KProcessHandleDataOffset = 0xD4;
-			ntrConfig->KProcessPIDOffset = 0xB4;
-			ntrConfig->KProcessCodesetOffset = 0xB0;
 		}
 		if (kernelVersion == SYSTEM_VERSION(2, 51, 0))
 		{
@@ -82,14 +74,17 @@ void	bnInitParamsByFirmware(void)
 			bnConfig->SvcPatchAddr = 0xDFF82288;
 			bnConfig->FSPatchAddr = 0x0010EED4;
 			bnConfig->SMPatchAddr = 0x0010189C;
-			ntrConfig->IoBasePad = 0xfffc6000;
-			ntrConfig->IoBaseLcd = 0xfffc8000;
-			ntrConfig->IoBasePdc = 0xfffc0000;
-			ntrConfig->KMMUHaxAddr = 0xfffbe000;
-			ntrConfig->KMMUHaxSize = 0x00010000;
-			ntrConfig->KProcessHandleDataOffset = 0xD4;
-			ntrConfig->KProcessPIDOffset = 0xB4;
-			ntrConfig->KProcessCodesetOffset = 0xB0;
+		}
+		if (kernelVersion == SYSTEM_VERSION(2, 51, 2))
+		{
+			// old3ds 11.1.0
+			ntrConfig->firmVersion = SYSTEM_VERSION(11, 1, 0);
+			ntrConfig->PMSvcRunAddr = 0x00103154;
+			ntrConfig->ControlMemoryPatchAddr1 = 0xDFF88468;
+			ntrConfig->ControlMemoryPatchAddr2 = 0xDFF8846C;
+			bnConfig->SvcPatchAddr = 0xDFF82288;
+			bnConfig->FSPatchAddr = 0x0010F024;
+			bnConfig->SMPatchAddr = 0x0010189C;
 		}
 	}
 	else
@@ -172,6 +167,17 @@ void	bnInitParamsByFirmware(void)
 			ntrConfig->ControlMemoryPatchAddr2 = 0xDFF8859C;
 			bnConfig->SvcPatchAddr = 0xDFF8226C;
 			bnConfig->FSPatchAddr = 0x0010EED4;
+			bnConfig->SMPatchAddr = 0x0010189C;
+		}
+		if (kernelVersion == SYSTEM_VERSION(2, 51, 2))
+		{
+			// new3ds 11.1
+			ntrConfig->firmVersion = SYSTEM_VERSION(11, 1, 0);
+			ntrConfig->PMSvcRunAddr = 0x00103150;
+			ntrConfig->ControlMemoryPatchAddr1 = 0xDFF88598;
+			ntrConfig->ControlMemoryPatchAddr2 = 0xDFF8859C;
+			bnConfig->SvcPatchAddr = 0xDFF8226C;
+			bnConfig->FSPatchAddr = 0x0010F024;
 			bnConfig->SMPatchAddr = 0x0010189C;
 		}
 	}

@@ -69,6 +69,15 @@ dbgKernelCacheInterface cacheInterface_NEW110 =
 	(void*)0xFFF2022C
 };
 
+dbgKernelCacheInterface cacheInterface_NEW111 =
+{
+	//for new 3ds 11.1
+	(void*)0xFFF261F0,
+	(void*)0xFFF1DF6C,
+	(void*)0xFFF1DC14,
+	(void*)0xFFF202A8
+};
+
 dbgKernelCacheInterface cacheInterface_Old90 =
 {
 	//for old 3ds 9.0
@@ -78,7 +87,8 @@ dbgKernelCacheInterface cacheInterface_Old90 =
 	(void*)0xFFF1F47C
 };
 
-dbgKernelCacheInterface cacheInterface_Old96 = {
+dbgKernelCacheInterface cacheInterface_Old96 =
+{
 	//for old 3ds 9.6
 	(void*)0xFFF24FF0,
 	(void*)0xFFF1CF98,
@@ -93,6 +103,15 @@ dbgKernelCacheInterface cacheInterface_Old110 =
 	(void*)0xFFF1D758,
 	(void*)0xFFF1D4F0,
 	(void*)0xFFF1FC50
+};
+
+dbgKernelCacheInterface cacheInterface_Old111 =
+{
+	//for old 3ds 11.1
+	(void*)0xFFF255A8,
+	(void*)0xFFF1D7D4,
+	(void*)0xFFF1D56C,
+	(void*)0xFFF1FCCC
 };
 
 void kernelCallback(void)
@@ -116,6 +135,8 @@ void kernelCallback(void)
 			cache = &cacheInterface_NEW102;
 		else if (firmVersion == SYSTEM_VERSION(11, 0, 0))
 			cache = &cacheInterface_NEW110;
+		else if (firmVersion == SYSTEM_VERSION(11, 1, 0))
+			cache = &cacheInterface_NEW111;
 	}
 	else
 	{
@@ -125,6 +146,8 @@ void kernelCallback(void)
 			cache = &cacheInterface_Old96;
 		else if (firmVersion == SYSTEM_VERSION(11, 0, 0))
 			cache = &cacheInterface_Old110;
+		else if (firmVersion == SYSTEM_VERSION(11, 1, 0))
+			cache = &cacheInterface_Old111;
 	}
 	*(int *)(svc_patch_addr + 8) = 0xE1A00000; //NOP
 	*(int *)(svc_patch_addr) = 0xE1A00000; //NOP
