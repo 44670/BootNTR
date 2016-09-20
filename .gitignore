@@ -243,3 +243,8 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+
+#3DS
+.elf
+.cia
+.3dsx
