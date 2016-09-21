@@ -136,5 +136,8 @@
     <ClCompile Include="source\memory_functions.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="source\draw.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -1,4 +1,5 @@
 #include "main.h"
+#include "draw.h"	
 
 NTR_CONFIG		g_ntrConfig = { 0 };
 BOOTNTR_CONFIG	g_bnConfig = { 0 };
@@ -12,89 +13,97 @@ bool			g_exit = false;
 
 #define SELECTOR
 
+void printMenu(int update)
+{
+	setScreen(GFX_TOP);
+	drawText(SCREEN_POS(115, 70), 1.5f, COLOR_BLUE, "Boot NTR");
+	drawText(SCREEN_POS(150, 110), 1.0f, COLOR_BLANK, "Selector");
+	setScreen(GFX_BOTTOM);
+	Printf(COLOR_BLANK, 0, "Which version should I load ?\n");
+	Printf(COLOR_BLANK, 0, " - 3.2  : Press \uE002\n");
+	Printf(COLOR_BLANK, 0, " - 3.3  : Press \uE000\n");
+	Printf(COLOR_BLANK, 0, " - 3.4  : Press \uE003\n");
+	Printf(COLOR_RED, 0, " - Exit : Press \uE001\n\n");
+	if (update)
+		updateScreen();
+}
+
 int main(void)
 {
 	u32		keys;
 
 	gfxInitDefault();
-	consoleInit(GFX_BOTTOM, NULL);
-#ifdef SELECTOR
-	printf("\nBootNTR Selector by Nanquitas\n\n");
-	printf("Hello !\n\n");
-	printf("Which version of NTR do I load ?\n");
-	printf(" - 3.2  : Press X\n");
-	printf(" - 3.3  : Press A\n");
-	printf(" - 3.4  : Press Y\n");
-	printf(" - Exit : Press B\n\n");
+	drawInit();	
 	while (1)
 	{
 		hidScanInput();
-		keys = (hidKeysDown() | hidKeysUp() | hidKeysHeld());
+		keys = (hidKeysDown() | hidKeysUp() | hidKeysHeld());		
 		if (keys & KEY_X)
 		{
-			printf("Loading NTR 3.2 ...\n\n");
+			printMenu(0);
+			Printf(COLOR_BLANK, BOLD, "Loading NTR 3.2 ...\n\n");
+			updateScreen();
 			remove("sdmc:/ntr.bin");
 			check_prim(copy_file("sdmc:/ntr_3_2.bin", "sdmc:/ntr.bin"), FILE_COPY_ERROR);
 			break;
 		}
 		else if (keys & KEY_A)
 		{
-			printf("Loading NTR 3.3 ...\n\n");
+			printMenu(0);
+			Printf(COLOR_BLANK, BOLD, "Loading NTR 3.3 ...\n\n");
+			updateScreen();
 			remove("sdmc:/ntr.bin");
 			check_prim(copy_file("sdmc:/ntr_3_3.bin", "sdmc:/ntr.bin"), FILE_COPY_ERROR);
 			break;
 		}
 		else if (keys & KEY_Y)
 		{
-			printf("Loading NTR 3.4 ...\n\n");
+			printMenu(0);
+			Printf(COLOR_BLANK, BOLD, "Loading NTR 3.4 ...\n\n");
+			updateScreen();
 			remove("sdmc:/ntr.bin");
 			check_prim(copy_file("sdmc:/ntr_3_4.bin", "sdmc:/ntr.bin"), FILE_COPY_ERROR);
 			break;
 		}
 		if (abort_and_exit())
 			goto error;
+		printMenu(1);
 	}
-#else
-	printf("\nBootNTR by Nanquitas\n\n");
-	printf("Hello !\n\n");
-	printf("Loading the ntr.bin you provided...\n\n");
-#endif
 	memset(&g_ntrConfig, 0, sizeof(g_ntrConfig));
 	memset(&g_bnConfig, 0, sizeof(g_bnConfig));
 	ntrConfig = &g_ntrConfig;
 	bnConfig = &g_bnConfig;
 	abort_and_exit();
-#ifdef SELECTOR
-	error:
-#endif
+error:	
 	if (!g_exit && bnBootNTR() == 0)
 	{
-		printf("NTR CFW loaded successfully !\n");
+		setScreen(GFX_BOTTOM);
+		Printf(COLOR_DARKGREEN, 0, "NTR CFW loaded successfully !\n");
+		updateScreen();
 		svcSleepThread(1000000000);
 	}
 	else
 	{
-
-		printf("The loading of NTR failed.\n");
-		if (g_primary_error != NULL)
-			printf("#%s\n", g_primary_error);
-		if (g_secondary_error != NULL)
-			printf("#%s\n", g_secondary_error);
-		if (g_third_error != NULL)
-			printf("#%s\n", g_third_error);
-		printf("\nYou should reboot your console and try again.\n\n");
-		printf("Press any key to exit.");
 		while (aptMainLoop())
 		{
+			setScreen(GFX_BOTTOM);
+			Printf(COLOR_RED, BOLD, "The loading of NTR failed.\n");
+			if (g_primary_error != NULL)
+				Printf(COLOR_BLACK, SMALL, "#%s\n", g_primary_error);
+			if (g_secondary_error != NULL)
+				Printf(COLOR_BLACK, SMALL, "#%s\n", g_secondary_error);
+			if (g_third_error != NULL)
+				Printf(COLOR_BLACK, SMALL, "#%s\n", g_third_error);
+			Printf(COLOR_BLANK, 0, "\nYou should reboot your console and try again.\n\n");
+			Printf(COLOR_BLANK, BOLD, "Press any key to exit.");
+			updateScreen();
 			hidScanInput();
 			keys = hidKeysDown();
 			if (keys)
 				break;
 		}
 	}
-	gfxFlushBuffers();
-	gfxSwapBuffers();
-	gspWaitForVBlank();
+	drawExit();
 	gfxExit();
 	return (0);
 }

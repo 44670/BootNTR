@@ -82,7 +82,7 @@ void	backdoorHandler();
 /*
 ** main.c
 */
-bool	abort_and_exit(void);
+void	printMenu(int update);
 
 /*
 ** files.c

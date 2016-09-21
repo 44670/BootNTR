@@ -245,6 +245,7 @@ ModelManifest.xml
 .fake/
 
 #3DS
-.elf
-.cia
-.3dsx
+*.elf
+*.cia
+*.3dsx
+.output/

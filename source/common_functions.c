@@ -1,4 +1,5 @@
 #include "main.h"
+#include "draw.h"
 
 extern u8		*tmpBuffer;
 extern char			*g_primary_error;
@@ -8,13 +9,15 @@ extern bool		g_exit;
 bool	abort_and_exit(void)
 {
 	hidScanInput();
-	if ((hidKeysDown() | hidKeysUp()) & KEY_B)
+	if ((hidKeysDown() | hidKeysHeld() | hidKeysUp()) & KEY_B)
 	{
 		g_exit = true;
 		g_primary_error = USER_ABORT;
-		printf("B pressed, loading aborted.\n\n");
 		while (1)
 		{
+			printMenu(0);
+			Printf(COLOR_BLACK, BOLD, "\uE001 pressed, loading aborted.\n\n");
+			updateScreen();
 			hidScanInput();
 			if ((hidKeysDown() | hidKeysUp() | hidKeysHeld()) == 0)
 				break;

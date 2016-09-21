@@ -71,6 +71,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>C:\Users\Nath\Desktop\prog\BootNTR\source;C:\devkitPro\libctru\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>C:\devkitPro\libctru\include;C:\Users\Nath\Desktop\BootNTR\lib\ctrcommon\include\ctrcommon;$(IncludePath)</IncludePath>
+    <ReferencePath>C:\devkitPro\libctru\include;$(ReferencePath)</ReferencePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -129,6 +133,7 @@
     <ClInclude Include="lib\ctrcommon\include\ctrcommon_font_bin.h" />
     <ClInclude Include="lib\ctrcommon\include\ctrcommon_shader_vsh_shbin.h" />
     <ClInclude Include="lib\ctrcommon\source\ctrcommon\service.hpp" />
+    <ClInclude Include="source\draw.h" />
     <ClInclude Include="source\main.h" />
     <ClInclude Include="source\mysvcs.h" />
     <ClInclude Include="source\ns.h" />
@@ -148,6 +153,7 @@
     <ClCompile Include="lib\ctrcommon\source\ctrcommon\sound.cpp" />
     <ClCompile Include="lib\ctrcommon\source\ctrcommon\ui.cpp" />
     <ClCompile Include="source\common_functions.c" />
+    <ClCompile Include="source\draw.c" />
     <ClCompile Include="source\files.c" />
     <ClCompile Include="source\firmware.c" />
     <ClCompile Include="source\homemenu.c" />
