@@ -28,6 +28,7 @@ SOURCES				:= source
 DATA				:= data
 INCLUDES			:= $(SOURCES) include 
 ICON				:= resources/icon.png
+BANNER				:= $(TOPDIR)/resources/fonzd_banner.bnr
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -73,7 +74,7 @@ ifneq ($(BUILD),$(notdir $(CURDIR)))
 recurse = $(shell find $2 -type $1 -name '$3' 2> /dev/null)
 
 null				:=
-SPACE				:=      $(null) $(null)
+SPACE				:=  $(null) $(null)
 export OUTPUT_D		:=	$(CURDIR)/output
 export OUTPUT_N		:=	$(subst $(SPACE),,$(APP_TITLE))
 export OUTPUT		:=	$(OUTPUT_D)/$(OUTPUT_N)
@@ -157,7 +158,7 @@ stripped.elf: $(OUTPUT).elf
 
 
 $(OUTPUT).cia: stripped.elf icon.icn
-	@$(MAKEROM) -f cia -o $(OUTPUT).cia -rsf $(RSF_CIA) -target t -exefslogo -elf stripped.elf -icon icon.icn -banner banner.bnr -DAPP_TITLE="$(APP_TITLE)" -DAPP_PRODUCT_CODE="$(APP_PRODUCT_CODE)" -DAPP_UNIQUE_ID="$(APP_UNIQUE_ID)"
+	@$(MAKEROM) -f cia -o $(OUTPUT).cia -rsf $(RSF_CIA) -target t -exefslogo -elf stripped.elf -icon icon.icn -banner $(BANNER) -DAPP_TITLE="$(APP_TITLE)" -DAPP_PRODUCT_CODE="$(APP_PRODUCT_CODE)" -DAPP_UNIQUE_ID="$(APP_UNIQUE_ID)"
 	@echo "built ... $(notdir $@)"
 
 $(OUTPUT).zip: $(OUTPUT_D) $(OUTPUT).elf  $(OUTPUT).smdh  $(OUTPUT).cia
@@ -174,19 +175,11 @@ $(OUTPUT).zip: $(OUTPUT_D) $(OUTPUT).elf  $(OUTPUT).smdh  $(OUTPUT).cia
 #---------------------------------------------------------------------------------
 	@echo $(notdir $<)
 	@$(bin2o)
-
-# WARNING: This is not the right way to do this! TODO: Do it right!
 #---------------------------------------------------------------------------------
-%.vsh.o	:	%.vsh
+%.png.o	:	%.png
 #---------------------------------------------------------------------------------
 	@echo $(notdir $<)
-	@python $(AEMSTRO)/aemstro_as.py $< ../$(notdir $<).shbin
-	@bin2s ../$(notdir $<).shbin | $(PREFIX)as -o $@
-	@echo "extern const u8" `(echo $(notdir $<).shbin | sed -e 's/^\([0-9]\)/_\1/' | tr . _)`"_end[];" > `(echo $(notdir $<).shbin | tr . _)`.h
-	@echo "extern const u8" `(echo $(notdir $<).shbin | sed -e 's/^\([0-9]\)/_\1/' | tr . _)`"[];" >> `(echo $(notdir $<).shbin | tr . _)`.h
-	@echo "extern const u32" `(echo $(notdir $<).shbin | sed -e 's/^\([0-9]\)/_\1/' | tr . _)`_size";" >> `(echo $(notdir $<).shbin | tr . _)`.h
-	@rm ../$(notdir $<).shbin
-
+	@$(bin2o)
 #---------------------------------------------------------------------------------
 # rules for assembling GPU shaders
 #---------------------------------------------------------------------------------
