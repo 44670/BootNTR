@@ -1,10 +1,3 @@
-NO_CTRCOMMON := 1
-
-#---------------------------------------------------------------------------------
-.SUFFIXES:
-#---------------------------------------------------------------------------------
-
-
 
 ifeq ($(strip $(DEVKITPRO)),)
 $(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>devkitPRO")
@@ -14,51 +7,45 @@ ifeq ($(strip $(DEVKITARM)),)
 $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
 endif
 
-CTRCOMMON = $(TOPDIR)/lib/ctrcommon
-
-TOPDIR ?= $(CURDIR)
+NO_CTRCOMMON := 1
+TOPDIR		?= $(CURDIR)
 include $(DEVKITARM)/3ds_rules
-
 include $(TOPDIR)/resources/AppInfo
+#---------------------------------------------------------------------------------
+.SUFFIXES:
+#---------------------------------------------------------------------------------
 
-APP_TITLE := $(shell echo "$(APP_TITLE)" | cut -c1-128)
-APP_DESCRIPTION := $(shell echo "$(APP_DESCRIPTION)" | cut -c1-256)
-APP_AUTHOR := $(shell echo "$(APP_AUTHOR)" | cut -c1-128)
-APP_PRODUCT_CODE := $(shell echo $(APP_PRODUCT_CODE) | cut -c1-16)
-APP_UNIQUE_ID := $(shell echo $(APP_UNIQUE_ID) | cut -c1-7)
+CTRCOMMON			:= $(TOPDIR)/lib/ctrcommon
 
-BUILD := build
-SOURCES := source 
-DATA := data
-INCLUDES := $(SOURCES) include 
-ICON := resources/icon.png
+APP_TITLE			:= $(shell echo "$(APP_TITLE)" | cut -c1-128)
+APP_DESCRIPTION		:= $(shell echo "$(APP_DESCRIPTION)" | cut -c1-256)
+APP_AUTHOR			:= $(shell echo "$(APP_AUTHOR)" | cut -c1-128)
+APP_PRODUCT_CODE	:= $(shell echo $(APP_PRODUCT_CODE) | cut -c1-16)
+APP_UNIQUE_ID		:= $(shell echo $(APP_UNIQUE_ID) | cut -c1-7)
+
+BUILD				:= build
+SOURCES				:= source 
+DATA				:= data
+INCLUDES			:= $(SOURCES) include 
+ICON				:= resources/icon.png
 
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-ARCH := -march=armv6k -mtune=mpcore -mfloat-abi=hard
 
-COMMON_FLAGS := -g -Wall -Wno-strict-aliasing -O3 -mword-relocations -fomit-frame-pointer -ffast-math $(ARCH) $(INCLUDE) -DARM11 -D_3DS $(BUILD_FLAGS)
+ARCH				:= -march=armv6k -mtune=mpcore -mfloat-abi=hard
+COMMON_FLAGS		:= -g -Wall -Wno-strict-aliasing -O3 -mword-relocations \
+					-fomit-frame-pointer -ffast-math $(ARCH) $(INCLUDE) -DARM11 -D_3DS $(BUILD_FLAGS)
+CXXFLAGS			:= $(COMMON_FLAGS) -std=gnu++11
+CFLAGS				:= $(COMMON_FLAGS) -std=gnu99
+ASFLAGS				:= -g $(ARCH)
+LDFLAGS				:= -specs=3dsx.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-CXXFLAGS := $(COMMON_FLAGS) -std=gnu++11
-ifeq ($(ENABLE_EXCEPTIONS),)
-	CXXFLAGS += -fno-rtti -fno-exceptions
-endif
+LIBS				:= -lcitro3d -lctru -lm
+LIBDIRS				:= $(PORTLIBS) $(CTRULIB) ./lib
 
-CFLAGS := $(COMMON_FLAGS) -std=gnu99
-
-ASFLAGS := -g $(ARCH)
-LDFLAGS = -specs=3dsx.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
-
-LIBS	:= -lcitro3d -lctru -lm
-LIBDIRS	:= $(PORTLIBS) $(CTRULIB) ./lib
-ifeq ($(NO_CTRCOMMON),)
-	LIBS	:= -lctrcommon -lctru -lm
-	LIBDIRS	:= $(CTRCOMMON) $(PORTLIBS) $(CTRULIB) ./lib
-endif
-
-RSF_3DS = $(CTRCOMMON)/tools/template-3ds.rsf
-RSF_CIA = ../template-cia.rsf
+RSF_3DS				= $(CTRCOMMON)/tools/template-3ds.rsf
+RSF_CIA				= ../template-cia.rsf
 
 ifeq ($(OS),Windows_NT)
 	MAKEROM = $(CTRCOMMON)/tools/makerom.exe
@@ -85,24 +72,24 @@ ifneq ($(BUILD),$(notdir $(CURDIR)))
 
 recurse = $(shell find $2 -type $1 -name '$3' 2> /dev/null)
 
-null            :=
-SPACE           :=      $(null) $(null)
-export OUTPUT_D	:=	$(CURDIR)/output
-export OUTPUT_N	:=	$(subst $(SPACE),,$(APP_TITLE))
-export OUTPUT	:=	$(OUTPUT_D)/$(OUTPUT_N)
-export TOPDIR	:=	$(CURDIR)
+null				:=
+SPACE				:=      $(null) $(null)
+export OUTPUT_D		:=	$(CURDIR)/output
+export OUTPUT_N		:=	$(subst $(SPACE),,$(APP_TITLE))
+export OUTPUT		:=	$(OUTPUT_D)/$(OUTPUT_N)
+export TOPDIR		:=	$(CURDIR)
 
-export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir) $(call recurse,d,$(CURDIR)/$(dir),*)) \
-			$(foreach dir,$(DATA),$(CURDIR)/$(dir) $(call recurse,d,$(CURDIR)/$(dir),*))
+export VPATH		:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir) $(call recurse,d,$(CURDIR)/$(dir),*)) \
+						$(foreach dir,$(DATA),$(CURDIR)/$(dir) $(call recurse,d,$(CURDIR)/$(dir),*))
 
-export DEPSDIR	:=	$(CURDIR)/$(BUILD)
+export DEPSDIR		:=	$(CURDIR)/$(BUILD)
 
-CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
-CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
-SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
-PICAFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.v.pica)))
-SHLISTFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.shlist)))
-BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
+CFILES				:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
+CPPFILES			:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
+SFILES				:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
+PICAFILES			:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.v.pica)))
+SHLISTFILES			:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.shlist)))
+BINFILES			:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
 
 #---------------------------------------------------------------------------------
 # use CXX for linking C++ projects, CC for standard C
@@ -118,17 +105,17 @@ else
 endif
 #---------------------------------------------------------------------------------
 
-export OFILES	:=	$(addsuffix .o,$(BINFILES)) \
-			$(PICAFILES:.v.pica=.shbin.o) $(SHLISTFILES:.shlist=.shbin.o) \
-			$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
+export OFILES		:=	$(addsuffix .o,$(BINFILES)) \
+						$(PICAFILES:.v.pica=.shbin.o) $(SHLISTFILES:.shlist=.shbin.o) \
+						$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
 
-export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
-			$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-			-I$(CURDIR)/$(BUILD)
+export INCLUDE		:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
+						$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
+						-I$(CURDIR)/$(BUILD)
 
-export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
+export LIBPATHS		:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 
-export APP_ICON := $(TOPDIR)/$(ICON)
+export APP_ICON		:= $(TOPDIR)/$(ICON)
 
 .PHONY: $(BUILD) clean all
 
