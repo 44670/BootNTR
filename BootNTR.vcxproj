@@ -133,6 +133,7 @@
     <ClInclude Include="lib\ctrcommon\include\ctrcommon_font_bin.h" />
     <ClInclude Include="lib\ctrcommon\include\ctrcommon_shader_vsh_shbin.h" />
     <ClInclude Include="lib\ctrcommon\source\ctrcommon\service.hpp" />
+    <ClInclude Include="source\Credits.h" />
     <ClInclude Include="source\draw.h" />
     <ClInclude Include="source\main.h" />
     <ClInclude Include="source\mysvcs.h" />

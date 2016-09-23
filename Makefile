@@ -26,6 +26,7 @@ APP_UNIQUE_ID		:= $(shell echo $(APP_UNIQUE_ID) | cut -c1-7)
 BUILD				:= build
 SOURCES				:= source 
 DATA				:= data
+ROMFS				:= $(TOPDIR)/romfs/romfsBuilt
 INCLUDES			:= $(SOURCES) include 
 ICON				:= resources/icon.png
 BANNER				:= $(TOPDIR)/resources/fonzd_banner.bnr
@@ -156,15 +157,20 @@ stripped.elf: $(OUTPUT).elf
 	@cp $(OUTPUT).elf stripped.elf
 	@$(PREFIX)strip stripped.elf
 
+ifneq ($(ROMFS),)
+ 	CIA := @$(MAKEROM) -f cia -o $(OUTPUT).cia -rsf $(RSF_CIA) -target t -exefslogo -elf stripped.elf -romfs $(ROMFS) -icon icon.icn -banner $(BANNER) -DAPP_TITLE="$(APP_TITLE)" -DAPP_PRODUCT_CODE="$(APP_PRODUCT_CODE)" -DAPP_UNIQUE_ID="$(APP_UNIQUE_ID)"
+else
+	CIA: =@$(MAKEROM) -f cia -o $(OUTPUT).cia -rsf $(RSF_CIA) -target t -exefslogo -elf stripped.elf -icon icon.icn -banner $(BANNER) -DAPP_TITLE="$(APP_TITLE)" -DAPP_PRODUCT_CODE="$(APP_PRODUCT_CODE)" -DAPP_UNIQUE_ID="$(APP_UNIQUE_ID)"
+endif
 
 $(OUTPUT).cia: stripped.elf icon.icn
-	@$(MAKEROM) -f cia -o $(OUTPUT).cia -rsf $(RSF_CIA) -target t -exefslogo -elf stripped.elf -icon icon.icn -banner $(BANNER) -DAPP_TITLE="$(APP_TITLE)" -DAPP_PRODUCT_CODE="$(APP_PRODUCT_CODE)" -DAPP_UNIQUE_ID="$(APP_UNIQUE_ID)"
+	$(CIA)
 	@echo "built ... $(notdir $@)"
 
 $(OUTPUT).zip: $(OUTPUT_D) $(OUTPUT).elf  $(OUTPUT).smdh  $(OUTPUT).cia
 	@cd $(OUTPUT_D); \
 	mkdir -p 3ds/$(OUTPUT_N); \
-	zip -r $(OUTPUT_N).zip  $(OUTPUT_N).cia  > /dev/null; \
+	zip -r $(OUTPUT_N).zip  $(OUTPUT_N).cia > /dev/null; \
 	rm -r 3ds
 	@echo "built ... $(notdir $@)"
 
