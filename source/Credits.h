@@ -1,7 +1,7 @@
 #ifndef CREDITS_H
 #define CREDITS_H
 
-static const int	creditsCount = 13;
+static const int	creditsCount = 15;
 static const char * credits[] =
 {
 	"AstronautLevel",

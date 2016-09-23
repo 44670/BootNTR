@@ -80,6 +80,9 @@
     <ClInclude Include="source\Credits.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="source\lodepng.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lib\ctrcommon\source\ctrcommon\app.cpp">
@@ -143,6 +146,9 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="source\draw.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="source\lodepng.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>

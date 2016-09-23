@@ -135,6 +135,7 @@
     <ClInclude Include="lib\ctrcommon\source\ctrcommon\service.hpp" />
     <ClInclude Include="source\Credits.h" />
     <ClInclude Include="source\draw.h" />
+    <ClInclude Include="source\lodepng.h" />
     <ClInclude Include="source\main.h" />
     <ClInclude Include="source\mysvcs.h" />
     <ClInclude Include="source\ns.h" />
@@ -159,6 +160,7 @@
     <ClCompile Include="source\firmware.c" />
     <ClCompile Include="source\homemenu.c" />
     <ClCompile Include="source\kernel.c" />
+    <ClCompile Include="source\lodepng.c" />
     <ClCompile Include="source\main.c" />
     <ClCompile Include="source\memory_functions.c" />
     <ClCompile Include="source\ntr_launcher.c" />

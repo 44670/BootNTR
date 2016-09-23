@@ -1,16 +1,16 @@
 ﻿#include "draw.h"
 
-static DVLB_s			*vshader_dvlb;
-static shaderProgram_s	program;
-static int				uLoc_projection;
-static C3D_Tex			*glyphSheets;
-static textVertex_s		*textVtxArray;
-static int				textVtxArrayPos;
-static drawTarget_t		top;
-static drawTarget_t		bottom;
-static bool				frameStarted = false;
-static gfxScreen_t		currentScreen = -1;
-static cursor_t	cursor[2] = { { 10, 10 },{ 10, 10 } };
+static DVLB_s           *vshader_dvlb;
+static shaderProgram_s  program;
+static int              uLoc_projection;
+static C3D_Tex          *glyphSheets;
+static textVertex_s     *textVtxArray;
+static int              textVtxArrayPos;
+static drawTarget_t     top;
+static drawTarget_t     bottom;
+static bool             frameStarted = false;
+static gfxScreen_t      currentScreen = -1;
+static cursor_t         cursor[2] = { { 10, 10 },{ 10, 10 } };
 
 #define TEXT_VTX_ARRAY_COUNT (4 * 1024)
 
@@ -37,11 +37,11 @@ void printVertex(textVertex_s *vtx)
 		);
 }
 
-static void bind_sprite(sprite_t *sprite)
+static void bind_texture(C3D_Tex *texture)
 {
 	C3D_TexEnv	*env;
 
-	C3D_TexBind(0, (C3D_Tex *)&sprite->texture);
+	C3D_TexBind(0, texture);
 	env = C3D_GetTexEnv(0);
 	C3D_TexEnvSrc(env, C3D_Both, GPU_TEXTURE0, 0, 0);
 	C3D_TexEnvOp(env, C3D_Both, 0, 0, 0);
@@ -50,20 +50,22 @@ static void bind_sprite(sprite_t *sprite)
 
 void draw_sprite(float x, float y, sprite_t *sprite)
 {
-	float			height;
-	float			width;
-	float			u;
-	float			v;
-	int				arrayIndex;
+	float       height;
+	float       width;
+	float       u;
+	float       v;
+	int         arrayIndex;
+	C3D_Tex     *texture;
 
 	if (!sprite) return;
+	texture = &sprite->texture;
 	height = sprite->height;
 	width = sprite->width;
-	u = width / (float)sprite->texture.width;
-	v = height / (float)sprite->texture.width;
+	u = width / (float)texture->width;
+	v = height / (float)texture->width;
 
 	//Bind the sprite's texture
-	bind_sprite(sprite);
+	bind_texture(texture);
 
 	C3D_BufInfo	*bufInfo = C3D_GetBufInfo();
 	BufInfo_Init(bufInfo);
@@ -82,21 +84,21 @@ void draw_sprite(float x, float y, sprite_t *sprite)
 
 sprite_t *load_png(const char *filename)
 {
-	u8		*image;
-	u8		*dst;
-	u8		*src;
-	u8		*gpusrc;
-	int		i;
-	int		r;
-	int		g;
-	int		b;
-	int		a;
-	unsigned int width;
-	unsigned int height;
-	C3D_Tex		*texture;
-	sprite_t	*sprite;
-	Result		ret;
-	bool		result;
+	u8              *image;
+	u8              *dst;
+	u8              *src;
+	u8              *gpusrc;
+	int             i;
+	int             r;
+	int             g;
+	int             b;
+	int             a;
+	unsigned int    width;
+	unsigned int    height;
+	C3D_Tex         *texture;
+	sprite_t        *sprite;
+	Result          ret;
+	bool            result;
 
 	//Allocate the sprite
 	if (!(sprite = (sprite_t *)malloc(sizeof(sprite_t))))
@@ -155,10 +157,10 @@ error:
 
 static void sceneInit(void)
 {
-	int				i;
-	TGLP_s			*glyphInfo;
-	C3D_Tex			*tex;
-	C3D_AttrInfo	*attrInfo;
+	int	            i;
+	TGLP_s          *glyphInfo;
+	C3D_Tex         *tex;
+	C3D_AttrInfo    *attrInfo;
 
 	// Load the vertex shader, create a shader program and bind it
 	vshader_dvlb = DVLB_ParseFile((u32*)vshader_shbin, vshader_shbin_size);
@@ -225,16 +227,16 @@ static void setTextColor(u32 color)
 
 static void renderText(float x, float y, float scaleX, float scaleY, bool baseline, const char *text, cursor_t *cursor)
 {
-	u32				flags;
-	u32				code;
-	int				lastSheet;
-	int				glyphIdx;
-	int				arrayIndex;
-	ssize_t			units;
-	float			firstX;
-	C3D_BufInfo		*bufInfo;
-	fontGlyphPos_s	data;
-	const u8		*p = (const u8 *)text;
+	u32             flags;
+	u32             code;
+	int             lastSheet;
+	int             glyphIdx;
+	int             arrayIndex;
+	ssize_t         units;
+	float           firstX;
+	C3D_BufInfo     *bufInfo;
+	fontGlyphPos_s  data;
+	const u8        *p = (const u8 *)text;
 
 	// Configure buffers
 	bufInfo = C3D_GetBufInfo();
@@ -294,10 +296,10 @@ static void renderText(float x, float y, float scaleX, float scaleY, bool baseli
 
 void drawText(screenPos_t pos, float size, u32 color, char *text, ...)
 {
-	char		buf[4096];
-	va_list		vaList;
-	float		posX;
-	float		posY;
+	char        buf[4096];
+	va_list     vaList;
+	float       posX;
+	float       posY;
 	
 	if (!frameStarted) return;
 	posX = POS_X(pos);
@@ -388,12 +390,12 @@ void setScreen(gfxScreen_t screen)
 void Printf(u32 color, u32 flags, char *text, ...)
 {
 	//TODO: Find the best size for BOLD and SKINNY
-	char		buf[4096];
-	va_list		vaList;
-	float		posX;
-	float		posY;
-	float		sizeX;
-	float		sizeY;
+	char        buf[4096];
+	va_list     vaList;
+	float       posX;
+	float       posY;
+	float       sizeX;
+	float       sizeY;
 
 	if (flags)
 	{
