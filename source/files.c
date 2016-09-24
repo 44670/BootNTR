@@ -10,7 +10,7 @@ int		copy_file(char *old_filename, char  *new_filename)
 
 	old_file = fopen(old_filename, "rb");
 	new_file = fopen(new_filename, "wb");
-	value = (t_BLOCK) { {0, 0, 0, 0} };;
+	value = (t_BLOCK) { {0, 0, 0, 0} };
 	check_prim(!old_file, FILE_COPY_ERROR);
 	if (!new_file)
 	{
@@ -29,5 +29,6 @@ int		copy_file(char *old_filename, char  *new_filename)
 	fclose(old_file);
 	return  (0);
 error:
+    remove("sdmc:/ntr.bin");
 	return (RESULT_ERROR);
 }

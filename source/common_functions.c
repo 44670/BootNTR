@@ -1,5 +1,5 @@
 #include "main.h"
-#include "draw.h"
+#include "graphics.h"
 
 extern u8       *tmpBuffer;
 extern char     *g_primary_error;
@@ -13,11 +13,9 @@ bool	abort_and_exit(void)
 	{
 		g_exit = true;
 		g_primary_error = USER_ABORT;
+        newAppInfoEntry(DEFAULT_COLOR, CENTER, "Loading aborted");
 		while (1)
 		{
-			printMenu(0);
-			Printf(COLOR_BLACK, BOLD, "\uE001 pressed, loading aborted.\n\n");
-			updateScreen();
 			hidScanInput();
 			if ((hidKeysDown() | hidKeysUp() | hidKeysHeld()) == 0)
 				break;

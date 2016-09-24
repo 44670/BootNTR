@@ -63,12 +63,21 @@ static void bindTexture(C3D_Tex *texture)
 	C3D_TexEnvFunc(env, C3D_Both, GPU_REPLACE);
 }
 
-void drawSprite(float x, float y, sprite_t *sprite)
+void setSpritePos(sprite_t *sprite, float posX, float posY)
+{
+    if (!sprite) return;
+    sprite->posX = posX;
+    sprite->posY = posY;
+}
+
+void drawSprite(sprite_t *sprite)
 {
 	float       height;
 	float       width;
 	float       u;
 	float       v;
+    float       x;
+    float       y;
 	int         arrayIndex;
 	C3D_Tex     *texture;
 
@@ -76,6 +85,8 @@ void drawSprite(float x, float y, sprite_t *sprite)
 	texture = &sprite->texture;
 	height = sprite->height;
 	width = sprite->width;
+    x = sprite->posX;
+    y = sprite->posY;
 	u = width / (float)texture->width;
 	v = height / (float)texture->height;
 
@@ -120,6 +131,14 @@ texInitError:
     free(sprite);
 allocError:
     return (NULL);
+}
+
+void deleteSprite(sprite_t *sprite)
+{
+    if (!sprite) return;
+    C3D_TexDelete(&sprite->texture);
+    free(sprite);
+    sprite = NULL;
 }
 
 static void sceneInit(void)
@@ -205,18 +224,23 @@ void drawInit(void)
     sceneInit();
 }
 
-void drawExit(void)
+void drawEndFrame(void)
 {
     if (frameStarted)
     {
         C3D_FrameEnd(0);
         frameStarted = false;
     }
+}
+
+void drawExit(void)
+{
+    drawEndFrame();
     sceneExit();
     C3D_Fini();
 }
 
-static void setTextColor(u32 color)
+void setTextColor(u32 color)
 {
 	C3D_TexEnv	*env;
 	
@@ -229,7 +253,36 @@ static void setTextColor(u32 color)
 	C3D_TexEnvColor(env, color);
 }
 
-static void renderText(float x, float y, float scaleX, float scaleY, bool baseline, const char *text, cursor_t *cursor)
+void getTextSizeInfos(float *width, float scaleX, float scaleY, const char *text)
+{
+    float   w;
+    u8      *c;
+    u32     code;
+    ssize_t units;
+    int     glyphIndex;
+    fontGlyphPos_s  data;
+
+    w = 0.0f;
+    c = (u8 *)text;
+    if (!text) return;
+    while (*c == '\n') c++;
+    do
+    {
+        if (!*c) break;
+        units = decode_utf8(&code, c);
+        if (units == -1) break;
+        c += units;
+        if (code > 0)
+        {
+            glyphIndex = fontGlyphIndexFromCodePoint(code);
+            fontCalcGlyphPos(&data, glyphIndex, GLYPH_POS_CALC_VTXCOORD, scaleX, scaleY);
+            w += data.xAdvance;
+        }
+    } while (code > 0);
+    *width = w;
+}
+
+void renderText(float x, float y, float scaleX, float scaleY, bool baseline, const char *text, cursor_t *cursor)
 {
 	u32             flags;
 	u32             code;
@@ -350,7 +403,7 @@ void setScreen(gfxScreen_t screen)
 	}
 	else return;
 }
-
+/*
 void Printf(u32 color, u32 flags, char *text, ...)
 {
 	//TODO: Find the best size for BOLD and SKINNY
@@ -388,4 +441,4 @@ void Printf(u32 color, u32 flags, char *text, ...)
 	setTextColor(color);
 	renderText(posX, posY, sizeX, sizeY, false, buf, &cursor[currentScreen]);
 	va_end(vaList);
-}
+}*/

@@ -55,6 +55,7 @@ typedef struct	sprite_s
 	float			width;
 }				sprite_t;
 
+/*
 enum drawFlags
 {
 	BOLD = BIT(0),
@@ -62,19 +63,28 @@ enum drawFlags
 	BIG = BIT(2),
 	SMALL = BIT(4),
 	NEWLINE = BIT(5)
-};
+};*/
 
 typedef u32 screenPos_t;
 
-void drawText(screenPos_t pos, float size, u32 color, char *text, ...);
-void drawInit(void);
-void drawExit(void);
-void updateScreen(void);
-void setScreen(gfxScreen_t screen);
-void Printf(u32 color, u32 flags, char *text, ...);
-void drawSprite(float x, float y, sprite_t *sprite);
-Result loadPNGFile(sprite_t **out, const char *filename);
-sprite_t *newSprite(int width, int height);
+void        drawInit(void);
+void        drawExit(void);
+void        drawEndFrame(void);
+void        getTextSizeInfos(float *width, float scaleX, float scaleY, const char *text);
+void        setTextColor(u32 color);
+void        renderText(float x, float y, float scaleX, float scaleY, bool baseline, const char *text, cursor_t *cursor);
+void        drawText(screenPos_t pos, float size, u32 color, char *text, ...);
+void        Printf(u32 color, u32 flags, char *text, ...);
+
+void        setScreen(gfxScreen_t screen);
+void        updateScreen(void);
+
+sprite_t    *newSprite(int width, int height);
+void        deleteSprite(sprite_t *sprite);
+void        setSpritePos(sprite_t *sprite, float posX, float posY);
+void        drawSprite(sprite_t *sprite);
+
+Result      loadPNGFile(sprite_t **out, const char *filename);
 
 #define COLOR_BLUE	0xFFFF0000
 #define COLOR_RED	0xFF0000FF

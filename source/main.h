@@ -6,9 +6,8 @@
 #include <3ds.h>
 #include "ntr_config.h"
 #include "mysvcs.h"
-
-#define VALIDATE_PARAM(a) if ((a) == 0) { printf( \
-	"param is missing: %s\n", #a); return (RESULT_ERROR); }
+//printf("param is missing: %s\n", #a);
+#define VALIDATE_PARAM(a) if ((a) == 0) { return (RESULT_ERROR); }
 #define check_prim(result, err) if ((result) != 0) {g_primary_error = err; \
 	goto error; }
 #define check_sec(result, err) if ((result) != 0) {g_secondary_error = err; \
