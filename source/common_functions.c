@@ -1,10 +1,10 @@
 #include "main.h"
 #include "draw.h"
 
-extern u8		*tmpBuffer;
-extern char			*g_primary_error;
-extern char			*g_secondary_error;
-extern bool		g_exit;
+extern u8       *tmpBuffer;
+extern char     *g_primary_error;
+extern char     *g_secondary_error;
+extern bool     g_exit;
 
 bool	abort_and_exit(void)
 {

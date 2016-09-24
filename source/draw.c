@@ -14,6 +14,21 @@ static cursor_t         cursor[2] = { { 10, 10 },{ 10, 10 } };
 
 #define TEXT_VTX_ARRAY_COUNT (4 * 1024)
 
+#define TEX_MIN_SIZE 32
+
+//Grabbed from: http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
+unsigned int nextPow2(unsigned int v)
+{
+    v--;
+    v |= v >> 1;
+    v |= v >> 2;
+    v |= v >> 4;
+    v |= v >> 8;
+    v |= v >> 16;
+    v++;
+    return (v >= TEX_MIN_SIZE ? v : TEX_MIN_SIZE);
+}
+
 static void addTextVertex(float vx, float vy, float tx, float ty)
 {
 	textVertex_s	*vtx;
@@ -28,16 +43,16 @@ static void addTextVertex(float vx, float vy, float tx, float ty)
 
 void printVertex(textVertex_s *vtx)
 {
-	printf("Vtx: pos[0] %f, pos[1] %f pos[2] %f, tx[0] %f, tx[1] %f\n", \
-		vtx->position[0], \
-		vtx->position[1], \
-		vtx->position[2], \
-		vtx->texcoord[0], \
-		vtx->texcoord[1]  \
+	printf("Vtx: pos[0] %f, pos[1] %f pos[2] %f, tx[0] %f, tx[1] %f\n",
+		vtx->position[0],
+		vtx->position[1],
+		vtx->position[2],
+		vtx->texcoord[0],
+		vtx->texcoord[1]
 		);
 }
 
-static void bind_texture(C3D_Tex *texture)
+static void bindTexture(C3D_Tex *texture)
 {
 	C3D_TexEnv	*env;
 
@@ -48,7 +63,7 @@ static void bind_texture(C3D_Tex *texture)
 	C3D_TexEnvFunc(env, C3D_Both, GPU_REPLACE);
 }
 
-void draw_sprite(float x, float y, sprite_t *sprite)
+void drawSprite(float x, float y, sprite_t *sprite)
 {
 	float       height;
 	float       width;
@@ -62,10 +77,10 @@ void draw_sprite(float x, float y, sprite_t *sprite)
 	height = sprite->height;
 	width = sprite->width;
 	u = width / (float)texture->width;
-	v = height / (float)texture->width;
+	v = height / (float)texture->height;
 
 	//Bind the sprite's texture
-	bind_texture(texture);
+	bindTexture(texture);
 
 	C3D_BufInfo	*bufInfo = C3D_GetBufInfo();
 	BufInfo_Init(bufInfo);
@@ -73,86 +88,38 @@ void draw_sprite(float x, float y, sprite_t *sprite)
 
 	//Set the vertices
 	arrayIndex = textVtxArrayPos;
-	addTextVertex(x, y, 0.0f, 0.0f);
-	addTextVertex(x + width, y, u, 0.0f);
-	addTextVertex(x, y + height, 0.0f, v);
-	addTextVertex(x + width, y + height, u, v);
+    addTextVertex(x, y + height, 0.0f, v); //left bottom
+    addTextVertex(x + width, y + height, u, v); //right bottom
+	addTextVertex(x, y, 0.0f, 0.0f); //left top
+	addTextVertex(x + width, y, u, 0.0f); //right top	
 
 	//Draw 
 	C3D_DrawArrays(GPU_TRIANGLE_STRIP, arrayIndex, 4);
 }
 
-sprite_t *load_png(const char *filename)
+sprite_t *newSprite(int width, int height)
 {
-	u8              *image;
-	u8              *dst;
-	u8              *src;
-	u8              *gpusrc;
-	int             i;
-	int             r;
-	int             g;
-	int             b;
-	int             a;
-	unsigned int    width;
-	unsigned int    height;
-	C3D_Tex         *texture;
-	sprite_t        *sprite;
-	Result          ret;
-	bool            result;
+    sprite_t    *sprite;
+    C3D_Tex     *texture;
+    bool        result;
 
-	//Allocate the sprite
-	if (!(sprite = (sprite_t *)malloc(sizeof(sprite_t))))
-		goto error;
-	texture = &sprite->texture;
+    //Alloc the sprite
+    sprite = (sprite_t *)calloc(1, sizeof(sprite_t));
+    if (!sprite) goto allocError;
+    texture = &sprite->texture;
 
-	//Retrieve the data of the png (ret == 0 on success)
-	ret = lodepng_decode32_file(&image, &width, &height, filename);
-	if (ret || !image) goto error;
-	sprite->height = (float)height;
-	sprite->width = (float)width;
+    //Create and init the sprite's texture
+    result = C3D_TexInit(texture, nextPow2(width), nextPow2(height), GPU_RGBA8);
+    if (!result) goto texInitError;
+    C3D_TexSetWrap(texture, GPU_CLAMP_TO_BORDER, GPU_CLAMP_TO_BORDER);
 
-	// GX_DisplayTransfer needs input buffer in linear RAM
-	if (!(gpusrc = linearAlloc(width * height * 4)))
-		goto error;
-	src = image;
-	dst = gpusrc;
-
-	// lodepng outputs big endian rgba so we need to convert
-	for (i = 0; i < width * height; i++)
-	{
-		r = *src++;
-		g = *src++;
-		b = *src++;
-		a = *src++;
-
-		*dst++ = a;
-		*dst++ = b;
-		*dst++ = g;
-		*dst++ = r;
-	}
-	// ensure data is in physical ram
-	GSPGPU_FlushDataCache(gpusrc, width * height * 4);
-
-	// Load the texture (result == true on success)
-	result = C3D_TexInit(texture, width, height, GPU_RGBA8);
-	C3D_TexSetWrap(texture, GPU_CLAMP_TO_BORDER, GPU_CLAMP_TO_BORDER);
-	if (!result) goto error;
-	
-	// Convert image to 3DS tiled texture format
-	C3D_SafeDisplayTransfer((u32 *)gpusrc, GX_BUFFER_DIM(width, height), \
-		(u32 *)texture->data, GX_BUFFER_DIM(width, height), TEXTURE_TRANSFER_FLAGS);
-	gspWaitForPPF();
-	C3D_TexSetFilter(texture, GPU_LINEAR, GPU_NEAREST);
-
-	if (gpusrc)	linearFree(gpusrc);
-	if (image)	free(image);
-	return (sprite);
-error:
-	if (gpusrc)	linearFree(gpusrc);
-	if (image)	free(image);
-	if (sprite) free(sprite);
-	sprite = NULL;
-	return (sprite);
+    sprite->width = (float)width;
+    sprite->height = (float)height;
+    return (sprite);
+texInitError:
+    free(sprite);
+allocError:
+    return (NULL);
 }
 
 static void sceneInit(void)
@@ -210,6 +177,43 @@ static void sceneExit(void)
 	// Free the shader program
 	shaderProgramFree(&program);
 	DVLB_Free(vshader_dvlb);
+}
+
+void drawInit(void)
+{
+    C3D_RenderTarget *target;
+
+    //Init Citro3D
+    C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
+
+    // Initialize the top render target
+    target = C3D_RenderTargetCreate(240, 400, GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8);
+    C3D_RenderTargetSetClear(target, C3D_CLEAR_ALL, CLEAR_COLOR, 0);
+    C3D_RenderTargetSetOutput(target, GFX_TOP, GFX_LEFT, DISPLAY_TRANSFER_FLAGS);
+    top.target = target;
+
+    // Initialize the bottom render target
+    target = C3D_RenderTargetCreate(240, 320, GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8);
+    C3D_RenderTargetSetClear(target, C3D_CLEAR_ALL, CLEAR_COLOR, 0);
+    C3D_RenderTargetSetOutput(target, GFX_BOTTOM, GFX_LEFT, DISPLAY_TRANSFER_FLAGS);
+    bottom.target = target;
+
+    //Initialize the system font
+    fontEnsureMapped();
+
+    // Initialize the scene
+    sceneInit();
+}
+
+void drawExit(void)
+{
+    if (frameStarted)
+    {
+        C3D_FrameEnd(0);
+        frameStarted = false;
+    }
+    sceneExit();
+    C3D_Fini();
 }
 
 static void setTextColor(u32 color)
@@ -312,68 +316,28 @@ void drawText(screenPos_t pos, float size, u32 color, char *text, ...)
 
 }
 
-void drawInit(void)
-{
-	C3D_RenderTarget *target;
-
-	//Init Citro3D
-	C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
-
-	// Initialize the top render target
-	target = C3D_RenderTargetCreate(240, 400, GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8);
-	C3D_RenderTargetSetClear(target, C3D_CLEAR_ALL, CLEAR_COLOR, 0);
-	C3D_RenderTargetSetOutput(target, GFX_TOP, GFX_LEFT, DISPLAY_TRANSFER_FLAGS);
-	top.target = target;
-
-	// Initialize the bottom render target
-	target = C3D_RenderTargetCreate(240, 320, GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8);
-	C3D_RenderTargetSetClear(target, C3D_CLEAR_ALL, CLEAR_COLOR, 0);
-	C3D_RenderTargetSetOutput(target, GFX_BOTTOM, GFX_LEFT, DISPLAY_TRANSFER_FLAGS);
-	bottom.target = target;
-
-	//Initialize the system font
-	fontEnsureMapped();
-
-	// Initialize the scene
-	sceneInit();
-
-	//Start frame
-	C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
-	frameStarted = true;
-}
-
-void drawExit(void)
-{
-	if (frameStarted)
-	{
-		C3D_FrameEnd(0);
-		frameStarted = false;
-	}
-	sceneExit();
-	C3D_Fini();
-}
-
 void updateScreen(void)
 {
-	//printf("Update...");
 	if (frameStarted)
 		C3D_FrameEnd(0);
 	else
 		frameStarted = true;
-	//printf("1");
 	C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
-	//printf("2");
 	textVtxArrayPos = 0;
 	cursor[0] = (cursor_t){ 10, 10 };
 	cursor[1] = (cursor_t){ 10, 10 };
 	currentScreen = -1;
-	//printf("end\n");
 }
 
 void setScreen(gfxScreen_t screen)
 {
 	if (screen == currentScreen) return;
 	currentScreen = screen;
+    if (!frameStarted)
+    {
+        C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
+        frameStarted = true;
+    }
 	if (screen == GFX_TOP)
 	{
 		C3D_FrameDrawOn(top.target);

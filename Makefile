@@ -27,6 +27,7 @@ BUILD				:= build
 SOURCES				:= source 
 DATA				:= data
 ROMFS				:= $(TOPDIR)/romfs/romfsBuilt
+ROMFS3DSX			:= $(TOPDIR)/romfs
 INCLUDES			:= $(SOURCES) include 
 ICON				:= resources/icon.png
 BANNER				:= $(TOPDIR)/resources/fonzd_banner.bnr
@@ -43,7 +44,7 @@ CFLAGS				:= $(COMMON_FLAGS) -std=gnu99
 ASFLAGS				:= -g $(ARCH)
 LDFLAGS				:= -specs=3dsx.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS				:= -lcitro3d -lctru -lm
+LIBS				:= -lcitro3d -lctru -lpng -lz -lm
 LIBDIRS				:= $(PORTLIBS) $(CTRULIB) ./lib
 
 RSF_3DS				= $(CTRCOMMON)/tools/template-3ds.rsf
@@ -119,6 +120,8 @@ export LIBPATHS		:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 
 export APP_ICON		:= $(TOPDIR)/$(ICON)
 
+export _3DSXFLAGS += --smdh=$(OUTPUT).smdh
+
 .PHONY: $(BUILD) clean all
 
 #---------------------------------------------------------------------------------
@@ -127,6 +130,10 @@ all: $(BUILD)
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
+#---------------------------------------------------------------------------------
+
+citra: $(OUTPUT).3dsx
+	@cp "C:/Users/Nath/Desktop/BootNTR/output/$(OUTPUT_N).3dsx" "C:/Users/Nath/Desktop/citra/$(OUTPUT_N).3dsx"
 
 #---------------------------------------------------------------------------------
 clean:
@@ -151,6 +158,8 @@ $(OUTPUT_D):
 icon.icn: $(TOPDIR)/resources/icon.png
 	@$(BANNERTOOL) makesmdh -s "$(APP_TITLE)" -l "$(APP_TITLE)" -p "$(APP_AUTHOR)" -i $(TOPDIR)/resources/icon.png -o icon.icn > /dev/null
 
+$(OUTPUT).3dsx: $(OUTPUT).elf
+
 $(OUTPUT).elf: $(OFILES)
 
 stripped.elf: $(OUTPUT).elf
@@ -159,6 +168,7 @@ stripped.elf: $(OUTPUT).elf
 
 ifneq ($(ROMFS),)
  	CIA := @$(MAKEROM) -f cia -o $(OUTPUT).cia -rsf $(RSF_CIA) -target t -exefslogo -elf stripped.elf -romfs $(ROMFS) -icon icon.icn -banner $(BANNER) -DAPP_TITLE="$(APP_TITLE)" -DAPP_PRODUCT_CODE="$(APP_PRODUCT_CODE)" -DAPP_UNIQUE_ID="$(APP_UNIQUE_ID)"
+    export _3DSXFLAGS += --romfs=$(ROMFS3DSX)
 else
 	CIA: =@$(MAKEROM) -f cia -o $(OUTPUT).cia -rsf $(RSF_CIA) -target t -exefslogo -elf stripped.elf -icon icon.icn -banner $(BANNER) -DAPP_TITLE="$(APP_TITLE)" -DAPP_PRODUCT_CODE="$(APP_PRODUCT_CODE)" -DAPP_UNIQUE_ID="$(APP_UNIQUE_ID)"
 endif
@@ -167,7 +177,7 @@ $(OUTPUT).cia: stripped.elf icon.icn
 	$(CIA)
 	@echo "built ... $(notdir $@)"
 
-$(OUTPUT).zip: $(OUTPUT_D) $(OUTPUT).elf  $(OUTPUT).smdh  $(OUTPUT).cia
+$(OUTPUT).zip: $(OUTPUT_D) $(OUTPUT).elf  $(OUTPUT).smdh $(OUTPUT).3dsx  $(OUTPUT).cia 
 	@cd $(OUTPUT_D); \
 	mkdir -p 3ds/$(OUTPUT_N); \
 	zip -r $(OUTPUT_N).zip  $(OUTPUT_N).cia > /dev/null; \

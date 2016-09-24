@@ -151,5 +151,8 @@
     <ClCompile Include="source\lodepng.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="source\png.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
