@@ -282,6 +282,31 @@ void getTextSizeInfos(float *width, float scaleX, float scaleY, const char *text
     *width = w;
 }
 
+void    findBestSize(float *sizeX, float *sizeY, float posXMin, float posXMax, float sizeMax, const char *text)
+{
+    float scale;
+    float originalTextWidth;
+    float margin; //in pixels
+    float textWidth;
+    float bounds;
+
+    if (!text | !sizeX) return;
+    getTextSizeInfos(&originalTextWidth, 1.0f, 1.0f, text);
+    scale = sizeMax;
+    margin = 1.0f;
+    bounds = posXMax - posXMin;
+    bounds -= (margin * 2);
+    while (1)
+    {
+        textWidth = scale * originalTextWidth;
+        if (textWidth > bounds) scale -= 0.01f;
+        else break;
+        if (scale <= 0.0f) break;
+    }
+    *sizeX = scale;
+    if (sizeY) *sizeY = scale;
+}
+
 void renderText(float x, float y, float scaleX, float scaleY, bool baseline, const char *text, cursor_t *cursor)
 {
 	u32             flags;

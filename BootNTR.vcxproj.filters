@@ -80,7 +80,10 @@
     <ClInclude Include="source\Credits.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="source\lodepng.h">
+    <ClInclude Include="source\graphics.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="source\appInfo.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>
@@ -148,10 +151,13 @@
     <ClCompile Include="source\draw.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="source\lodepng.c">
+    <ClCompile Include="source\png.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="source\png.c">
+    <ClCompile Include="source\graphics.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="source\appInfo.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>

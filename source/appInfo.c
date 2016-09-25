@@ -65,18 +65,18 @@ static void getDrawParameters(appInfoEntry_t *entry, float *sizeX, float *sizeY)
     flags = entry->flags;
     //Set the font size
     if (flags & BIG) scaleX = scaleY = 0.6f;
-    else if (flags & SMALL) scaleX = scaleY = 0.37f;
+    else if (flags & SMALL) scaleX = scaleY = 0.4f;
     else scaleX = scaleY = 0.5f;
 
     //Set the type
-    if (flags & BOLD) scaleX += 0.1f;
-    else if (flags & SKINNY) scaleY += 0.1f;
+    if (flags & BOLD) scaleX += 0.05f;
+    else if (flags & SKINNY) scaleY += 0.05f;
 
     //Set the alignment
     getTextSizeInfos(&textWidth, scaleX, scaleY, entry->buffer);
     if (flags & CENTER)
     {
-        temp = 294.0f - cursor.posX;
+        temp = 297.0f - cursor.posX;
         temp -= textWidth;
         if (temp > 0)
         {
@@ -86,18 +86,18 @@ static void getDrawParameters(appInfoEntry_t *entry, float *sizeX, float *sizeY)
     }
     if (flags & RIGHT_ALIGN)
     {
-        cursor.posX = 294.0f;
+        cursor.posX = 297.0f;
         cursor.posX -= textWidth;
     }
 
     if (flags & NEWLINE)
-        cursor.posY += scaleY * fontGetInfo()->lineFeed;
+        cursor.posY += 0.4f * fontGetInfo()->lineFeed;
     
     //Return the size
     *sizeX = scaleX;
     *sizeY = scaleY;
 }
-//x->294
+
 void    drawAppInfoEntry(int index)
 {
     appInfoEntry_t  *entry;
@@ -110,7 +110,9 @@ void    drawAppInfoEntry(int index)
     sizeX = sizeY = 0.0f;
     getDrawParameters(entry, &sizeX, &sizeY);
     lineFeed = sizeY * fontGetInfo()->lineFeed;
+#ifndef CITRA
     setTextColor(entry->color);
+#endif
     renderText(cursor.posX, cursor.posY, sizeX, sizeY, false, entry->buffer, &cursor);
     cursor.posY += lineFeed;
 exit:
@@ -123,11 +125,11 @@ void    drawAppInfo(void)
 
     if (!init || entryCount <= 0) return;
 
-    cursor = (cursor_t){ 177, 63};
+    cursor = (cursor_t){ 177, 64};
     drawSprite(background);
     for (i = 0; i < entryCount; i++)
     {
-        if (cursor.posY >= 176) break;
+        if (cursor.posY >= 190) break;
         cursor.posX = 177;
         drawAppInfoEntry(i);
     }

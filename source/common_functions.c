@@ -13,7 +13,7 @@ bool	abort_and_exit(void)
 	{
 		g_exit = true;
 		g_primary_error = USER_ABORT;
-        newAppInfoEntry(DEFAULT_COLOR, CENTER, "Loading aborted");
+        newAppInfoEntry(DEFAULT_COLOR, CENTER | SKINNY | SMALL, "Loading aborted");
 		while (1)
 		{
 			hidScanInput();

@@ -7,6 +7,7 @@
 #define MAX_ENTRIES 10
 #define BUFFER_SIZE 100
 #define DEFAULT_COLOR 0xFFF8AE2D
+#define CITRA
 
 typedef enum
 {
@@ -16,7 +17,7 @@ typedef enum
     SMALL = BIT(3),
     CENTER = BIT(4),
     RIGHT_ALIGN = BIT(5),
-    NEWLINE = BIT(6),
+    NEWLINE = BIT(6)
 }               appInfoEntryFlags;
 
 typedef struct  appInfoEntry_s

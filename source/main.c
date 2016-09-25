@@ -19,8 +19,6 @@ int main(void)
     touchPosition touchPos;
 
 	gfxInitDefault();
-    //gfxInit(GSP_BGR8_OES, GSP_BGR8_OES, true);
-	//consoleInit(GFX_BOTTOM, NULL);
 	drawInit();
 	romfsInit();
     initUI();
@@ -33,24 +31,21 @@ int main(void)
         {
             if (touchPos.py >= 42 && touchPos.py <= 92)
             {
-               // newAppInfoEntry(DEFAULT_COLOR, CENTER, "3.2 Selected");
-                newAppInfoEntry(DEFAULT_COLOR, CENTER, "Loading 3.2 ...");
+                newAppInfoEntry(DEFAULT_COLOR, CENTER | SMALL | SKINNY, "Loading 3.2 ...");
                 remove("sdmc:/ntr.bin");
                 check_prim(copy_file("sdmc:/ntr_3_2.bin", "sdmc:/ntr.bin"), FILE_COPY_ERROR);
                 break;
             }
             else if (touchPos.py >= 99 && touchPos.py <= 150)
             {
-              //  newAppInfoEntry(DEFAULT_COLOR, CENTER, "3.3 Selected");
-                newAppInfoEntry(DEFAULT_COLOR, CENTER, "Loading 3.3 ...");
+                newAppInfoEntry(DEFAULT_COLOR, CENTER | SMALL | SKINNY, "Loading 3.3 ...");
                 remove("sdmc:/ntr.bin");
                 check_prim(copy_file("sdmc:/ntr_3_3.bin", "sdmc:/ntr.bin"), FILE_COPY_ERROR);
                 break;
             }
             else if (touchPos.py >= 156 && touchPos.py <= 208)
             {
-               // newAppInfoEntry(DEFAULT_COLOR, CENTER, "3.4 Selected");
-                newAppInfoEntry(DEFAULT_COLOR, CENTER, "Loading 3.4 ...");
+                newAppInfoEntry(DEFAULT_COLOR, CENTER | SMALL | SKINNY, "Loading 3.4 ...");
                 remove("sdmc:/ntr.bin");
                 check_prim(copy_file("sdmc:/ntr_3_4.bin", "sdmc:/ntr.bin"), FILE_COPY_ERROR);
                 break;
@@ -59,7 +54,6 @@ int main(void)
 		if (abort_and_exit())
 			goto error;
         updateUI();
-      //  svcSleepThread(100);
 	}
 	memset(&g_ntrConfig, 0, sizeof(g_ntrConfig));
 	memset(&g_bnConfig, 0, sizeof(g_bnConfig));
@@ -67,9 +61,9 @@ int main(void)
 	bnConfig = &g_bnConfig;
 	abort_and_exit();
 error:	
-	if (!g_exit && bnBootNTR() == 0)
+	if (1)//(!g_exit && bnBootNTR() == 0)
 	{
-        newAppInfoEntry(DEFAULT_COLOR, CENTER | BIG | NEWLINE, "Success !");
+        newAppInfoEntry(DEFAULT_COLOR, CENTER | BOLD | NEWLINE, "Success !");
         newAppInfoEntry(DEFAULT_COLOR, CENTER | SMALL | BOLD |NEWLINE, "Returning to home");
         newAppInfoEntry(DEFAULT_COLOR, CENTER |SMALL | BOLD, "menu ...");
         updateUI();
@@ -78,7 +72,7 @@ error:
 	else
 	{
         newAppInfoEntry(DEFAULT_COLOR, CENTER | BOLD | NEWLINE, "Load failed !");
-        newAppInfoEntry(DEFAULT_COLOR, CENTER | BOLD, "\uE00A");
+        if (!g_third_error) newAppInfoEntry(DEFAULT_COLOR, CENTER | BOLD, "\uE00A");
         if (g_primary_error != NULL)
         {
             if (g_primary_error == UNKNOWN_FIRM)

@@ -74,8 +74,7 @@ void        getTextSizeInfos(float *width, float scaleX, float scaleY, const cha
 void        setTextColor(u32 color);
 void        renderText(float x, float y, float scaleX, float scaleY, bool baseline, const char *text, cursor_t *cursor);
 void        drawText(screenPos_t pos, float size, u32 color, char *text, ...);
-void        Printf(u32 color, u32 flags, char *text, ...);
-
+void        findBestSize(float *sizeX, float *sizeY, float posXMin, float posXMax, float sizeMax, const char *text);
 void        setScreen(gfxScreen_t screen);
 void        updateScreen(void);
 

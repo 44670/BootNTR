@@ -30,7 +30,8 @@ ROMFS				:= $(TOPDIR)/romfs/romfsBuilt
 ROMFS3DSX			:= $(TOPDIR)/romfs
 INCLUDES			:= $(SOURCES) include 
 ICON				:= resources/icon.png
-BANNER				:= $(TOPDIR)/resources/fonzd_banner.bnr
+BANNER				:= $(TOPDIR)/resources/fonzd_banner2.bnr
+CITRA_D				:= "C:/Users/Nath/Desktop/citra"
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -133,7 +134,9 @@ $(BUILD):
 #---------------------------------------------------------------------------------
 
 citra: $(OUTPUT).3dsx
-	@cp "C:/Users/Nath/Desktop/BootNTR/output/$(OUTPUT_N).3dsx" "C:/Users/Nath/Desktop/citra/$(OUTPUT_N).3dsx"
+	@cp "$(OUTPUT_D)/$(OUTPUT_N).3dsx" "$(CITRA_D)/$(OUTPUT_N).3dsx"
+	@cd $(CITRA_D)
+	$(CITRA_D)/citra.exe "$(CITRA_D)/$(OUTPUT_N).3dsx"
 
 #---------------------------------------------------------------------------------
 clean:
