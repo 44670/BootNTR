@@ -22,6 +22,8 @@ APP_DESCRIPTION		:= $(shell echo "$(APP_DESCRIPTION)" | cut -c1-256)
 APP_AUTHOR			:= $(shell echo "$(APP_AUTHOR)" | cut -c1-128)
 APP_PRODUCT_CODE	:= $(shell echo $(APP_PRODUCT_CODE) | cut -c1-16)
 APP_UNIQUE_ID		:= $(shell echo $(APP_UNIQUE_ID) | cut -c1-7)
+APP_MAJOR_VERSION   := $(shell echo $(APP_MAJOR_VERSION) | cut -c1-2)
+APP_MINOR_VERSION   := $(shell echo $(APP_MINOR_VERSION) | cut -c1-2)
 
 BUILD				:= build
 SOURCES				:= source 
@@ -49,7 +51,7 @@ LIBS				:= -lcitro3d -lctru -lpng -lz -lm
 LIBDIRS				:= $(PORTLIBS) $(CTRULIB) ./lib
 
 RSF_3DS				= $(CTRCOMMON)/tools/template-3ds.rsf
-RSF_CIA				= ../template-cia.rsf
+RSF_CIA				= $(TOPDIR)/NTRCFWSelector-cia.rsf
 
 ifeq ($(OS),Windows_NT)
 	MAKEROM = $(CTRCOMMON)/tools/makerom.exe
@@ -133,16 +135,29 @@ $(BUILD):
 	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 #---------------------------------------------------------------------------------
 
-citra: $(OUTPUT).3dsx
+citra:
 	@cp "$(OUTPUT_D)/$(OUTPUT_N).3dsx" "$(CITRA_D)/$(OUTPUT_N).3dsx"
 	@cd $(CITRA_D)
 	$(CITRA_D)/citra.exe "$(CITRA_D)/$(OUTPUT_N).3dsx"
 
 #---------------------------------------------------------------------------------
 clean:
-	@echo clean ...
+	@echo clean ... 
 	@rm -fr $(BUILD) $(OUTPUT_D)
+#---------------------------------------------------------------------------------
+re:
+	@echo re ...
+	@rm -rf $(OUTPUT).3dsx $(OUTPUT).cia
+	@make
 
+#---------------------------------------------------------------------------------
+
+sd:
+	#@echo deleting e:/cias/$(OUTPUT_N).cia ...
+	#@rm e:/cias/$(OUTPUT_N).cia
+	@echo copying $(OUTPUT_N).cia on the SD Card ...
+	@cp $(OUTPUT).cia e:/cias/$(OUTPUT_N).cia
+	@echo done
 
 #---------------------------------------------------------------------------------
 else
@@ -159,7 +174,7 @@ $(OUTPUT_D):
 	@[ -d $@ ] || mkdir -p $@
 
 icon.icn: $(TOPDIR)/resources/icon.png
-	@$(BANNERTOOL) makesmdh -s "$(APP_TITLE)" -l "$(APP_TITLE)" -p "$(APP_AUTHOR)" -i $(TOPDIR)/resources/icon.png -o icon.icn > /dev/null
+	@$(BANNERTOOL) makesmdh -s "$(APP_TITLE)" -l "$(APP_DESCRIPTION)" -p "$(APP_AUTHOR)" -i $(TOPDIR)/resources/icon.png -o icon.icn > /dev/null
 
 $(OUTPUT).3dsx: $(OUTPUT).elf
 
@@ -170,10 +185,10 @@ stripped.elf: $(OUTPUT).elf
 	@$(PREFIX)strip stripped.elf
 
 ifneq ($(ROMFS),)
- 	CIA := @$(MAKEROM) -f cia -o $(OUTPUT).cia -rsf $(RSF_CIA) -target t -exefslogo -elf stripped.elf -romfs $(ROMFS) -icon icon.icn -banner $(BANNER) -DAPP_TITLE="$(APP_TITLE)" -DAPP_PRODUCT_CODE="$(APP_PRODUCT_CODE)" -DAPP_UNIQUE_ID="$(APP_UNIQUE_ID)"
+ 	CIA := @$(MAKEROM) -f cia -o $(OUTPUT).cia -rsf $(RSF_CIA) -target t -exefslogo -elf stripped.elf -romfs $(ROMFS) -icon icon.icn -banner $(BANNER) -DAPP_TITLE="$(APP_TITLE)" -DAPP_PRODUCT_CODE="$(APP_PRODUCT_CODE)" -DAPP_UNIQUE_ID="$(APP_UNIQUE_ID)" -major $(APP_MAJOR_VERSION) -minor $(APP_MINOR_VERSION)
     export _3DSXFLAGS += --romfs=$(ROMFS3DSX)
 else
-	CIA: =@$(MAKEROM) -f cia -o $(OUTPUT).cia -rsf $(RSF_CIA) -target t -exefslogo -elf stripped.elf -icon icon.icn -banner $(BANNER) -DAPP_TITLE="$(APP_TITLE)" -DAPP_PRODUCT_CODE="$(APP_PRODUCT_CODE)" -DAPP_UNIQUE_ID="$(APP_UNIQUE_ID)"
+	CIA: =@$(MAKEROM) -f cia -o $(OUTPUT).cia -rsf $(RSF_CIA) -target t -exefslogo -elf stripped.elf -icon icon.icn -banner $(BANNER) -DAPP_TITLE="$(APP_TITLE)" -DAPP_PRODUCT_CODE="$(APP_PRODUCT_CODE)" -DAPP_UNIQUE_ID="$(APP_UNIQUE_ID)" -major "$(APP_MAJOR_VERSION)" -minor "$(APP_MINOR_VERSION)"
 endif
 
 $(OUTPUT).cia: stripped.elf icon.icn

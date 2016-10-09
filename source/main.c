@@ -1,97 +1,69 @@
 #include "main.h"
 #include "draw.h"
-#include "graphics.h"
+#include "config.h"
+#include "button.h"
+#include <time.h>
 
-NTR_CONFIG		g_ntrConfig = { 0 };
-BOOTNTR_CONFIG	g_bnConfig = { 0 };
-NTR_CONFIG		*ntrConfig;
-BOOTNTR_CONFIG	*bnConfig;
-u8				*tmpBuffer;
-char			*g_primary_error = NULL;
-char			*g_secondary_error = NULL;
-char			*g_third_error = NULL;
-bool			g_exit = false;
+extern bootNtrConfig_t *bnConfig;
+u8				  *tmpBuffer;
+char			  *g_primary_error = NULL;
+char			  *g_secondary_error = NULL;
+char			  *g_third_error = NULL;
+bool			  g_exit = false;
+
 
 int main(void)
 {
-	u32		keys;
-    u32		kernelVersion = osGetKernelVersion();
-    touchPosition touchPos;
+    u32         keys;
+    u32         kernelVersion;
+    int         ret;
 
 	gfxInitDefault();
 	drawInit();
 	romfsInit();
     initUI();
-	while (aptMainLoop())
-	{
-		hidScanInput();
-        hidTouchRead(&touchPos);
-		keys = (hidKeysDown());
-        if (touchPos.px >= 11 && touchPos.px <= 99)
-        {
-            if (touchPos.py >= 42 && touchPos.py <= 92)
-            {
-                newAppInfoEntry(DEFAULT_COLOR, CENTER | SMALL | SKINNY, "Loading 3.2 ...");
-                remove("sdmc:/ntr.bin");
-                check_prim(copy_file("sdmc:/ntr_3_2.bin", "sdmc:/ntr.bin"), FILE_COPY_ERROR);
-                break;
-            }
-            else if (touchPos.py >= 99 && touchPos.py <= 150)
-            {
-                newAppInfoEntry(DEFAULT_COLOR, CENTER | SMALL | SKINNY, "Loading 3.3 ...");
-                remove("sdmc:/ntr.bin");
-                check_prim(copy_file("sdmc:/ntr_3_3.bin", "sdmc:/ntr.bin"), FILE_COPY_ERROR);
-                break;
-            }
-            else if (touchPos.py >= 156 && touchPos.py <= 208)
-            {
-                newAppInfoEntry(DEFAULT_COLOR, CENTER | SMALL | SKINNY, "Loading 3.4 ...");
-                remove("sdmc:/ntr.bin");
-                check_prim(copy_file("sdmc:/ntr_3_4.bin", "sdmc:/ntr.bin"), FILE_COPY_ERROR);
-                break;
-            }
-        }
-		if (abort_and_exit())
-			goto error;
+    hidScanInput();
+    keys = (hidKeysDown() | hidKeysHeld());
+    if (keys & KEY_SELECT)
+        resetConfig();
+    configInit();
+    kernelVersion = osGetKernelVersion();
+    initMainMenu();
+    ret = mainMenu();
+
+    if (ret == 2) goto waitForExit;
+    if (!g_exit && bnBootNTR() == 0)
+    {
+        newAppStatus(DEFAULT_COLOR, CENTER | BOLD | NEWLINE, "Success !");
+        newAppStatus(DEFAULT_COLOR, CENTER | TINY | SKINNY | NEWLINE, "Returning to home");
+        newAppStatus(DEFAULT_COLOR, CENTER | TINY | SKINNY, "menu ...");
         updateUI();
-	}
-	memset(&g_ntrConfig, 0, sizeof(g_ntrConfig));
-	memset(&g_bnConfig, 0, sizeof(g_bnConfig));
-	ntrConfig = &g_ntrConfig;
-	bnConfig = &g_bnConfig;
-	abort_and_exit();
-error:	
-	if (1)//(!g_exit && bnBootNTR() == 0)
-	{
-        newAppInfoEntry(DEFAULT_COLOR, CENTER | BOLD | NEWLINE, "Success !");
-        newAppInfoEntry(DEFAULT_COLOR, CENTER | SMALL | BOLD |NEWLINE, "Returning to home");
-        newAppInfoEntry(DEFAULT_COLOR, CENTER |SMALL | BOLD, "menu ...");
-        updateUI();
-		svcSleepThread(1000000000);
-	}
+        svcSleepThread(100000);
+    }
 	else
 	{
-        newAppInfoEntry(DEFAULT_COLOR, CENTER | BOLD | NEWLINE, "Load failed !");
-        if (!g_third_error) newAppInfoEntry(DEFAULT_COLOR, CENTER | BOLD, "\uE00A");
+        newAppStatus(DEFAULT_COLOR, CENTER | BOLD | NEWLINE, "Load failed !");
+        if (!g_third_error) newAppStatus(DEFAULT_COLOR, CENTER | BOLD, "\uE00A");
         if (g_primary_error != NULL)
         {
             if (g_primary_error == UNKNOWN_FIRM)
             {
-                newAppInfoEntry(DEFAULT_COLOR, SMALL | CENTER, "#Firmware unknown");
-                newAppInfoEntry(DEFAULT_COLOR, SMALL | CENTER, "#Detected firm: %d.%d.%d", \
+                newAppStatus(DEFAULT_COLOR, TINY | CENTER, "#Firmware unknown");
+                newAppStatus(DEFAULT_COLOR, TINY | CENTER, "#Detected firm: %d.%d.%d", \
                     GET_VERSION_MAJOR(kernelVersion), \
                     GET_VERSION_MINOR(kernelVersion), \
                     GET_VERSION_REVISION(kernelVersion));
             }
             else
-                newAppInfoEntry(DEFAULT_COLOR, SMALL | CENTER, "#%s", g_primary_error);
+                newAppStatus(DEFAULT_COLOR, TINY | CENTER, "#%s", g_primary_error);
         }            
         if (g_secondary_error != NULL)
-            newAppInfoEntry(DEFAULT_COLOR, SMALL | CENTER, "#%s", g_secondary_error);
+            newAppStatus(DEFAULT_COLOR, TINY | CENTER, "#%s", g_secondary_error);
         if (g_third_error != NULL)
-            newAppInfoEntry(DEFAULT_COLOR, SMALL | CENTER, "#%s", g_third_error);
-        newAppInfoEntry(DEFAULT_COLOR, CENTER | SMALL | BOLD | NEWLINE, "Press any key to");
-        newAppInfoEntry(DEFAULT_COLOR, CENTER | SMALL | BOLD, "return to home menu");
+            newAppStatus(DEFAULT_COLOR, TINY | CENTER, "#%s", g_third_error);
+waitForExit:
+        newAppStatus(DEFAULT_COLOR, CENTER | TINY | SKINNY | NEWLINE, "Press any key to");
+        newAppStatus(DEFAULT_COLOR, CENTER | TINY | SKINNY, "return to home menu");
         while (aptMainLoop())
         {
             updateUI();
@@ -101,6 +73,8 @@ error:
                 break;
         }
 	}
+    configExit();
+    exitMainMenu();
     exitUI();
 	romfsExit();
 	drawExit();

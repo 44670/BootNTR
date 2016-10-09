@@ -56,7 +56,10 @@ Result textureTile32(C3D_Tex *texture)
             *(u32 *)(tmp + dstOffset) = __builtin_bswap32(pixel); /* RGBA8 -> ABGR8 */
         }
     }
+    
+    GSPGPU_FlushDataCache(tmp, width * height * 4);
     memcpy(texture->data, tmp, width * height * 4);
+    GSPGPU_FlushDataCache(texture->data, width * height * 4);
     linearFree(tmp);
     return (MAKERESULT(RL_SUCCESS, RS_SUCCESS, RM_COMMON, RD_SUCCESS));
 error:
@@ -169,7 +172,7 @@ errorCreateRead:
 }
 
 
-Result  loadPNGFile(sprite_t **out, const char *filename)
+Result  newSpriteFromPNG(sprite_t **out, const char *filename)
 {
     FILE        *file;
     Result      result;

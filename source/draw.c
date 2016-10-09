@@ -12,7 +12,7 @@ static bool             frameStarted = false;
 static gfxScreen_t      currentScreen = -1;
 static cursor_t         cursor[2] = { { 10, 10 },{ 10, 10 } };
 
-#define TEXT_VTX_ARRAY_COUNT (4 * 1024)
+#define TEXT_VTX_ARRAY_COUNT (8 * 1024)
 
 #define TEX_MIN_SIZE 32
 
@@ -96,7 +96,6 @@ void drawSprite(sprite_t *sprite)
 	C3D_BufInfo	*bufInfo = C3D_GetBufInfo();
 	BufInfo_Init(bufInfo);
 	BufInfo_Add(bufInfo, textVtxArray, sizeof(textVertex_s), 2, 0x10);
-
 	//Set the vertices
 	arrayIndex = textVtxArrayPos;
     addTextVertex(x, y + height, 0.0f, v); //left bottom
@@ -242,6 +241,7 @@ void drawExit(void)
 
 void setTextColor(u32 color)
 {
+#ifndef CITRA
 	C3D_TexEnv	*env;
 	
 	env = C3D_GetTexEnv(0);
@@ -251,6 +251,7 @@ void setTextColor(u32 color)
 	C3D_TexEnvFunc(env, C3D_RGB, GPU_REPLACE);
 	C3D_TexEnvFunc(env, C3D_Alpha, GPU_MODULATE);
 	C3D_TexEnvColor(env, color);
+#endif
 }
 
 void getTextSizeInfos(float *width, float scaleX, float scaleY, const char *text)

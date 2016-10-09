@@ -1,9 +1,8 @@
 #include "main.h"
+#include "config.h"
 
-extern NTR_CONFIG		g_ntrConfig;
-extern BOOTNTR_CONFIG	g_bnConfig;
-extern NTR_CONFIG		*ntrConfig;
-extern BOOTNTR_CONFIG	*bnConfig;
+extern ntrConfig_t		*ntrConfig;
+extern bootNtrConfig_t	*bnConfig;
 extern u8				*tmpBuffer;
 extern char				*g_primary_error;
 extern char				*g_secondary_error;
@@ -16,9 +15,9 @@ Result		bnPatchAccessCheck(void)
 	u32		fsPatchValue = 0x47702001;
 
 	check_prim(abort_and_exit(), USER_ABORT);
-	svc_backDoor((void*)backdoorHandler);
+	svcBackdoor(backdoorHandler);
 	// do a dma copy to get the finish state value on current console
-	ret = copyRemoteMemory(CURRENT_PROCESS_HANDLE, tmpBuffer, CURRENT_PROCESS_HANDLE, tmpBuffer + 0x10, 0x10);
+	ret = copyRemoteMemory(CURRENT_PROCESS_HANDLE, (u32)tmpBuffer, CURRENT_PROCESS_HANDLE, (u32)tmpBuffer + 0x10, 0x10);
 	check_sec(ret, REMOTECOPY_FAILURE);
 	ret = patchRemoteProcess(bnConfig->SMPid, bnConfig->SMPatchAddr, smPatchBuf, 8);
 	check_sec(ret, SMPATCH_FAILURE);
@@ -29,41 +28,67 @@ error:
 	return (RESULT_ERROR);
 }
 
+u32 loadNTRBin(void)
+{
+    u32                 size;
+    u32                 alignedSize;
+    u8                  *mem;
+    FILE                *ntr;
+    u32                 ret;
+    char                path[0x100];
+    static const char   *ntrVersionStrings[3] =
+    {
+        "ntr_3_2.bin",
+        "ntr_3_3.bin",
+        "ntr_3_4.bin"
+    };
+
+
+    strJoin(path, bnConfig->config->binariesPath + 5, ntrVersionStrings[bnConfig->versionToLaunch]);
+    
+    // Get size
+    ntr = fopen(path, "rb");
+    check_prim(!ntr, FILEOPEN_FAILURE);
+    fseek(ntr, 0, SEEK_END);
+    size = ftell(ntr);
+    fseek(ntr, 0, SEEK_SET);
+    alignedSize = rtAlignToPageSize(size);
+    ntrConfig->arm11BinSize = alignedSize;
+
+    // Allocate memory
+    mem = (u8 *)linearMemAlign(alignedSize * 2, 0x1000);
+    check_sec(!mem, LINEARMEMALIGN_FAILURE);
+    ntrConfig->arm11BinStart = ((u32)mem + alignedSize);
+    ret = rtCheckRemoteMemoryRegionSafeForWrite(getCurrentProcessHandle(), (u32)mem, alignedSize * 2);
+    check_prim(ret, PROTECTMEMORY_FAILURE);
+
+    // Read to memory
+    memset(mem, 0, alignedSize * 2);
+    fread(mem, size, 1, ntr);
+    fclose(ntr);
+    svcFlushProcessDataCache(getCurrentProcessHandle(), mem, alignedSize);
+
+    // Don't know why but we need to copy the data, else it crash...
+    memcpy(mem + alignedSize, mem, size);
+    svcFlushProcessDataCache(getCurrentProcessHandle(), mem + alignedSize, alignedSize);
+    return ((u32)mem);
+error:
+    return (RESULT_ERROR);
+}
+
 Result		bnLoadAndExecuteNTR(void)
 {
-	u32		size;
 	u32		outAddr;
-	u32		totalSize;
 	u32		*bootArgs;
-	Handle	fsUserHandle;
-	FILE	*file;
 
-	check_prim(abort_and_exit(), USER_ABORT);
-	file = fopen("sdmc:/ntr.bin", "rb");
-	check_prim(!file, FILEOPEN_FAILURE);
-	fseek(file, 0, SEEK_END);
-	size = ftell(file);
-	check_prim(!size, NULLSIZE);
-	fseek(file, 0, SEEK_SET);
-	ntrConfig->arm11BinSize = rtAlignToPageSize(size);
-	totalSize = (ntrConfig->arm11BinSize) * 2;
-	outAddr = (u32)linearMemAlign(totalSize, 0x1000);
-	check_prim(!outAddr, LINEARMEMALIGN_FAILURE);
-	ntrConfig->arm11BinStart = (outAddr + ntrConfig->arm11BinSize);
-	rtCheckRemoteMemoryRegionSafeForWrite(getCurrentProcessHandle(), outAddr, totalSize);
-	memset((void *)outAddr, 0, totalSize);
-	fread((void *)outAddr, size, 1, file);
-	memcpy((void *)(outAddr + (ntrConfig->arm11BinSize)), (void *)outAddr, size);
-	fsUserHandle = 0;
-	srvGetServiceHandle(&fsUserHandle, "fs:USER");
-	FSUSER_Initialize(fsUserHandle);
-	ntrConfig->fsUserHandle = fsUserHandle;
+    outAddr = loadNTRBin();
+    if (outAddr == RESULT_ERROR)
+        goto error;
 	bootArgs = (u32 *)(outAddr + 4);
 	bootArgs[0] = 0;
 	bootArgs[1] = 0xb00d;
 	bootArgs[2] = (u32)ntrConfig;
 	((funcType)(outAddr))();
-	svcCloseHandle(fsUserHandle);
 	return (0);
 error:
 	return (RESULT_ERROR);
@@ -71,31 +96,105 @@ error:
 
 Result		bnBootNTR(void)
 {
-	Result ret;
+	Result  ret;
+    u8      *linearAddress;
 
-	tmpBuffer = (u8 *)linearMemAlign(TMPBUFFER_SIZE, 0x1000);
+    linearAddress = NULL;
+    
+    // Set firm params
+    check_prim(bnInitParamsByFirmware(), UNKNOWN_FIRM);
+	
+    // Alloc temp buffer
+    linearAddress = (u8 *)linearMemAlign(TMPBUFFER_SIZE, 0x1000);
+    tmpBuffer = linearAddress;
 	check_prim(!tmpBuffer, LINEARMEMALIGN_FAILURE);
-	bnInitParamsByFirmware();
-	if (validateFirmParams() != 0)
-	{
-		ntrConfig->firmVersion = 0;
-		check_prim(RESULT_ERROR, UNKNOWN_FIRM);
-	}
-	ret = bnPatchAccessCheck();
-	check_third(ret, ACCESSPATCH_FAILURE);
-	ret = copyRemoteMemory(CURRENT_PROCESS_HANDLE, tmpBuffer, CURRENT_PROCESS_HANDLE, tmpBuffer + 0x10, 0x10);
-	check_sec(ret, REMOTECOPY_FAILURE);
-	rtCheckRemoteMemoryRegionSafeForWrite(getCurrentProcessHandle(), (u32)tmpBuffer, TMPBUFFER_SIZE);
-	bnInitParamsByHomeMenu();
-	if (validateHomeMenuParams() != 0)
-	{
-		// Home menu Params is not complete, should be considered as unsupported
-		ntrConfig->HomeMenuVersion = 0;
-		check_sec(RESULT_ERROR, UNKNOWN_HOMEMENU);
-	}
+    rtCheckRemoteMemoryRegionSafeForWrite(getCurrentProcessHandle(), (u32)tmpBuffer, TMPBUFFER_SIZE);
+    
+    // Patch services
+    ret = bnPatchAccessCheck();
+    check_third(ret, ACCESSPATCH_FAILURE);
+    
+    // Init home menu params
+    check_sec(bnInitParamsByHomeMenu(), UNKNOWN_HOMEMENU);
+    
+    // Free temp buffer
+    linearFree(linearAddress);
+
+    // Load NTR
 	ret = bnLoadAndExecuteNTR();
 	check_third(ret, LOAD_FAILED);
 	return (ret);
 error:
+    if (linearAddress) linearFree(linearAddress);
 	return (RESULT_ERROR);
+}
+
+static char *dumpString[] =
+{
+    "Kernel",
+    "FS Process",
+    "PM Process",
+    "SM Process",
+    "HomeMenu Process"
+};
+
+void        printDumpLog(char *str)
+{
+    static int  remove = 0;
+    static int  changeMode = 0;
+    static int  mode = 0;
+    static char address[9] = "DFFF0000";
+    //Mode:
+    // 0 = Kernel Shared Memeory
+    // 1 = FS
+    // 2 = PM
+    // 3 = SM
+    // 4 = HomeMenu
+
+    if (strncmp(str, "dump finished", 13) == 0)
+    {
+        changeMode = 1;
+        str += 5;
+    }
+    if (changeMode || strncmp(str, "addr:", 5) == 0)
+    {
+        if (mode == 0)
+        {
+            strncpyFromTail(address, str, 8);
+            if (*address == '0')
+            {
+                remove = 0;
+                mode += 1;
+            }
+        }
+        if (remove) removeAppTop();
+        remove = 1;
+        newAppTop(DEFAULT_COLOR, TINY | SKINNY, "%s\uE019%s", dumpString[mode], str);
+        mode += changeMode;
+        remove = !changeMode;
+        changeMode = 0;
+    }
+    else
+    {
+        if (strncmp(str, "current", 7) && strncmp(str, "firmware", 8))
+            newAppTop(DEFAULT_COLOR, TINY | SKINNY, str);
+    }
+}
+
+void        launchNTRDumpMode(void)
+{
+    u32		isNew3DS = 0;
+    char    buffer[0x20];
+
+    APT_CheckNew3DS((bool *)&isNew3DS);
+
+    ntrConfig->firmVersion = 0;
+    ntrConfig->HomeMenuVersion = 0;
+    ntrConfig->isNew3DS = isNew3DS;
+    ntrConfig->PMPid = 2;
+    ntrConfig->HomeMenuPid = 0xf;
+    bnConfig->versionToLaunch = V33;
+    ntrConfig->ShowDbgFunc = (u32)printDumpLog;
+    copyRemoteMemory(CURRENT_PROCESS_HANDLE, (u32)buffer, CURRENT_PROCESS_HANDLE, (u32)buffer + 0x10, 0x10);
+    bnLoadAndExecuteNTR();
 }

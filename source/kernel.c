@@ -1,9 +1,8 @@
 #include "main.h"
+#include "config.h"
 
-extern NTR_CONFIG		g_ntrConfig;
-extern BOOTNTR_CONFIG	g_bnConfig;
-extern NTR_CONFIG		*ntrConfig;
-extern BOOTNTR_CONFIG	*bnConfig;
+extern ntrConfig_t		*ntrConfig;
+extern bootNtrConfig_t	*bnConfig;
 extern u8				*tmpBuffer;
 extern char				*g_error;
 
@@ -114,9 +113,9 @@ dbgKernelCacheInterface cacheInterface_Old111 =
 	(void*)0xFFF1FCCC
 };
 
-void kernelCallback(void)
+void    kernelCallback(void)
 {
-	u32							svc_patch_addr = g_bnConfig.SvcPatchAddr;
+	u32							svc_patch_addr = bnConfig->SvcPatchAddr;
 	u32							firmVersion = ntrConfig->firmVersion;
 	u32							isNew3DS = ntrConfig->isNew3DS;
 	dbgKernelCacheInterface		*cache = NULL;

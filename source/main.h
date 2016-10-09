@@ -2,12 +2,19 @@
 #define MAIN_H
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <unistd.h>
+#include <sys/stat.h>
 #include <3ds.h>
-#include "ntr_config.h"
+#include "graphics.h"
 #include "mysvcs.h"
+
+#define APP_VERSION_MAJOR 2
+#define APP_VERSION_MINOR 0
 //printf("param is missing: %s\n", #a);
-#define VALIDATE_PARAM(a) if ((a) == 0) { return (RESULT_ERROR); }
 #define check_prim(result, err) if ((result) != 0) {g_primary_error = err; \
 	goto error; }
 #define check_sec(result, err) if ((result) != 0) {g_secondary_error = err; \
@@ -15,7 +22,8 @@
 #define check_third(result, err) if ((result) != 0) {g_third_error = err; \
 	goto error; }
 
-
+typedef uint32_t  u32;
+typedef uint8_t   u8;
 #define CURRENT_PROCESS_HANDLE	(0xffff8001)
 #define RESULT_ERROR			(1)
 #define TMPBUFFER_SIZE			(0x20000)
@@ -51,7 +59,7 @@ static const char * const s_error[] =
 	"SMPATCH_FAILURE",
 	"FSPATCH_FAILURE",
 	"FILEOPEN_FAILURE",
-	"NULLSIZE",
+	"NULL SIZE",
 	"LINEARMEMALIGN_FAILURE",
 	"ACCESSPATCH_FAILURE",
 	"UNKNOWN_FIRM",
@@ -68,6 +76,13 @@ typedef struct	s_BLOCK
 	u32			buffer[4];
 }				t_BLOCK;
 
+typedef enum    version_e
+{
+    V32 = 0,
+    V33 = 1,
+    V34 = 2
+}               version_t;
+
 /*
 ** misc.s
 */
@@ -76,18 +91,21 @@ void	flushDataCache(void);
 void	FlushAllCache(void);
 void	InvalidateEntireInstructionCache(void);
 void	InvalidateEntireDataCache(void);
-void	backdoorHandler();
+s32     backdoorHandler();
 
 /*
-** main.c
+** mainMenu.c
 */
-void	printMenu(int update);
+void    initMainMenu(void);
+void    exitMainMenu(void);
+int     mainMenu(void);
+void    ntrDumpMode(void);
 
 /*
 ** files.c
 */
 int		copy_file(char *old_filename, char  *new_filename);
-
+bool    fileExists(const char *path);
 /*
 ** common_functions.c
 */
@@ -97,29 +115,40 @@ void	flushDataCache(void);
 void	doFlushCache(void);
 void	doStallCpu(void);
 void	doWait(void);
-
+void    strJoin(char *dst, const char *s1, const char *s2);
+void    strInsert(char *dst, char *src, int index);
+void    strncpyFromTail(char *dst, char *src, int nb);
+bool    inputPathKeyboard(char *dst, char *hintText, char *initialText, int bufSize);
+void    waitAllKeysReleased(void);
+void    wait(int seconds);
 /*
 ** ntr_launcher.c
 */
 Result		bnPatchAccessCheck(void);
 Result		bnLoadAndExecuteNTR(void);
 Result		bnBootNTR(void);
+void        launchNTRDumpMode(void);
+
+/*
+** pathPatcher.c
+*/
+Result        loadAndPatch(version_t version);
 
 /*
 ** memory_functions.c
 */
-u32		protectRemoteMemory(Handle hProcess, void *addr, u32 size);
-u32		copyRemoteMemory(Handle hDst, void *ptrDst, Handle hSrc, void *ptrSrc, u32 size);
+u32		protectRemoteMemory(Handle hProcess, u32 addr, u32 size);
+u32		copyRemoteMemory(Handle hDst, u32 ptrDst, Handle hSrc, u32 ptrSrc, u32 size);
 u32		patchRemoteProcess(u32 pid, u32 addr, u8 *buf, u32 len);
 u32		rtAlignToPageSize(u32 size);
 u32		rtGetPageOfAddress(u32 addr);
 u32		rtCheckRemoteMemoryRegionSafeForWrite(Handle hProcess, u32 addr, u32 size);
+u32     memfind(u8 *startPos, u32 size, const void *pattern, u32 patternSize);
 
 /*
-** firmware.c
+** firmware.c   
 */
-void	bnInitParamsByFirmware(void);
-Result	validateFirmParams(void);
+Result	bnInitParamsByFirmware(void);
 
 /*
 ** kernel.c
@@ -130,6 +159,5 @@ void	kernelCallback(void);
 ** homemenu.c
 */
 Result	bnInitParamsByHomeMenu(void);
-Result	validateHomeMenuParams(void);
 
 #endif

@@ -1,71 +1,182 @@
 #include "appInfo.h"
 
-static u32              init = 0;
+static bool autoUpdate = true;
 
-static sprite_t         *background;
-static u32              entryList[BUFFER_SIZE];
-static int              entryCount = 0;
-static cursor_t         cursor;
-
-void    appInfoInit(sprite_t *sprite)
+void    appInfoDisableAutoUpdate(void)
 {
-    background = sprite;
-    memset(entryList, 0, sizeof(entryList));
-    init = 1;
+    autoUpdate = false;
 }
 
-void    newAppInfoEntry(u32 color, u32 flags, char *text, ...)
+void    appInfoEnableAutoUpdate(void)
 {
+    autoUpdate = true;
+}
+
+appInfoObject_t     *newAppInfoObject(sprite_t *sprite, u32 maxEntryCount, u32 posX, u32 posY)
+{
+    appInfoObject_t *object;
+
+    if (!sprite) goto error;
+
+    object = (appInfoObject_t *)calloc(1, sizeof(appInfoObject_t));
+    if (!object) goto error;
+    object->entryList = (u32 *)calloc(maxEntryCount, sizeof(u32 *));
+    if (!object->entryList) goto allocError;
+    object->sprite = sprite;
+    object->spritePosX = sprite->posX;
+    object->spritePosY = sprite->posY;
+    object->maxEntryCount = maxEntryCount;
+    object->entryCount = 0;
+    object->cursor.posX = (float)posX;
+    object->cursor.posY = (float)posY;
+    object->boundX = 0;
+    object->boundY = 0;
+    return (object);
+allocError:
+    free(object);
+error:
+    return (NULL);
+}
+
+void    deleteAppInfoObject(appInfoObject_t *object)
+{
+    if (!object) return;
+    free(object->entryList);
+    free(object);
+}
+
+void    appInfoSetTextBoundaries(appInfoObject_t *object, float posX, float posY)
+{
+    if (!object) return;
+    object->boundX = posX;
+    object->boundY = posY;
+}
+
+void    appInfoSetSpritePosition(appInfoObject_t *object, float posX, float posY)
+{
+    if (!object) return;
+    object->spritePosX = posX;
+    object->spritePosY = posY;
+}
+
+static void scrollDown(appInfoObject_t *object)
+{
+    appInfoEntry_t  *entry;
+    int             index;
+    u32             entryCount;
+    u32             *entryList;
+
+    if (!object) goto exit;
+    entryCount = object->entryCount;
+    if (entryCount <= 0) goto exit;
+    entryList = object->entryList;
+    entry = (appInfoEntry_t *)entryList[0];
+    free(entry);
+    entryCount--;
+    for (index = 0; index < entryCount; index++)
+    {
+        entryList[index] = entryList[index + 1];
+    }
+    entryList[index] = 0;
+    object->entryCount = entryCount;
+exit:
+    return;
+}
+
+void newAppInfoEntry(appInfoObject_t *object, u32 color, u32 flags, char *text, ...)
+{
+    u32             entryCount;
+    u32             *entryList;
     appInfoEntry_t  *entry;
     va_list         vaList;
 
-    if (!text) return;
-    if (entryCount >= MAX_ENTRIES) return;
+    if (!text || !object) goto exit;
+    if (flags & SCROLL)
+    {
+        scrollDown(object);
+        if (flags & NEWLINE)
+            scrollDown(object);
+    }
+    entryCount = object->entryCount;
+    entryList = object->entryList;
+    if (entryCount >= object->maxEntryCount)
+    {
+        scrollDown(object);
+        entryCount = object->entryCount;
+    }
     entry = (appInfoEntry_t *)calloc(1, sizeof(appInfoEntry_t));
-    if (!entry) return;
+    if (!entry) goto exit;
     va_start(vaList, text);
     vsnprintf(entry->buffer, BUFFER_SIZE, text, vaList);
     va_end(vaList);
     entry->color = color;
     entry->flags = flags;
     entryList[entryCount] = (u32)entry;
-    entryCount++;
-    updateUI();
+    object->entryCount++;
+    if (autoUpdate)
+        updateUI();
+exit:
+    return;
 }
 
-void    removeAppInfoEntry(void)
+static void deleteLastEntry(appInfoObject_t *object)
 {
-    appInfoEntry_t *entry;
+    u32             entryCount;
+    appInfoEntry_t  *entry;
 
-    if (entryCount <= 0) return;
+    if (!object) goto exit;
+    entryCount = object->entryCount;
+    if (entryCount <= 0) goto exit;
     entryCount--;
-    entry = (appInfoEntry_t *)entryList[entryCount];
-    entryList[entryCount] = 0;
+    entry = (appInfoEntry_t *)object->entryList[entryCount];
+    object->entryList[entryCount] = 0;
     free(entry);
-    updateUI();
+    object->entryCount = entryCount;
+exit:
+    return;
+
 }
 
-void    clearAppInfo(void)
+void    removeAppInfoEntry(appInfoObject_t *object)
 {
+    deleteLastEntry(object);
+    if (autoUpdate)
+        updateUI();
+}
+
+void    clearAppInfo(appInfoObject_t *object, bool updateScreen)
+{
+    u32     entryCount;
     int     i;
 
+    entryCount = object->entryCount;
     for (i = entryCount; i > 0; i--)
-        removeAppInfoEntry();
+        deleteLastEntry(object);
+    if (updateScreen)
+        updateUI();
 }
 
-static void getDrawParameters(appInfoEntry_t *entry, float *sizeX, float *sizeY)
+static void getDrawParameters(appInfoObject_t *object, int index, float *sizeX, float *sizeY)
 {
-    float   textWidth;
-    float   scaleX;
-    float   scaleY;
-    float   temp;
-    u32     flags;
+    appInfoEntry_t  *entry;
+    float           textWidth;
+    float           scaleX;
+    float           scaleY;
+    float           temp;
+    u32             flags;
+    cursor_t        *cursor;
 
-    if (!entry | !sizeX | !sizeY) return;
+    if (!object || !sizeX || !sizeY) return;
+    entry = (appInfoEntry_t *)object->entryList[index];
     flags = entry->flags;
+    cursor = &object->cursor;
+
     //Set the font size
     if (flags & BIG) scaleX = scaleY = 0.6f;
-    else if (flags & SMALL) scaleX = scaleY = 0.4f;
+    else if (flags & MEDIUM) scaleX = scaleY = 0.55f;
+    else if (flags & SMALL) scaleX = scaleY = 0.45f;
+    else if (flags & TINY) scaleX = scaleY = 0.4f;
+    
     else scaleX = scaleY = 0.5f;
 
     //Set the type
@@ -76,61 +187,72 @@ static void getDrawParameters(appInfoEntry_t *entry, float *sizeX, float *sizeY)
     getTextSizeInfos(&textWidth, scaleX, scaleY, entry->buffer);
     if (flags & CENTER)
     {
-        temp = 297.0f - cursor.posX;
+        temp = object->boundX - cursor->posX;
         temp -= textWidth;
         if (temp > 0)
         {
             temp /= 2;
-            cursor.posX += temp;
+            cursor->posX += temp;
         }
     }
     if (flags & RIGHT_ALIGN)
     {
-        cursor.posX = 297.0f;
-        cursor.posX -= textWidth;
+        cursor->posX = 297.0f;
+        cursor->posX -= textWidth;
     }
 
     if (flags & NEWLINE)
-        cursor.posY += 0.4f * fontGetInfo()->lineFeed;
+        cursor->posY += 0.3f * fontGetInfo()->lineFeed;
     
     //Return the size
     *sizeX = scaleX;
     *sizeY = scaleY;
 }
-
-void    drawAppInfoEntry(int index)
+void    drawAppInfoEntry(appInfoObject_t  *object, int index)
 {
-    appInfoEntry_t  *entry;
     float           sizeX;
     float           sizeY;
     float           lineFeed;
+    appInfoEntry_t  *entry;
+    cursor_t        *cursor;
 
-    if (index >= entryCount || index < 0) goto exit;
-    entry = (appInfoEntry_t *)entryList[index];
+    if (!object || index >= object->entryCount) goto exit;
+    entry = (appInfoEntry_t *)object->entryList[index];
+    cursor = &object->cursor;
     sizeX = sizeY = 0.0f;
-    getDrawParameters(entry, &sizeX, &sizeY);
+    getDrawParameters(object, index, &sizeX, &sizeY);
     lineFeed = sizeY * fontGetInfo()->lineFeed;
-#ifndef CITRA
     setTextColor(entry->color);
-#endif
-    renderText(cursor.posX, cursor.posY, sizeX, sizeY, false, entry->buffer, &cursor);
-    cursor.posY += lineFeed;
+    renderText(cursor->posX, cursor->posY, sizeX, sizeY, false, entry->buffer, cursor);
+    cursor->posY += lineFeed;
 exit:
     return;
 }
 
-void    drawAppInfo(void)
+void    drawAppInfo(appInfoObject_t *object)
 {
-    int     i;
+    int         i;
+    u32         entryCount;
+    float       boundY;
+    float       cursorXBak;
+    float       cursorYBak;
+    cursor_t    *cursor;
 
-    if (!init || entryCount <= 0) return;
-
-    cursor = (cursor_t){ 177, 64};
-    drawSprite(background);
+    if (!object) return;
+    entryCount = object->entryCount;
+    if (entryCount <= 0) return;
+    boundY = object->boundY;
+    cursor = &object->cursor;
+    cursorXBak = cursor->posX;
+    cursorYBak = cursor->posY;
+    setSpritePos(object->sprite, object->spritePosX, object->spritePosY);
+    drawSprite(object->sprite);
     for (i = 0; i < entryCount; i++)
     {
-        if (cursor.posY >= 190) break;
-        cursor.posX = 177;
-        drawAppInfoEntry(i);
+        if (cursor->posY >= boundY) break;
+        cursor->posX = cursorXBak;
+        drawAppInfoEntry(object, i);
     }
+    cursor->posX = cursorXBak;
+    cursor->posY = cursorYBak;
 }

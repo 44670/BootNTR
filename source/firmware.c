@@ -1,29 +1,20 @@
 #include "main.h"
+#include "config.h"
 
-extern NTR_CONFIG		*ntrConfig;
-extern BOOTNTR_CONFIG	*bnConfig;
+extern ntrConfig_t		*ntrConfig;
+extern bootNtrConfig_t	*bnConfig;
 extern u8				*tmpBuffer;
 extern char				*g_error;
 
-void	bnInitParamsByFirmware(void)
+Result	bnInitParamsByFirmware(void)
 {
 	u32		kernelVersion = osGetKernelVersion();
-	u32		isNew3DS = 0;
-	bool	tmp;
-	Result	ret;
+	bool	isNew3DS = false;
 
-	if (kernelVersion >= SYSTEM_VERSION(2, 44, 6))
-	{
-		ret = APT_CheckNew3DS(&tmp);
-		if (ret == 0)
-		{
-			if (tmp)
-				isNew3DS = 1;
-		}
-	}
-	ntrConfig->isNew3DS = isNew3DS;
+	APT_CheckNew3DS(&isNew3DS);
+	ntrConfig->isNew3DS = isNew3DS ? 1 : 0;
 	ntrConfig->PMPid = 2;
-	ntrConfig->HomeMenuPid = 0xf;
+	ntrConfig->HomeMenuPid = 0xF;
 	bnConfig->SMPid = 3;
 	bnConfig->FSPid = 0;
 	if (!isNew3DS)
@@ -41,8 +32,9 @@ void	bnInitParamsByFirmware(void)
 			//TODO: add old3ds 8.0.0 firmware support 
 			ntrConfig->firmVersion = SYSTEM_VERSION(8, 0, 0);
 			bnConfig->SvcPatchAddr = 0xDFF82294;
+            goto unsupported;
 		}
-		if (kernelVersion == SYSTEM_VERSION(2, 46, 0))
+		else if (kernelVersion == SYSTEM_VERSION(2, 46, 0))
 		{
 			// old3ds 9.0.0
 			ntrConfig->firmVersion = SYSTEM_VERSION(9, 0, 0);
@@ -53,7 +45,7 @@ void	bnInitParamsByFirmware(void)
 			bnConfig->FSPatchAddr = 0x0010ED64;
 			bnConfig->SMPatchAddr = 0x00101838;
 		}
-		if (kernelVersion == SYSTEM_VERSION(2, 50, 1))
+		else if (kernelVersion == SYSTEM_VERSION(2, 50, 1))
 		{
 			// old3ds 9.6.0
 			ntrConfig->firmVersion = SYSTEM_VERSION(9, 6, 0);
@@ -64,7 +56,7 @@ void	bnInitParamsByFirmware(void)
 			bnConfig->FSPatchAddr = 0x0010EFAC;
 			bnConfig->SMPatchAddr = 0x0010189C;
 		}
-		if (kernelVersion == SYSTEM_VERSION(2, 51, 0))
+		else if (kernelVersion == SYSTEM_VERSION(2, 51, 0))
 		{
 			// old3ds 11.0.0
 			ntrConfig->firmVersion = SYSTEM_VERSION(11, 0, 0);
@@ -75,7 +67,7 @@ void	bnInitParamsByFirmware(void)
 			bnConfig->FSPatchAddr = 0x0010EED4;
 			bnConfig->SMPatchAddr = 0x0010189C;
 		}
-		if (kernelVersion == SYSTEM_VERSION(2, 51, 2))
+		else if (kernelVersion == SYSTEM_VERSION(2, 51, 2))
 		{
 			// old3ds 11.1.0
 			ntrConfig->firmVersion = SYSTEM_VERSION(11, 1, 0);
@@ -86,6 +78,8 @@ void	bnInitParamsByFirmware(void)
 			bnConfig->FSPatchAddr = 0x0010F024;
 			bnConfig->SMPatchAddr = 0x0010189C;
 		}
+        else 
+            goto unsupported;
 	}
 	else
 	{
@@ -108,7 +102,7 @@ void	bnInitParamsByFirmware(void)
 			bnConfig->FSPatchAddr = 0x0010ED64;
 			bnConfig->SMPatchAddr = 0x00101838;
 		}
-		if (kernelVersion == SYSTEM_VERSION(2, 46, 0))
+		else if (kernelVersion == SYSTEM_VERSION(2, 46, 0))
 		{
 			// new3ds 9.0
 			ntrConfig->firmVersion = SYSTEM_VERSION(9, 0, 0);
@@ -119,7 +113,7 @@ void	bnInitParamsByFirmware(void)
 			bnConfig->FSPatchAddr = 0x0010ED64;
 			bnConfig->SMPatchAddr = 0x00101838;
 		}
-		if (kernelVersion == SYSTEM_VERSION(2, 49, 0))
+		else if (kernelVersion == SYSTEM_VERSION(2, 49, 0))
 		{
 			// new3ds 9.5
 			ntrConfig->firmVersion = SYSTEM_VERSION(9, 5, 0);
@@ -130,7 +124,7 @@ void	bnInitParamsByFirmware(void)
 			bnConfig->FSPatchAddr = 0x0010ED64;
 			bnConfig->SMPatchAddr = 0x00101838;
 		}
-		if (kernelVersion == SYSTEM_VERSION(2, 50, 1))
+		else if (kernelVersion == SYSTEM_VERSION(2, 50, 1))
 		{
 			//new3ds 9.6
 			ntrConfig->firmVersion = SYSTEM_VERSION(9, 6, 0);
@@ -141,13 +135,14 @@ void	bnInitParamsByFirmware(void)
 			bnConfig->FSPatchAddr = 0x0010EFAC;
 			bnConfig->SMPatchAddr = 0x0010189C;
 		}
-		if (kernelVersion == SYSTEM_VERSION(2, 50, 7))
+		else if (kernelVersion == SYSTEM_VERSION(2, 50, 7))
 		{
 			// new3ds 10.0
 			//TODO: add new3ds 10.0 firmware support
 			ntrConfig->firmVersion = SYSTEM_VERSION(10, 0, 0);
+            goto unsupported;
 		}
-		if (kernelVersion == SYSTEM_VERSION(2, 50, 9))
+		else if (kernelVersion == SYSTEM_VERSION(2, 50, 9))
 		{
 			// new3ds 10.2
 			ntrConfig->firmVersion = SYSTEM_VERSION(10, 2, 0);
@@ -158,7 +153,7 @@ void	bnInitParamsByFirmware(void)
 			bnConfig->FSPatchAddr = 0x0010EED4;
 			bnConfig->SMPatchAddr = 0x0010189C;
 		}
-		if (kernelVersion == SYSTEM_VERSION(2, 51, 0))
+		else if (kernelVersion == SYSTEM_VERSION(2, 51, 0))
 		{
 			// new3ds 11.0
 			ntrConfig->firmVersion = SYSTEM_VERSION(11, 0, 0);
@@ -169,7 +164,7 @@ void	bnInitParamsByFirmware(void)
 			bnConfig->FSPatchAddr = 0x0010EED4;
 			bnConfig->SMPatchAddr = 0x0010189C;
 		}
-		if (kernelVersion == SYSTEM_VERSION(2, 51, 2))
+		else if (kernelVersion == SYSTEM_VERSION(2, 51, 2))
 		{
 			// new3ds 11.1
 			ntrConfig->firmVersion = SYSTEM_VERSION(11, 1, 0);
@@ -180,23 +175,12 @@ void	bnInitParamsByFirmware(void)
 			bnConfig->FSPatchAddr = 0x0010F024;
 			bnConfig->SMPatchAddr = 0x0010189C;
 		}
+        else 
+            goto unsupported;
 	}
 	bnConfig->requireKernelHax = 0;
-}
-
-Result	validateFirmParams(void)
-{
-	VALIDATE_PARAM(ntrConfig->PMSvcRunAddr);
-	VALIDATE_PARAM(bnConfig->SvcPatchAddr);
-	VALIDATE_PARAM(bnConfig->FSPatchAddr);
-	VALIDATE_PARAM(bnConfig->SMPatchAddr);
-	VALIDATE_PARAM(ntrConfig->IoBasePad);
-	VALIDATE_PARAM(ntrConfig->IoBaseLcd);
-	VALIDATE_PARAM(ntrConfig->IoBasePdc);
-	VALIDATE_PARAM(ntrConfig->KMMUHaxAddr);
-	VALIDATE_PARAM(ntrConfig->KMMUHaxSize);
-	VALIDATE_PARAM(ntrConfig->KProcessHandleDataOffset);
-	VALIDATE_PARAM(ntrConfig->KProcessPIDOffset);
-	VALIDATE_PARAM(ntrConfig->KProcessCodesetOffset);
-	return (0);
+    return (0);
+unsupported:
+    ntrConfig->firmVersion = 0;
+    return (RESULT_ERROR);
 }

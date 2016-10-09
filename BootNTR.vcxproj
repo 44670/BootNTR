@@ -134,8 +134,11 @@
     <ClInclude Include="lib\ctrcommon\include\ctrcommon_shader_vsh_shbin.h" />
     <ClInclude Include="lib\ctrcommon\source\ctrcommon\service.hpp" />
     <ClInclude Include="source\appInfo.h" />
+    <ClInclude Include="source\button.h" />
+    <ClInclude Include="source\config.h" />
     <ClInclude Include="source\Credits.h" />
     <ClInclude Include="source\draw.h" />
+    <ClInclude Include="source\drawableObject.h" />
     <ClInclude Include="source\graphics.h" />
     <ClInclude Include="source\main.h" />
     <ClInclude Include="source\mysvcs.h" />
@@ -156,16 +159,22 @@
     <ClCompile Include="lib\ctrcommon\source\ctrcommon\sound.cpp" />
     <ClCompile Include="lib\ctrcommon\source\ctrcommon\ui.cpp" />
     <ClCompile Include="source\appInfo.c" />
+    <ClCompile Include="source\button.c" />
     <ClCompile Include="source\common_functions.c" />
+    <ClCompile Include="source\config.c" />
     <ClCompile Include="source\draw.c" />
+    <ClCompile Include="source\drawableObject.c" />
     <ClCompile Include="source\files.c" />
     <ClCompile Include="source\firmware.c" />
+    <ClCompile Include="source\firstLaunchMenu.c" />
     <ClCompile Include="source\graphics.c" />
     <ClCompile Include="source\homemenu.c" />
     <ClCompile Include="source\kernel.c" />
     <ClCompile Include="source\main.c" />
+    <ClCompile Include="source\mainMenu.c" />
     <ClCompile Include="source\memory_functions.c" />
     <ClCompile Include="source\ntr_launcher.c" />
+    <ClCompile Include="source\pathPatcher.c" />
     <ClCompile Include="source\png.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

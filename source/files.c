@@ -2,6 +2,18 @@
 
 extern char		*g_primary_error;
 
+bool    fileExists(const char *path)
+{
+    int exists;
+
+    if (!path) goto error;
+    exists = access(path, F_OK);
+    if (exists == 0)
+        return (true);
+error:
+    return (false);
+}
+
 int		copy_file(char *old_filename, char  *new_filename)
 {
 	FILE		*old_file = NULL;
