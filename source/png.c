@@ -6,60 +6,30 @@
 
 #define PNG_SIGSIZE (8)
 
-// Grabbed from Citra Emulator (citra/src/video_core/utils.h)
-static inline u32 mortonInterleave(u32 x, u32 y)
-{
-    u32 i;
-
-    i = (x & 7) | ((y & 7) << 8); // ---- -210
-    i = (i ^ (i << 2)) & 0x1313;  // ---2 --10
-    i = (i ^ (i << 1)) & 0x1515;  // ---2 -1-0
-    i = (i | (i >> 7)) & 0x3F;
-    return (i);
-}
-
-//Grabbed from Citra Emulator (citra/src/video_core/utils.h)
-static inline u32 getMortonOffset(u32 x, u32 y, u32 bytes_per_pixel)
-{
-    u32 i;
-    
-    i = mortonInterleave(x, y);
-    unsigned int offset = (x & ~7) * 8;
-    return (i + offset) * bytes_per_pixel;
-}
-
 Result textureTile32(C3D_Tex *texture)
 {
     u8      *tmp;
     int     i;
-    int     j;
     int     height;
     int     width;
-    u32     coarseY;
-    u32     dstOffset;
     u32     pixel;
+    u32     size;
     
     height = (int)texture->height;
     width = (int)texture->width;
     tmp = linearAlloc(width * height * 4);
     if (!tmp) goto error;
-    for (j = 0; j < height; j++)
+    size = width * height * 4;
+    for (i = 0; i < size; i += 4)
     {
-        for (i = 0; i < width; i++)
-        {
-
-            coarseY = j & ~7;
-            dstOffset = getMortonOffset(i, j, 4);
-            dstOffset += coarseY * width * 4;
-
-             pixel = ((u32 *)texture->data)[i + (height - 1 - j) * width];
-            *(u32 *)(tmp + dstOffset) = __builtin_bswap32(pixel); /* RGBA8 -> ABGR8 */
-        }
-    }
-    
+        pixel = *(u32 *)(texture->data + i);
+        *(u32 *)(tmp + i) = __builtin_bswap32(pixel);
+    }    
     GSPGPU_FlushDataCache(tmp, width * height * 4);
-    memcpy(texture->data, tmp, width * height * 4);
     GSPGPU_FlushDataCache(texture->data, width * height * 4);
+    C3D_SafeDisplayTransfer((u32 *)tmp, GX_BUFFER_DIM(width, height), \
+        (u32*)texture->data, GX_BUFFER_DIM(width, height), TEXTURE_TRANSFER_FLAGS);
+    gspWaitForPPF();
     linearFree(tmp);
     return (MAKERESULT(RL_SUCCESS, RS_SUCCESS, RM_COMMON, RD_SUCCESS));
 error:
@@ -69,7 +39,7 @@ error:
 static void readPNGFile(png_structp pngPtr, png_bytep data, png_size_t length)
 {
     FILE *file = (FILE *)png_get_io_ptr(pngPtr);
-    fread(data, 1, length, file);
+    fread(data, length, 1, file);
 }
 
 static Result loadPNGGeneric(sprite_t **out, const void *ioPtr)
@@ -120,23 +90,17 @@ static Result loadPNGGeneric(sprite_t **out, const void *ioPtr)
     }
 
     if (bitDepth == 16) png_set_scale_16(pngPtr);
-    if (bitDepth == 8 && colorType == PNG_COLOR_TYPE_RGB)
-        png_set_filler(pngPtr, 0xFF, PNG_FILLER_AFTER);
-    if (colorType == PNG_COLOR_TYPE_GRAY ||
-        colorType == PNG_COLOR_TYPE_GRAY_ALPHA)
+    if (bitDepth == 8 && colorType == PNG_COLOR_TYPE_RGB) png_set_filler(pngPtr, 0xFF, PNG_FILLER_AFTER);
+    if (colorType == PNG_COLOR_TYPE_GRAY || colorType == PNG_COLOR_TYPE_GRAY_ALPHA)
         png_set_gray_to_rgb(pngPtr);
     if (colorType == PNG_COLOR_TYPE_PALETTE)
     {
         png_set_palette_to_rgb(pngPtr);
         png_set_filler(pngPtr, 0xFF, PNG_FILLER_AFTER);
     }
-    if (colorType == PNG_COLOR_TYPE_GRAY && bitDepth < 8)
-        png_set_expand_gray_1_2_4_to_8(pngPtr);
-
-    if (png_get_valid(pngPtr, infoPtr, PNG_INFO_tRNS))
-        png_set_tRNS_to_alpha(pngPtr);
-    if (bitDepth < 8)
-        png_set_packing(pngPtr);
+    if (colorType == PNG_COLOR_TYPE_GRAY && bitDepth < 8) png_set_expand_gray_1_2_4_to_8(pngPtr);
+    if (png_get_valid(pngPtr, infoPtr, PNG_INFO_tRNS)) png_set_tRNS_to_alpha(pngPtr);
+    if (bitDepth < 8) png_set_packing(pngPtr);
     png_read_update_info(pngPtr, infoPtr);
     rowPtrs = (png_bytep *)malloc(sizeof(png_bytep) * height);
     if (!rowPtrs)

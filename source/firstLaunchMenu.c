@@ -22,11 +22,13 @@ static button_t         *createCustomButton;
 static button_t         *useDefaultButton;
 static button_t         *useSecondButton;
 static button_t         *saveSettingButton;
+static button_t         *okButton;
 
 static sprite_t          *mainWindow;
 static sprite_t          *customWindow;
 static sprite_t          *defaultWindow;
 static sprite_t          *secondWindow;
+static sprite_t          *warningWindow;
 static window_t         *window;
 
 static u32              g_status;
@@ -81,25 +83,28 @@ void    initSettingsMenu(void)
     changeBottomFooter(pressBackSprite);
     changeBottomHeader(desiredChoiceSprite);
 
-    newSpriteFromPNG(&buttonBackground, "romfs:/sprites/largeButtonBg.png");
+    newSpriteFromPNG(&buttonBackground, "romfs:/sprites/largeButtonBackground.png");
 
     newSpriteFromPNG(&sprite, "romfs:/sprites/textSprites/binariesPath.png");
-    binariesPathButton = newButton(50.0f, 41.0f, changeStatus, 5, buttonBackground, sprite);
+    binariesPathButton = newButton(48.0f, 34.0f, changeStatus, 5, buttonBackground, sprite);
 
     newSpriteFromPNG(&sprite, "romfs:/sprites/textSprites/pluginsPath.png");
-    pluginsPathButton = newButton(50.0f, 95.0f, changeStatus, 4, buttonBackground, sprite);
+    pluginsPathButton = newButton(48.0f, 88.0f, changeStatus, 4, buttonBackground, sprite);
 
     newSpriteFromPNG(&sprite, "romfs:/sprites/textSprites/saveSettings.png");
-    saveSettingButton = newButton(50.0f, 95.0f, changeStatus, 6, buttonBackground, sprite);
+    saveSettingButton = newButton(48.0f, 88.0f, changeStatus, 6, buttonBackground, sprite);
 
     newSpriteFromPNG(&sprite, "romfs:/sprites/textSprites/useDefault.png");
-    useDefaultButton = newButton(50.0f, 41.0f, changeStatus, 1, buttonBackground, sprite);
+    useDefaultButton = newButton(48.0f, 34.0f, changeStatus, 1, buttonBackground, sprite);
 
     newSpriteFromPNG(&sprite, "romfs:/sprites/textSprites/useSettings2.png");
-    useSecondButton = newButton(50.0f, 95.0f, changeStatus, 2, buttonBackground, sprite);
+    useSecondButton = newButton(48.0f, 88.0f, changeStatus, 2, buttonBackground, sprite);
 
     newSpriteFromPNG(&sprite, "romfs:/sprites/textSprites/createCustom.png");
-    createCustomButton = newButton(50.0f, 149.0f, changeStatus, 3, buttonBackground, sprite);
+    createCustomButton = newButton(48.0f, 142.0f, changeStatus, 3, buttonBackground, sprite);
+
+    newSpriteFromPNG(&sprite, "romfs:/sprites/textSprites/ok.png");
+    okButton = newButton(48.0f, 88.0f, changeStatus, 6, buttonBackground, sprite);
 
     addBottomObject(binariesPathButton);
     addBottomObject(pluginsPathButton);
@@ -107,15 +112,19 @@ void    initSettingsMenu(void)
     addBottomObject(useDefaultButton);
     addBottomObject(useSecondButton);
     addBottomObject(createCustomButton);
+    addBottomObject(okButton);
 
     newSpriteFromPNG(&mainWindow, "romfs:/sprites/textSprites/mainSettingsWindow.png");
     newSpriteFromPNG(&customWindow, "romfs:/sprites/textSprites/customSettingsWindow.png");
     newSpriteFromPNG(&defaultWindow, "romfs:/sprites/textSprites/defaultSettingsWindow.png");
     newSpriteFromPNG(&secondWindow, "romfs:/sprites/textSprites/secondSettingsWindow.png");
+    newSpriteFromPNG(&warningWindow, "romfs:/sprites/textSprites/pluginFolderWarning.png");
+
     setSpritePos(mainWindow, 46.0f, 65.0f);
     setSpritePos(customWindow, 46.0f, 65.0f);
     setSpritePos(defaultWindow, 46.0f, 65.0f);
     setSpritePos(secondWindow, 46.0f, 65.0f);
+    setSpritePos(warningWindow, 46.0f, 65.0f);
 
     newSpriteFromPNG(&sprite, "romfs:/sprites/menuBackground.png");
     setSpritePos(sprite, 43.0f, 20.0f);
@@ -125,7 +134,6 @@ void    initSettingsMenu(void)
     setSpritePos(sprite, 111.0f, 35.0f);
     changeWindowTitle(window, sprite);
     addTopObject(window);
-
     pluginPathText = newText(NULL, 158, 123, 0.45f, 0.5f, COLOR_BLANK);
     binPathText = newText(NULL, 158, 109, 0.45f, 0.5f, COLOR_BLANK);
     addTopObject(pluginPathText);
@@ -151,9 +159,21 @@ void    exitSettingsMenu(void)
     deleteSprite(customWindow);
     deleteSprite(defaultWindow);
     deleteSprite(secondWindow);
+    deleteSprite(warningWindow);
     free(window);
     free(pluginPathText);
     free(binPathText);
+}
+
+static void showWarning(void)
+{
+    waitAllKeysReleased();
+    changeWindowContent(window, warningWindow);
+    okButton->show(okButton);
+    changeBottomFooter(NULL);
+    g_status = 0;
+    while (!g_status)
+        updateUI();
 }
 
 
@@ -173,7 +193,7 @@ static void customSettings(void)
     createCustomButton->hide(createCustomButton);
     binariesPathButton->show(binariesPathButton);
     pluginsPathButton->show(pluginsPathButton);
-    moveButton(saveSettingButton, 50.0f, 149.0f);
+    moveButton(saveSettingButton, 48.0f, 142.0f);
     saveSettingButton->show(saveSettingButton);
     changeBottomFooter(pressBackSprite);
     showText(pluginPathText);
@@ -208,16 +228,23 @@ again:
         else if (status & e_EXIT)
         {
             if (checkPath())
+            {
+                saveSettingButton->hide(saveSettingButton);
+                binariesPathButton->hide(binariesPathButton);
+                pluginsPathButton->hide(pluginsPathButton);
+                hideText(pluginPathText);
+                hideText(binPathText);
+                if (strncmp("sdmc:/plugin", p_pluginPath, 12))
+                    showWarning();
                 return;
-            else
-                pathError = true;
+            }                
             goto again;
         }
         else if (keys & KEY_B)
         {
             pathError = false;
             saveSettingButton->hide(saveSettingButton);
-            moveButton(saveSettingButton, 50.0f, 95.0f);
+            moveButton(saveSettingButton, 48.0f, 88.0f);
             binariesPathButton->hide(binariesPathButton);
             pluginsPathButton->hide(pluginsPathButton);
             g_status |= e_MAIN;
@@ -241,7 +268,6 @@ static void defaultSettings(void)
     changeBottomFooter(pressBackSprite);
     strcpy(p_globalPath, hblPath);
     strJoin(p_pluginPath, rootPath, "plugin/");
-
     g_status = 0;
     while (!g_status)
     {
@@ -279,11 +305,13 @@ void secondSettings(void)
         keys = hidKeysDown() | hidKeysHeld();
         if (keys & KEY_B)
         {
-            saveSettingButton->hide(saveSettingButton);
             g_status |= e_MAIN;
             break;
         }
     }
+    saveSettingButton->hide(saveSettingButton);
+    if (!(g_status & e_MAIN))
+        showWarning();
 }
 
 static void    setFiles(void)
@@ -291,64 +319,64 @@ static void    setFiles(void)
     int     ret;
     if (!fileExists(bnConfig->config->binariesPath + 5))
     {
-        newAppTop(COLOR_BLANK, SMALL, "%s, doesn't exist", bnConfig->config->binariesPath);
-        newAppTop(COLOR_BLANK, SMALL, "Creating directory:");
+        newAppTop(COLOR_BLANK, SKINNY, "%s, doesn't exist", bnConfig->config->binariesPath);
+        newAppTop(COLOR_BLANK, SKINNY, "Creating directory:");
         updateUI();
-        ret = mkdir(bnConfig->config->binariesPath + 5, 777);
+        ret = createDir(bnConfig->config->binariesPath + 5);
         removeAppTop();
         if (ret)
-            newAppTop(COLOR_BLANK, SMALL, "Creating directory: Failed");
+            newAppTop(COLOR_SALMON, SKINNY, "Creating directory: Failed");
         else
-            newAppTop(COLOR_BLANK, SMALL, "Creating directory: Success");
+            newAppTop(COLOR_LIMEGREEN, SKINNY, "Creating directory: Success");
         updateUI();
     }        
     if (!fileExists(bnConfig->config->pluginPath + 5))
     {
-        newAppTop(COLOR_BLANK, SMALL, "%s, doesn't exist", bnConfig->config->pluginPath);
-        newAppTop(COLOR_BLANK, SMALL, "Creating directory:");
+        newAppTop(COLOR_BLANK, SKINNY, "%s, doesn't exist", bnConfig->config->pluginPath);
+        newAppTop(COLOR_BLANK, SKINNY, "Creating directory:");
         updateUI();
-        ret = mkdir(bnConfig->config->pluginPath + 5, 777);
+        ret = createDir(bnConfig->config->pluginPath + 5);
         removeAppTop();
         if (ret)
-            newAppTop(COLOR_BLANK, SMALL, "Creating directory: Failed");
+            newAppTop(COLOR_SALMON, SKINNY, "Creating directory: Failed");
         else
-            newAppTop(COLOR_BLANK, SMALL, "Creating directory: Success");
+            newAppTop(COLOR_LIMEGREEN, SKINNY, "Creating directory: Success");
         updateUI();
     }
         
-    newAppTop(COLOR_BLANK, NEWLINE, "Setting up files...");
+    newAppTop(COLOR_BLANK, NEWLINE | SKINNY, "Setting up files...");
 
-    newAppTop(COLOR_BLANK, SMALL, "Setting up 3.2...");
+    newAppTop(COLOR_BLANK, SKINNY, "Setting up 3.2...");
     updateUI();
     ret = loadAndPatch(V32);
     removeAppTop();
     if (ret)
-        newAppTop(COLOR_BLANK, SMALL, "Setting up 3.2... Error.");
+        newAppTop(COLOR_SALMON, SKINNY, "Setting up 3.2... Error.");
     else
-        newAppTop(COLOR_BLANK, SMALL, "Setting up 3.2... Done.");
+        newAppTop(COLOR_LIMEGREEN, SKINNY, "Setting up 3.2... Done.");
     updateUI();
 
-    newAppTop(COLOR_BLANK, SMALL, "Setting up 3.3...");
+    newAppTop(COLOR_BLANK, SKINNY, "Setting up 3.3...");
     updateUI();
     ret = loadAndPatch(V33);
     removeAppTop();
     if (ret)
-        newAppTop(COLOR_BLANK, SMALL, "Setting up 3.3... Error.");
+        newAppTop(COLOR_SALMON, SKINNY, "Setting up 3.3... Error.");
     else
-        newAppTop(COLOR_BLANK, SMALL, "Setting up 3.3... Done.");
+        newAppTop(COLOR_LIMEGREEN, SKINNY, "Setting up 3.3... Done.");
     updateUI();
 
-    newAppTop(COLOR_BLANK, SMALL, "Setting up 3.4...");
+    newAppTop(COLOR_BLANK, SKINNY, "Setting up 3.4...");
     updateUI();
     ret = loadAndPatch(V34);
     removeAppTop();
     if (ret)
-        newAppTop(COLOR_BLANK, SMALL, "Setting up 3.4... Error.");
+        newAppTop(COLOR_SALMON, SKINNY, "Setting up 3.4... Error.");
     else
-        newAppTop(COLOR_BLANK, SMALL, "Setting up 3.4... Done.");
+        newAppTop(COLOR_LIMEGREEN, SKINNY, "Setting up 3.4... Done.");
     updateUI();
 
-    newAppTop(COLOR_BLANK, 0, "Finished");
+    newAppTop(COLOR_LIMEGREEN, 0, "Finished");
     updateUI();
     clearTop(1);
     wait(3);
@@ -382,7 +410,8 @@ again:
         status = g_status;
     }
     setFiles();
-    appInfoEnableAutoUpdate();
     exitSettingsMenu();
+    appInfoEnableAutoUpdate();
+    updateUI();
 }
 

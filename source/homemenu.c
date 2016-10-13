@@ -13,8 +13,22 @@ Result	bnInitParamsByHomeMenu(void)
 	u32		ret;
 	vu32	t = 0x11111111;
 	u8		region;
+    bool    firstError = true;
 
+again:
 	ret = svcOpenProcess(&hProcess, ntrConfig->HomeMenuPid);
+    if (ret)
+    {
+        newAppStatus(DEFAULT_COLOR, TINY | CENTER, "An error occurred");
+        newAppStatus(DEFAULT_COLOR, TINY | CENTER, "Retry in 2 seconds");
+        updateUI();
+        svcSleepThread(2000000000);
+        firstError = false;
+        removeAppStatus();
+        removeAppStatus();
+        updateUI();
+        goto again;
+    }
 	check_prim(ret, OPENPROCESS_FAILURE);
 	flushDataCache();
 	*(u32 *)(tmpBuffer) = 0;

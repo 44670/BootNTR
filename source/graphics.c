@@ -41,6 +41,7 @@ void    initUI(void)
     appInfoSetTextBoundaries(appTop, 345.0f, 210.0f);
 
     sprintf(appVersion, "Version: %d.%d", APP_VERSION_MAJOR, APP_VERSION_MINOR);
+    updateUI();
 }
 
 void    exitUI(void)

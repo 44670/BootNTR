@@ -1,6 +1,7 @@
 #include "appInfo.h"
 
 static bool autoUpdate = true;
+static bool showBackground = true;
 
 void    appInfoDisableAutoUpdate(void)
 {
@@ -10,6 +11,16 @@ void    appInfoDisableAutoUpdate(void)
 void    appInfoEnableAutoUpdate(void)
 {
     autoUpdate = true;
+}
+
+void    appInfoHideBackground(void)
+{
+    showBackground = false;
+}
+
+void    appInfoShowBackground(void)
+{
+    showBackground = true;
 }
 
 appInfoObject_t     *newAppInfoObject(sprite_t *sprite, u32 maxEntryCount, u32 posX, u32 posY)
@@ -246,7 +257,8 @@ void    drawAppInfo(appInfoObject_t *object)
     cursorXBak = cursor->posX;
     cursorYBak = cursor->posY;
     setSpritePos(object->sprite, object->spritePosX, object->spritePosY);
-    drawSprite(object->sprite);
+    if (showBackground)
+        drawSprite(object->sprite);
     for (i = 0; i < entryCount; i++)
     {
         if (cursor->posY >= boundY) break;

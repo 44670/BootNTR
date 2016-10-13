@@ -83,10 +83,10 @@ void        drawButton(button_t *button)
     setSpritePos(button->buttonSprite, posX, posY);
     drawSprite(button->buttonSprite);
     marginX = button->buttonSprite->width - button->textSprite->width;
-    marginX /= 2;
+    if (marginX > 1) marginX = (float)((u32)marginX / 2);
     posX += marginX;
     marginY = button->buttonSprite->height - button->textSprite->height;
-    marginY /= 2;
+    if (marginY > 1) marginY = (float)((u32)marginY / 2);
     posY += marginY;
     setSpritePos(button->textSprite, posX, posY);
     drawSprite(button->textSprite);

@@ -1,4 +1,6 @@
 #include "main.h"
+#include <errno.h>
+#include <sys/stat.h>
 
 extern char		*g_primary_error;
 
@@ -43,4 +45,30 @@ int		copy_file(char *old_filename, char  *new_filename)
 error:
     remove("sdmc:/ntr.bin");
 	return (RESULT_ERROR);
+}
+
+int     createDir(const char *path)
+{
+    u32     len = strlen(path);
+    char    _path[0x100];
+    char    *p;
+
+    errno = 0;
+    if (len > 0x100) goto error;
+    strcpy(_path, path);
+    for (p = _path + 1; *p; p++)
+    {
+        if (*p == '/')
+        {
+            *p = '\0';
+            if (mkdir(_path, 777) != 0)
+                if (errno != EEXIST) goto error;
+            *p = '/';
+        }
+    }
+    if (mkdir(_path, 777) != 0)
+        if (errno != EEXIST) goto error;
+    return (0);
+error:
+    return (-1);
 }

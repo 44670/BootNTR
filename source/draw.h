@@ -35,9 +35,9 @@ typedef struct
 {
 	float	position[3];
 	float	texcoord[2];
-}			textVertex_s;
+}			textVertex_s;   
 
-typedef struct	drawTarget_s
+typedef struct	drawTarget_s    
 {
 	C3D_RenderTarget	*target;
 	C3D_Mtx				projection;
@@ -63,7 +63,6 @@ void        drawInit(void);
 void        drawExit(void);
 void        drawEndFrame(void);
 void        getTextSizeInfos(float *width, float scaleX, float scaleY, const char *text);
-void        resetTextColor(void);
 void        setTextColor(u32 color);
 void        renderText(float x, float y, float scaleX, float scaleY, bool baseline, const char *text, cursor_t *cursor);
 void        drawText(screenPos_t pos, float size, u32 color, char *text, ...);
@@ -77,15 +76,19 @@ void        deleteSprite(sprite_t *sprite);
 void        setSpritePos(sprite_t *sprite, float posX, float posY);
 void        drawSprite(sprite_t *sprite);
 
-#define COLOR_BLUE	0xFFFF0000
-#define COLOR_RED	0xFF0000FF
-#define COLOR_GREEN	0xFF00FF00
-#define COLOR_BLANK	0xFFFFFFFF
-#define COLOR_BLACK	0xFF000000
-#define COLOR_GREY	0xFF989898
-#define COLOR_ORANGE 0xFF00A5FF
+#define COLOR_BLUE	        0xFFFF0000
+#define COLOR_RED	        0xFF0000FF
+#define COLOR_GREEN	        0xFF00FF00
+#define COLOR_BLANK	        0xFFFFFFFF
+#define COLOR_BLACK	        0xFF000000
+#define COLOR_GREY	        0xFF989898
+#define COLOR_ORANGE        0xFF00A5FF
+#define COLOR_LIMEGREEN     0xFF32CD32
+#define COLOR_SALMON        0xFF7280FA
+#define COLOR_SILVER        0xFFC0C0C0
+#define COLOR_CORAL         0xFF507FFF
 
-#define COLOR_DARKGREEN	0xFF006400
+#define COLOR_DARKGREEN	    0xFF006400
 
 
 

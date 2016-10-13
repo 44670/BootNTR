@@ -140,13 +140,13 @@ void    waitAllKeysReleased(void)
     }
 }
 
-void    debug(char *str)
+void    debug(char *str, int seconds)
 {
     time_t t;
 
     newAppTop(DEFAULT_COLOR, 0, "%s", str);
     t = time(NULL);
-    while (t + 2 != time(NULL))
+    while (t + seconds != time(NULL))
         updateUI();
 }
 

@@ -95,6 +95,9 @@
     <ClInclude Include="source\drawableObject.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="source\json\json.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lib\ctrcommon\source\ctrcommon\app.cpp">
@@ -185,6 +188,12 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="source\mainMenu.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="source\updater.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="source\json\json.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>

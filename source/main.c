@@ -21,26 +21,40 @@ int main(void)
 	gfxInitDefault();
 	drawInit();
 	romfsInit();
+    ptmSysmInit();
+    amInit();
+    httpcInit(0);
     initUI();
     hidScanInput();
     keys = (hidKeysDown() | hidKeysHeld());
     if (keys & KEY_SELECT)
         resetConfig();
     configInit();
+    if (launchUpdater())
+    {
+        newAppStatus(DEFAULT_COLOR, CENTER | BOLD | NEWLINE, "Updated !");
+        goto waitForExit;
+    }
     kernelVersion = osGetKernelVersion();
     initMainMenu();
+    waitAllKeysReleased();
     ret = mainMenu();
-
     if (ret == 2) goto waitForExit;
-    if (!g_exit && bnBootNTR() == 0)
+    if (!g_exit)
     {
-        newAppStatus(DEFAULT_COLOR, CENTER | BOLD | NEWLINE, "Success !");
-        newAppStatus(DEFAULT_COLOR, CENTER | TINY | SKINNY | NEWLINE, "Returning to home");
-        newAppStatus(DEFAULT_COLOR, CENTER | TINY | SKINNY, "menu ...");
-        updateUI();
-        svcSleepThread(100000);
+        ret = bnBootNTR();
+        if (!ret)
+        {
+            newAppStatus(DEFAULT_COLOR, CENTER | BOLD | NEWLINE, "Success !");
+            newAppStatus(DEFAULT_COLOR, CENTER | TINY | SKINNY | NEWLINE, "Returning to home");
+            newAppStatus(DEFAULT_COLOR, CENTER | TINY | SKINNY, "menu ...");
+            updateUI();
+            g_exit = true;
+            svcSleepThread(100000);
+            goto exit;
+        }        
     }
-	else
+	if (g_exit || ret)
 	{
         newAppStatus(DEFAULT_COLOR, CENTER | BOLD | NEWLINE, "Load failed !");
         if (!g_third_error) newAppStatus(DEFAULT_COLOR, CENTER | BOLD, "\uE00A");
@@ -63,7 +77,10 @@ int main(void)
             newAppStatus(DEFAULT_COLOR, TINY | CENTER, "#%s", g_third_error);
 waitForExit:
         newAppStatus(DEFAULT_COLOR, CENTER | TINY | SKINNY | NEWLINE, "Press any key to");
-        newAppStatus(DEFAULT_COLOR, CENTER | TINY | SKINNY, "return to home menu");
+        if (g_exit)
+            newAppStatus(DEFAULT_COLOR, CENTER | TINY | SKINNY, "return to HomeMenu");
+        else
+            newAppStatus(DEFAULT_COLOR, CENTER | TINY | SKINNY, "reboot");
         while (aptMainLoop())
         {
             updateUI();
@@ -73,11 +90,17 @@ waitForExit:
                 break;
         }
 	}
+exit:
     configExit();
     exitMainMenu();
     exitUI();
 	romfsExit();
 	drawExit();
 	gfxExit();
+    amExit();
+    httpcExit();
+    if (!g_exit)
+        PTMSYSM_RebootAsync(0);
+    ptmSysmExit();
 	return (0);
 }

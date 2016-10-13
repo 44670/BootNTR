@@ -14,7 +14,7 @@ static cursor_t         cursor[2] = { { 10, 10 },{ 10, 10 } };
 
 #define TEXT_VTX_ARRAY_COUNT (8 * 1024)
 
-#define TEX_MIN_SIZE 32
+#define TEX_MIN_SIZE 64
 
 //Grabbed from: http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
 unsigned int nextPow2(unsigned int v)
@@ -92,7 +92,6 @@ void drawSprite(sprite_t *sprite)
 
 	//Bind the sprite's texture
 	bindTexture(texture);
-
 	C3D_BufInfo	*bufInfo = C3D_GetBufInfo();
 	BufInfo_Init(bufInfo);
 	BufInfo_Add(bufInfo, textVtxArray, sizeof(textVertex_s), 2, 0x10);
@@ -121,7 +120,9 @@ sprite_t *newSprite(int width, int height)
     //Create and init the sprite's texture
     result = C3D_TexInit(texture, nextPow2(width), nextPow2(height), GPU_RGBA8);
     if (!result) goto texInitError;
-    C3D_TexSetWrap(texture, GPU_CLAMP_TO_BORDER, GPU_CLAMP_TO_BORDER);
+    //C3D_TexSetWrap(texture, GPU_CLAMP_TO_BORDER, GPU_CLAMP_TO_BORDER);
+    texture->param = GPU_TEXTURE_MAG_FILTER(GPU_LINEAR) | GPU_TEXTURE_MIN_FILTER(GPU_LINEAR)
+        | GPU_TEXTURE_WRAP_S(GPU_CLAMP_TO_BORDER) | GPU_TEXTURE_WRAP_T(GPU_CLAMP_TO_BORDER);
 
     sprite->width = (float)width;
     sprite->height = (float)height;

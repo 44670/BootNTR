@@ -40,7 +40,7 @@ void    initMainMenu(void)
     sprite_t *sprite;
     newSpriteFromPNG(&desiredVersionSprite, "romfs:/sprites/textSprites/touchDesiredVersion.png");
     newSpriteFromPNG(&pressExitSprite, "romfs:/sprites/textSprites/pressBExit.png");
-    newSpriteFromPNG(&tinyButtonBGSprite, "romfs:/sprites/tinyButtonBg.png");
+    newSpriteFromPNG(&tinyButtonBGSprite, "romfs:/sprites/tinyButtonBackground.png");
 
     setSpritePos(desiredVersionSprite, 34.0f, 7.0f);
     setSpritePos(pressExitSprite, 180.0f, 217.0f);
@@ -49,11 +49,11 @@ void    initMainMenu(void)
     changeBottomHeader(desiredVersionSprite);
 
     newSpriteFromPNG(&sprite, "romfs:/sprites/textSprites/32Version.png");
-    V32Button = newButton(11.0f, 42.0f, selectVersion, 1, tinyButtonBGSprite, sprite);
+    V32Button = newButton(11.0f, 35.0f, selectVersion, 1, tinyButtonBGSprite, sprite);
     newSpriteFromPNG(&sprite, "romfs:/sprites/textSprites/33Version.png");
-    V33Button = newButton(11.0f, 99.0f, selectVersion, 2, tinyButtonBGSprite, sprite);
+    V33Button = newButton(11.0f, 94.0f, selectVersion, 2, tinyButtonBGSprite, sprite);
     newSpriteFromPNG(&sprite, "romfs:/sprites/textSprites/34Version.png");
-    V34Button = newButton(11.0f, 156.0f, selectVersion, 3, tinyButtonBGSprite, sprite);
+    V34Button = newButton(11.0f, 152.0f, selectVersion, 3, tinyButtonBGSprite, sprite);
 
     V32Button->show(V32Button);
     V33Button->show(V33Button);
@@ -94,7 +94,7 @@ int     mainMenu(void)
     appInfoDisableAutoUpdate();
     if (!noTimer)
     {
-        timerBak = timer = 3;
+        timerBak = timer = TIMER;
         newAppStatus(DEFAULT_COLOR, CENTER | TINY | SKINNY, "Loading %s in %d", versionString[bnConfig->versionToLaunch], timerBak);
         baseTime = time(NULL);
         updateUI();
@@ -104,6 +104,12 @@ int     mainMenu(void)
     {
         keys = hidKeysDown() | hidKeysHeld();
         if (keys == (KEY_L | KEY_R | KEY_X | KEY_DUP)) goto dumpMode;
+        if (keys)
+        {
+            noTimer = true;
+            removeAppStatus();
+            updateUI();
+        }
         if (abort_and_exit()) goto abort;
         if (!noTimer)
         {

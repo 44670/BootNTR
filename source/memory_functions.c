@@ -17,12 +17,14 @@ u32		copyRemoteMemory(Handle hDst, u32 ptrDst, Handle hSrc, u32 ptrSrc, u32 size
 	u32		state;
 	u32		i;
 	u32		result;
+    bool    firstError = true;
 
 	if ((result = svcFlushProcessDataCache(hSrc, (void *)ptrSrc, size)) != 0)
 		goto error;
 	if ((result = svcFlushProcessDataCache(hDst, (void *)ptrDst, size)) != 0)
 		goto error;
-	if ((result = svcStartInterProcessDma(&hdma, hDst, (void *)ptrDst, hSrc, (void *)ptrSrc, size, dmaConfig)) != 0)
+again:
+    if ((result = svcStartInterProcessDma(&hdma, hDst, (void *)ptrDst, hSrc, (void *)ptrSrc, size, dmaConfig)) != 0)
 		goto error;
 	state = 0;
 	if (ntrConfig->InterProcessDmaFinishState == 0)
@@ -51,10 +53,22 @@ u32		copyRemoteMemory(Handle hDst, u32 ptrDst, Handle hSrc, u32 ptrSrc, u32 size
 		{
 			g_primary_error = READREMOTEMEMORY_TIMEOUT;
 			svcCloseHandle(hdma);
+            if (firstError)
+            {
+                newAppStatus(DEFAULT_COLOR, TINY | CENTER, "An error occurred");
+                newAppStatus(DEFAULT_COLOR, TINY | CENTER, "Retry in 2 seconds");
+                updateUI();
+                svcSleepThread(2000000000);
+                firstError = false;
+                removeAppStatus();
+                removeAppStatus();
+                updateUI();
+                goto again;
+            }
 			goto error;
 		}
 	}
-	svc_closeHandle(hdma);
+	svcCloseHandle(hdma);
 	if ((result = svcInvalidateProcessDataCache(hDst, (void *)ptrDst, size)) != 0)
 		goto error;
 	return (0);

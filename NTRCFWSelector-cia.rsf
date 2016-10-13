@@ -130,6 +130,7 @@ AccessControlInfo:
     GetThreadInfo: 44
     GetThreadPriority: 11
     InvalidateProcessDataCache : 82
+    KernelSetState: 124
     MapMemoryBlock: 31
     OpenProcess : 51
     OutputDebugString: 61
@@ -181,6 +182,7 @@ AccessControlInfo:
    - nim:aoc
    - nwm::UDS
    - ptm:u
+   - ptm:sysm
    - qtm:u
    - soc:U
    - ssl:C

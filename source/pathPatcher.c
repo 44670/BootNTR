@@ -120,34 +120,42 @@ Result  loadAndPatch(version_t version)
     binPath = bnConfig->config->binariesPath;
     plgPath = bnConfig->config->pluginPath;
     strJoin(inPath, "romfs:/", ntrVersionStrings[version]);
-    strJoin(outPath, binPath, ntrVersionStrings[version]);
+    
 
     if (!strncmp("sdmc:", binPath, 5)) binPath += 5;
     if (!strncmp("sdmc:", plgPath, 5)) plgPath += 5;
 
-    strJoin(fixedPath[BINARY], binPath, ntrVersionStrings[version]);
-    strJoin(fixedPath[PLUGIN], plgPath, fixedName[PLUGIN]);
-    strJoin(fixedPath[DEBUG], binPath, ntrVersionStrings[version]);
-    strJoin(fixedPath[KERNEL], binPath, fixedName[KERNEL]);
-    strJoin(fixedPath[FS], binPath, fixedName[FS]);
-    strJoin(fixedPath[PM], binPath, fixedName[PM]);
-    strJoin(fixedPath[SM], binPath, fixedName[SM]);
-    strJoin(fixedPath[HOMEMENU], binPath, fixedName[HOMEMENU]);
-    strJoin(fixedPath[ARM], binPath, fixedName[ARM]);
-
+    if (version != V32)
+    {
+        strJoin(outPath, binPath, ntrVersionStrings[version]);
+        strJoin(fixedPath[BINARY], binPath, ntrVersionStrings[version]);
+        strJoin(fixedPath[PLUGIN], plgPath, fixedName[PLUGIN]);
+        strJoin(fixedPath[DEBUG], binPath, ntrVersionStrings[version]);
+        strJoin(fixedPath[KERNEL], binPath, fixedName[KERNEL]);
+        strJoin(fixedPath[FS], binPath, fixedName[FS]);
+        strJoin(fixedPath[PM], binPath, fixedName[PM]);
+        strJoin(fixedPath[SM], binPath, fixedName[SM]);
+        strJoin(fixedPath[HOMEMENU], binPath, fixedName[HOMEMENU]);
+        strJoin(fixedPath[ARM], binPath, fixedName[ARM]);
+    }
+    else
+    {
+        strcpy(outPath, originalPath[BINARY]);
+    }
     ntr = fopen(inPath, "rb");
     if (!ntr) goto error;
     fseek(ntr, 0, SEEK_END);
     size = ftell(ntr);
     rewind(ntr);
-    newSize = size + (RELOC_COUNT * 0x100);
+    newSize = (version == V32) ? size : size + (RELOC_COUNT * 0x100);
     mem = (u8 *)malloc(newSize);
     if (!mem) goto error;
     memset(mem, 0, newSize);
     fread(mem, size, 1, ntr);
     fclose(ntr);
     svcFlushProcessDataCache(CURRENT_PROCESS_HANDLE, mem, newSize);
-    patchBinary(mem, size);
+    if (version != V32)
+        patchBinary(mem, size);
     ntr = fopen(outPath, "wb");
     if (!ntr) goto error;
     fwrite(mem, newSize, 1, ntr);

@@ -26,13 +26,14 @@ APP_MAJOR_VERSION   := $(shell echo $(APP_MAJOR_VERSION) | cut -c1-2)
 APP_MINOR_VERSION   := $(shell echo $(APP_MINOR_VERSION) | cut -c1-2)
 
 BUILD				:= build
-SOURCES				:= source 
+SOURCES				:= source source/json
 DATA				:= data
 ROMFS				:= $(TOPDIR)/romfs/romfsBuilt
 ROMFS3DSX			:= $(TOPDIR)/romfs
 INCLUDES			:= $(SOURCES) include 
 ICON				:= resources/icon.png
-BANNER				:= $(TOPDIR)/resources/fonzd_banner2.bnr
+#BANNER				:= $(TOPDIR)/resources/FONZD_banner.bnr
+BANNER				:= $(TOPDIR)/resources/PabloMK7_banner.bnr
 CITRA_D				:= "C:/Users/Nath/Desktop/citra"
 
 #---------------------------------------------------------------------------------

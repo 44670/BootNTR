@@ -53,6 +53,8 @@ void                clearAppInfo(appInfoObject_t *object, bool updateScreen);
 void                drawAppInfo(appInfoObject_t *object);
 void                appInfoDisableAutoUpdate(void);
 void                appInfoEnableAutoUpdate(void);
+void                appInfoHideBackground(void);
+void                appInfoShowBackground(void);
 /*
 ** graphic.h
 */

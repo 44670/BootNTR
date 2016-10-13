@@ -140,6 +140,7 @@
     <ClInclude Include="source\draw.h" />
     <ClInclude Include="source\drawableObject.h" />
     <ClInclude Include="source\graphics.h" />
+    <ClInclude Include="source\json\json.h" />
     <ClInclude Include="source\main.h" />
     <ClInclude Include="source\mysvcs.h" />
     <ClInclude Include="source\ns.h" />
@@ -169,6 +170,7 @@
     <ClCompile Include="source\firstLaunchMenu.c" />
     <ClCompile Include="source\graphics.c" />
     <ClCompile Include="source\homemenu.c" />
+    <ClCompile Include="source\json\json.c" />
     <ClCompile Include="source\kernel.c" />
     <ClCompile Include="source\main.c" />
     <ClCompile Include="source\mainMenu.c" />
@@ -176,6 +178,7 @@
     <ClCompile Include="source\ntr_launcher.c" />
     <ClCompile Include="source\pathPatcher.c" />
     <ClCompile Include="source\png.c" />
+    <ClCompile Include="source\updater.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

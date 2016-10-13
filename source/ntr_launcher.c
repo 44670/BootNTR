@@ -4,9 +4,29 @@
 extern ntrConfig_t		*ntrConfig;
 extern bootNtrConfig_t	*bnConfig;
 extern u8				*tmpBuffer;
+extern bool              g_exit;
 extern char				*g_primary_error;
 extern char				*g_secondary_error;
 extern char				*g_third_error;
+
+int         isNTRAlreadyLaunched(void)
+{
+    Result  ret;
+    Handle  processHandle;
+
+    ret = svcOpenProcess(&processHandle, 0xf);
+    if (ret) goto error;
+    ret = copyRemoteMemory(CURRENT_PROCESS_HANDLE, (u32)tmpBuffer, processHandle, 0x06000000, 0x1000);
+    svcCloseHandle(processHandle);
+    if (!ret)
+    {
+        g_exit = true;
+        goto error;
+    }
+    return (0);
+error:
+    return (RESULT_ERROR);
+}
 
 Result		bnPatchAccessCheck(void)
 {
@@ -14,7 +34,6 @@ Result		bnPatchAccessCheck(void)
 	u8		smPatchBuf[] = { 0x02, 0x00, 0xA0, 0xE3, 0x1E, 0xFF, 0x2F, 0xE1 };
 	u32		fsPatchValue = 0x47702001;
 
-	check_prim(abort_and_exit(), USER_ABORT);
 	svcBackdoor(backdoorHandler);
 	// do a dma copy to get the finish state value on current console
 	ret = copyRemoteMemory(CURRENT_PROCESS_HANDLE, (u32)tmpBuffer, CURRENT_PROCESS_HANDLE, (u32)tmpBuffer + 0x10, 0x10);
@@ -43,8 +62,10 @@ u32 loadNTRBin(void)
         "ntr_3_4.bin"
     };
 
-
-    strJoin(path, bnConfig->config->binariesPath + 5, ntrVersionStrings[bnConfig->versionToLaunch]);
+    if (bnConfig->versionToLaunch == V32)
+        strJoin(path, "/", "ntr.bin");
+    else
+        strJoin(path, bnConfig->config->binariesPath + 5, ntrVersionStrings[bnConfig->versionToLaunch]);
     
     // Get size
     ntr = fopen(path, "rb");
@@ -66,11 +87,10 @@ u32 loadNTRBin(void)
     memset(mem, 0, alignedSize * 2);
     fread(mem, size, 1, ntr);
     fclose(ntr);
-    svcFlushProcessDataCache(getCurrentProcessHandle(), mem, alignedSize);
-
+    ret = svcFlushProcessDataCache(getCurrentProcessHandle(), mem, alignedSize);
     // Don't know why but we need to copy the data, else it crash...
     memcpy(mem + alignedSize, mem, size);
-    svcFlushProcessDataCache(getCurrentProcessHandle(), mem + alignedSize, alignedSize);
+    ret = svcFlushProcessDataCache(getCurrentProcessHandle(), mem, alignedSize * 2);
     return ((u32)mem);
 error:
     return (RESULT_ERROR);
@@ -109,7 +129,8 @@ Result		bnBootNTR(void)
     tmpBuffer = linearAddress;
 	check_prim(!tmpBuffer, LINEARMEMALIGN_FAILURE);
     rtCheckRemoteMemoryRegionSafeForWrite(getCurrentProcessHandle(), (u32)tmpBuffer, TMPBUFFER_SIZE);
-    
+    ret = isNTRAlreadyLaunched();
+    check_prim(ret, NTR_ALREADY_LAUNCHED);
     // Patch services
     ret = bnPatchAccessCheck();
     check_third(ret, ACCESSPATCH_FAILURE);

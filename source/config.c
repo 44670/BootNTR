@@ -16,13 +16,21 @@ bool    checkPath(void)
     if (strncmp(bnConfig->config->pluginPath, "sdmc:/", 6)) goto error;
     tmp = bnConfig->config->binariesPath;
     while (*(tmp + 1)) tmp++;
-    if (*tmp != '/') *tmp = '/';
+    if (*tmp != '/') *(tmp + 1) = '/';
     tmp = bnConfig->config->pluginPath;
     while (*(tmp + 1)) tmp++;
-    if (*tmp != '/') *tmp = '/';
+    if (*tmp != '/') *(tmp + 1) = '/';
     return (true);
 error:
-    return (false);
+    if (*bnConfig->config->binariesPath == '/')
+        strInsert(bnConfig->config->binariesPath, "sdmc:", 0);
+    else
+        strInsert(bnConfig->config->binariesPath, "sdmc:/", 0);
+    if (*bnConfig->config->pluginPath == '/')
+        strInsert(bnConfig->config->pluginPath, "sdmc:", 0);
+    else
+        strInsert(bnConfig->config->pluginPath, "sdmc:/", 0);
+    return (checkPath());
 }
 
 bool    loadConfigFromFile(config_t *config)
@@ -48,7 +56,7 @@ bool    saveConfig(void)
 
     config = g_bnConfig.config;
     if (!fileExists(configDir))
-        mkdir(configDir, 777);
+        createDir(configDir);
     if (!fileExists(configDir)) goto error;
     file = fopen(configPath, "wb");
     if (!file) goto error;

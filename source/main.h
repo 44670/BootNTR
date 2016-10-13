@@ -12,9 +12,12 @@
 #include "graphics.h"
 #include "mysvcs.h"
 
-#define APP_VERSION_MAJOR 2
-#define APP_VERSION_MINOR 0
-//printf("param is missing: %s\n", #a);
+#define APP_VERSION_MAJOR   2
+#define APP_VERSION_MINOR   0
+#define TIMER               2
+//#define CIA_VERSION         "BootNTRSelector-FONZD-Banner.cia"
+#define CIA_VERSION         "BootNTRSelector-PabloMK7-Banner.cia"
+
 #define check_prim(result, err) if ((result) != 0) {g_primary_error = err; \
 	goto error; }
 #define check_sec(result, err) if ((result) != 0) {g_secondary_error = err; \
@@ -27,6 +30,7 @@ typedef uint8_t   u8;
 #define CURRENT_PROCESS_HANDLE	(0xffff8001)
 #define RESULT_ERROR			(1)
 #define TMPBUFFER_SIZE			(0x20000)
+#define URL_MAX 1024
 
 #define READREMOTEMEMORY_TIMEOUT	(char *)s_error[0]
 #define OPENPROCESS_FAILURE			(char *)s_error[1]
@@ -46,6 +50,7 @@ typedef uint8_t   u8;
 #define USER_ABORT					(char *)s_error[15]
 #define FILE_COPY_ERROR				(char *)s_error[16]
 #define LOAD_FAILED					(char *)s_error[17]
+#define NTR_ALREADY_LAUNCHED		(char *)s_error[18]
 
 static const char * const s_error[] =
 {
@@ -66,9 +71,16 @@ static const char * const s_error[] =
 	"UNKNOWN_HOMEMENU",
 	"USER_ABORT",
 	"FILE_COPY_ERROR",
-	"LOAD_AND_EXECUTE"
+	"LOAD_AND_EXECUTE",
+    "NTR is already running"
 
 };
+
+typedef struct  updateData_s
+{
+    char            url[URL_MAX];
+    u32             responseCode;
+}               updateData_t;
 
 typedef void(*funcType)();
 typedef struct	s_BLOCK
@@ -106,6 +118,7 @@ void    ntrDumpMode(void);
 */
 int		copy_file(char *old_filename, char  *new_filename);
 bool    fileExists(const char *path);
+int     createDir(const char *path);
 /*
 ** common_functions.c
 */
@@ -121,6 +134,7 @@ void    strncpyFromTail(char *dst, char *src, int nb);
 bool    inputPathKeyboard(char *dst, char *hintText, char *initialText, int bufSize);
 void    waitAllKeysReleased(void);
 void    wait(int seconds);
+void    debug(char *str, int seconds);
 /*
 ** ntr_launcher.c
 */
@@ -159,5 +173,11 @@ void	kernelCallback(void);
 ** homemenu.c
 */
 Result	bnInitParamsByHomeMenu(void);
+
+/*
+** updater.c
+*/
+
+bool    launchUpdater(void);
 
 #endif
