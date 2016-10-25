@@ -72,7 +72,7 @@
     <IncludePath>C:\Users\Nath\Desktop\prog\BootNTR\source;C:\devkitPro\libctru\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\devkitPro\libctru\include;C:\Users\Nath\Desktop\BootNTR\lib\ctrcommon\include\ctrcommon;$(IncludePath)</IncludePath>
+    <IncludePath>C:\devkitPro\libctru\include;$(ProjectDir)\lib\ctrcommon\include\ctrcommon;$(IncludePath)</IncludePath>
     <ReferencePath>C:\devkitPro\libctru\include;$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

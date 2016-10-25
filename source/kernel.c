@@ -134,7 +134,7 @@ void    kernelCallback(void)
 			cache = &cacheInterface_NEW102;
 		else if (firmVersion == SYSTEM_VERSION(11, 0, 0))
 			cache = &cacheInterface_NEW110;
-		else if (firmVersion == SYSTEM_VERSION(11, 1, 0))
+		else if (firmVersion == SYSTEM_VERSION(11, 1, 0) || firmVersion == SYSTEM_VERSION(11, 2, 0))
 			cache = &cacheInterface_NEW111;
 	}
 	else
@@ -145,7 +145,7 @@ void    kernelCallback(void)
 			cache = &cacheInterface_Old96;
 		else if (firmVersion == SYSTEM_VERSION(11, 0, 0))
 			cache = &cacheInterface_Old110;
-		else if (firmVersion == SYSTEM_VERSION(11, 1, 0))
+		else if (firmVersion == SYSTEM_VERSION(11, 1, 0) || firmVersion == SYSTEM_VERSION(11, 2, 0))
 			cache = &cacheInterface_Old111;
 	}
 	*(int *)(svc_patch_addr + 8) = 0xE1A00000; //NOP

@@ -252,7 +252,7 @@ static Result parseResponseData(const char *jsonText, u32 size, bool *hasUpdate)
             if (name != NULL && assets != NULL)
             {                
                 snprintf(versionString, sizeof(versionString), "%d.%d", APP_VERSION_MAJOR, APP_VERSION_MINOR);
-                if (strncmp(name->u.string.ptr, versionString, name->u.string.length) != 0)
+                if (strncmp(versionString, name->u.string.ptr, name->u.string.length) > 0)
                 {            
                     for (i = 0; i < assets->u.array.length; i++)
                     {

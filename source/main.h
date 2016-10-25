@@ -13,7 +13,7 @@
 #include "mysvcs.h"
 
 #define APP_VERSION_MAJOR   2
-#define APP_VERSION_MINOR   0
+#define APP_VERSION_MINOR   2
 #define TIMER               2
 //#define CIA_VERSION         "BootNTRSelector-FONZD-Banner.cia"
 #define CIA_VERSION         "BootNTRSelector-PabloMK7-Banner.cia"
