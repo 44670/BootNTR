@@ -1,10 +1,10 @@
 #include "main.h"
 #include "config.h"
 
-extern ntrConfig_t		*ntrConfig;
-extern bootNtrConfig_t	*bnConfig;
-extern u8				*tmpBuffer;
-extern char				*g_error;
+extern ntrConfig_t      *ntrConfig;
+extern bootNtrConfig_t  *bnConfig;
+extern u8               *tmpBuffer;
+extern char             *g_error;
 
 Result	bnInitParamsByFirmware(void)
 {

@@ -32,8 +32,8 @@ ROMFS				:= $(TOPDIR)/romfs/romfsBuilt
 ROMFS3DSX			:= $(TOPDIR)/romfs
 INCLUDES			:= $(SOURCES) include 
 ICON				:= resources/icon.png
-BANNER				:= $(TOPDIR)/resources/FONZD_banner.bnr
-#BANNER				:= $(TOPDIR)/resources/PabloMK7_banner.bnr
+#BANNER				:= $(TOPDIR)/resources/FONZD_banner.bnr
+BANNER				:= $(TOPDIR)/resources/PabloMK7_banner.bnr
 CITRA_D				:= "C:/Users/Nath/Desktop/citra"
 
 #---------------------------------------------------------------------------------

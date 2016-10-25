@@ -1,10 +1,10 @@
 #include "main.h"
 #include "config.h"
 
-extern ntrConfig_t		*ntrConfig;
-extern bootNtrConfig_t	*bnConfig;
-extern u8				*tmpBuffer;
-extern char				*g_error;
+extern ntrConfig_t      *ntrConfig;
+extern bootNtrConfig_t  *bnConfig;
+extern u8               *tmpBuffer;
+extern char             *g_error;
 
 typedef struct
 {
@@ -77,6 +77,15 @@ dbgKernelCacheInterface cacheInterface_NEW111 =
 	(void*)0xFFF202A8
 };
 
+dbgKernelCacheInterface cacheInterface_NEW112 =
+{
+    //for new 3ds 11.2
+    (void*)0xFFF26210,
+    (void*)0xFFF1DF8C,
+    (void*)0xFFF1DC34,
+    (void*)0xFFF202C8
+};
+
 dbgKernelCacheInterface cacheInterface_Old90 =
 {
 	//for old 3ds 9.0
@@ -113,6 +122,15 @@ dbgKernelCacheInterface cacheInterface_Old111 =
 	(void*)0xFFF1FCCC
 };
 
+dbgKernelCacheInterface cacheInterface_Old112 =
+{
+    //for old 3ds 11.2
+    (void*)0xFFF255C8,
+    (void*)0xFFF1D7F4,
+    (void*)0xFFF1D58C,
+    (void*)0xFFF1FCEC
+};
+
 void    kernelCallback(void)
 {
 	u32							svc_patch_addr = bnConfig->SvcPatchAddr;
@@ -134,8 +152,10 @@ void    kernelCallback(void)
 			cache = &cacheInterface_NEW102;
 		else if (firmVersion == SYSTEM_VERSION(11, 0, 0))
 			cache = &cacheInterface_NEW110;
-		else if (firmVersion == SYSTEM_VERSION(11, 1, 0) || firmVersion == SYSTEM_VERSION(11, 2, 0))
+		else if (firmVersion == SYSTEM_VERSION(11, 1, 0))
 			cache = &cacheInterface_NEW111;
+        else if (firmVersion == SYSTEM_VERSION(11, 2, 0))
+            cache = &cacheInterface_NEW112;
 	}
 	else
 	{
@@ -145,8 +165,10 @@ void    kernelCallback(void)
 			cache = &cacheInterface_Old96;
 		else if (firmVersion == SYSTEM_VERSION(11, 0, 0))
 			cache = &cacheInterface_Old110;
-		else if (firmVersion == SYSTEM_VERSION(11, 1, 0) || firmVersion == SYSTEM_VERSION(11, 2, 0))
+		else if (firmVersion == SYSTEM_VERSION(11, 1, 0))
 			cache = &cacheInterface_Old111;
+        else if (firmVersion == SYSTEM_VERSION(11, 2, 0))
+            cache = &cacheInterface_Old112;
 	}
 	*(int *)(svc_patch_addr + 8) = 0xE1A00000; //NOP
 	*(int *)(svc_patch_addr) = 0xE1A00000; //NOP
