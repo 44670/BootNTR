@@ -13,7 +13,6 @@ Result	bnInitParamsByHomeMenu(void)
 	u32		ret;
 	vu32	t = 0x11111111;
 	u8		region;
-    bool    firstError = true;
 
 again:
 	ret = svcOpenProcess(&hProcess, ntrConfig->HomeMenuPid);
@@ -23,7 +22,6 @@ again:
         newAppStatus(DEFAULT_COLOR, TINY | CENTER, "Retry in 2 seconds");
         updateUI();
         svcSleepThread(2000000000);
-        firstError = false;
         removeAppStatus();
         removeAppStatus();
         updateUI();
@@ -311,7 +309,9 @@ again:
 		ntrConfig->HomeAptStartAppletAddr = 0x12ea08;
 	}
     else 
-        goto unsupported;
+	{
+		goto unsupported;
+	}
 	return (0);
 unsupported:
     ntrConfig->HomeMenuVersion = 0;

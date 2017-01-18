@@ -102,8 +102,10 @@ Result		bnLoadAndExecuteNTR(void)
 	u32		*bootArgs;
 
     outAddr = loadNTRBin();
-    if (outAddr == RESULT_ERROR)
-        goto error;
+    if (outAddr == RESULT_ERROR) 
+	{
+	        goto error;
+	}
 	bootArgs = (u32 *)(outAddr + 4);
 	bootArgs[0] = 0;
 	bootArgs[1] = 0xb00d;
