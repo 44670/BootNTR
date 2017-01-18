@@ -64,6 +64,7 @@ ifeq ($(TARGET),3DS)
     ROMFS_DIR := romfs
     BANNER_AUDIO := resources/audio.wav
     BANNER_IMAGE := resources/FonzD_banner.cgfx
+    #BANNER_IMAGE := resources/PabloMK7_banner.cgfx
     ICON := resources/icon.png
 	LOGO := 
 endif
