@@ -9,11 +9,6 @@ TitleInfo:
   UniqueId                : $(APP_UNIQUE_ID)
   Category                : Application
 
-CardInfo:
-  MediaSize               : 128MB # 128MB / 256MB / 512MB / 1GB / 2GB / 4GB / 8GB / 16GB / 32GB
-  MediaType               : Card1 # Card1 / Card2
-  CardDevice              : None # NorFlash(Pick this if you use savedata) / None
-
 Option:
   UseOnSD                 : true # true if App is to be installed to SD
   FreeProductCode         : true # Removes limitations on ProductCode
@@ -26,16 +21,19 @@ Option:
   # HostRoot                : "romfs"
 
 AccessControlInfo:
-  # UseOtherVariationSaveData : true
-  # UseExtSaveData : true
-  # ExtSaveDataId: 0xffffffff
-  # SystemSaveDataId1: 0x220
-  # SystemSaveDataId2: 0x00040010
-  # OtherUserSaveDataId1: 0x220
-  # OtherUserSaveDataId2: 0x330
-  # OtherUserSaveDataId3: 0x440
-  # UseExtendedSaveDataAccessControl: true
-  # AccessibleSaveDataIds: [0x101, 0x202, 0x303, 0x404, 0x505, 0x606]
+  CoreVersion                   : 2
+
+  # Exheader Format Version
+  DescVersion                   : 2
+  
+  # Minimum Required Kernel Version (below is for 9.0.0)
+  ReleaseKernelMajor            : "02"
+  ReleaseKernelMinor            : "46" 
+
+  # ExtData
+  UseExtSaveData                : false # enables ExtData       
+  #ExtSaveDataId                : 0x300 # only set this when the ID is different to the UniqueId
+
   FileSystemAccess:
    # - CategorySystemApplication
    # - CategoryHardwareCheck
@@ -43,7 +41,7 @@ AccessControlInfo:
    - Debug
    # - TwlCardBackup
    # - TwlNandData
-   # - Boss
+   #- Boss
    - DirectSdmc
    # - Core
    # - CtrNandRo
@@ -54,7 +52,7 @@ AccessControlInfo:
    # - ExportImportIvs
    - DirectSdmcWrite
    # - SwitchCleanup
-   # - SaveDataMove
+   #- SaveDataMove
    # - Shop
    # - Shell
    # - CategoryHomeMenu
@@ -68,13 +66,14 @@ AccessControlInfo:
    # - CreateSeed
    # - UseCardSpi
 
+  # Process Settings
+  MemoryType                    : Application # Application/System/Base
+  SystemMode                    : 64MB # 64MB(Default)/96MB/80MB/72MB/32MB
   IdealProcessor                : 0
   AffinityMask                  : 1
-  
   Priority                      : 16
-
-  MaxCpu                        : 0x9E # Default
-  
+  MaxCpu                        : 0 # Let system decide
+  HandleTableSize               : 0x200
   DisableDebug                  : true
   EnableForceDebug              : false
   CanWriteSharedPage            : true
@@ -84,19 +83,14 @@ AccessControlInfo:
   CanShareDeviceMemory          : true
   RunnableOnSleep               : false
   SpecialMemoryArrange          : true
-  
-  CoreVersion                   : 2
-  DescVersion                   : 2
-  
-  ReleaseKernelMajor            : "02"
-  ReleaseKernelMinor            : "33" 
-  MemoryType                    : Application # Application / System / Base
-  HandleTableSize: 512
-  IORegisterMapping: 
-   - 1ff50000-1ff57fff
-   - 1ff70000-1ff77fff
+ 
+  # Virtual Address Mappings
+  IORegisterMapping:
+   - 1ff00000-1ff7ffff   # DSP memory
   MemoryMapping: 
-   - 1f000000-1f5fffff:r
+   - 1f000000-1f5fffff:r # VRAM
+
+  # Accessible SVCs, <Name>:<ID>
   SystemCallAccess: 
     ArbitrateAddress: 34
     Break: 60
@@ -106,6 +100,7 @@ AccessControlInfo:
     CloseHandle: 35
     ConnectToPort: 45
     ControlMemory: 1
+    controlProcessMemory : 112
     CreateAddressArbiter: 33
     CreateEvent: 23
     CreateMemoryBlock: 30
@@ -116,7 +111,9 @@ AccessControlInfo:
     DuplicateHandle: 39
     ExitProcess: 3
     ExitThread: 9
+    FlushProcessDataCache : 84
     GetCurrentProcessorNumber: 17
+    GetDmaState : 87
     GetHandleInfo: 41
     GetProcessId: 53
     GetProcessIdOfThread: 54
@@ -132,7 +129,10 @@ AccessControlInfo:
     GetThreadIdealProcessor: 15
     GetThreadInfo: 44
     GetThreadPriority: 11
+    InvalidateProcessDataCache : 82
+    KernelSetState: 124
     MapMemoryBlock: 31
+    OpenProcess : 51
     OutputDebugString: 61
     QueryMemory: 2
     ReleaseMutex: 20
@@ -146,54 +146,53 @@ AccessControlInfo:
     SetTimer: 27
     SignalEvent: 24
     SleepThread: 10
+    StartInterProcessDma : 85
     UnmapMemoryBlock: 32
     WaitSynchronization1: 36
     WaitSynchronizationN: 37
     Backdoor: 123
-    controlProcessMemory: 112
-    StartInterProcessDma: 85
-    FlushProcessDataCache: 84
-    InvalidateProcessDataCache: 82
-    GetDmaState: 87
-    OpenProcess: 51
-  InterruptNumbers:
-  ServiceAccessControl: 
-   - APT:U
+
+  ServiceAccessControl:
    - $hioFIO
    - $hostio0
    - $hostio1
-   - ac:u
-   - boss:U
-   - cam:u
-   - cecd:u
    - cfg:u
-   - dlp:FKCL
-   - dlp:SRVR
-   - dsp::DSP
-   - frd:u
    - fs:USER
    - gsp::Gpu
    - hid:USER
-   - http:C
-   - ir:u
-   - mic:u
    - ndm:u
+   - pxi:dev
+   - APT:U
+   - ac:u
+   - act:u
+   - am:net
+   - boss:U
+   - cam:u
+   - cecd:u
+   - csnd:SND
+   - frd:u
+   - http:C
+   - ir:USER
+   - ir:u
+   - ir:rst
+   - ldr:ro
+   - mic:u
    - news:u
+   - nfc:u
+   - nim:aoc
    - nwm::UDS
    - ptm:u
-   - pxi:dev
+   - ptm:sysm
+   - qtm:u
    - soc:U
    - ssl:C
    - y2r:u
-   - am:u
-   - cfg:nor
-   - csnd:SND
 
 SystemControlInfo:
-  SaveDataSize: 0KB # It doesn't use any save data.
+  SaveDataSize: 0K
   RemasterVersion: 2
   StackSize: 0x40000
-  # JumpId: 0
+
   Dependency: 
     ac: 0x0004013000002402L
     am: 0x0004013000001502L
