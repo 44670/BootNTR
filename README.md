@@ -1,6 +1,6 @@
 # BootNTR
 
-Boots NTR CFW.
+Boots NTR C(losed source)FW.
 
 
 # Latest Build
