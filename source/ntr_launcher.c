@@ -85,12 +85,14 @@ u32 loadNTRBin(void)
 
     // Read to memory
     memset(mem, 0, alignedSize * 2);
-    fread(mem, size, 1, ntr);
+    u8 *temp = (u8 *)calloc(1, alignedSize);
+    fread(temp, size, 1, ntr);
     fclose(ntr);
-    ret = svcFlushProcessDataCache(getCurrentProcessHandle(), mem, alignedSize);
-    // Don't know why but we need to copy the data, else it crash...
-    memcpy(mem + alignedSize, mem, size);
-    ret = svcFlushProcessDataCache(getCurrentProcessHandle(), mem, alignedSize * 2);
+    svcFlushProcessDataCache(getCurrentProcessHandle(), temp, size);
+
+    copyRemoteMemory(getCurrentProcessHandle(), (u32)mem, getCurrentProcessHandle(), (u32)temp, size);
+    copyRemoteMemory(getCurrentProcessHandle(), (u32)mem + alignedSize, getCurrentProcessHandle(), (u32)temp, size);
+    free(temp);
     return ((u32)mem);
 error:
     return (RESULT_ERROR);

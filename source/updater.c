@@ -3,7 +3,10 @@
 #include "graphics.h"
 #include "drawableObject.h"
 #include "button.h"
+#include "config.h"
+#include <time.h>
 
+extern bootNtrConfig_t *bnConfig;
 static updateData_t     *updateData;
 static window_t         *updaterWindow;
 static button_t         *okButton;
@@ -359,6 +362,8 @@ bool launchUpdater(void)
     update = false;
     updateData = (updateData_t *)calloc(1, sizeof(updateData_t));
     if (!updateData) goto error;
+    
+    bnConfig->config->lastUpdateTime = time(NULL);
     initUpdater();
     newAppTop(COLOR_BLANK, NEWLINE, "");
     newAppTop(COLOR_BLANK, 0, "Checking for update");

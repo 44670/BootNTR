@@ -12,11 +12,15 @@
 #include "graphics.h"
 #include "mysvcs.h"
 
-#define APP_VERSION_MAJOR   2
-#define APP_VERSION_MINOR   3
-#define TIMER               2
+#define TIMER               3
+
+#if  FONZD_BANNER
 #define CIA_VERSION         "BootNTRSelector-FONZD-Banner.cia"
-//#define CIA_VERSION         "BootNTRSelector-PabloMK7-Banner.cia"
+#endif 
+
+#if  PABLOMK7_BANNER
+#define CIA_VERSION         "BootNTRSelector-PabloMK7-Banner.cia"
+#endif
 
 #define check_prim(result, err) if ((result) != 0) {g_primary_error = err; \
 	goto error; }

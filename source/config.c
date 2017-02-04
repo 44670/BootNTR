@@ -1,9 +1,9 @@
 #include "config.h"
 
-static bootNtrConfig_t	g_bnConfig = { 0 };
-static ntrConfig_t		g_ntrConfig = { 0 };
-bootNtrConfig_t	        *bnConfig;
-ntrConfig_t		        *ntrConfig;
+static bootNtrConfig_t  g_bnConfig = { 0 };
+static ntrConfig_t      g_ntrConfig = { 0 };
+bootNtrConfig_t         *bnConfig;
+ntrConfig_t             *ntrConfig;
 
 static const char   *configPath = "/Nintendo 3DS/EBNTR/config";
 static const char   *configDir = "/Nintendo 3DS/EBNTR/";
@@ -44,6 +44,16 @@ bool    loadConfigFromFile(config_t *config)
     if (!file) goto error;
     fread(config, sizeof(config_t), 1, file);
     fclose(file);
+
+    // Check version of the config file
+    if (config->version != CURRENT_CONFIG_VERSION)
+    {
+        memset(config, 0, sizeof(config_t));
+        config->version = CURRENT_CONFIG_VERSION;
+        bnConfig->checkForUpdate = true;
+        goto error;
+    }
+
     return (true);
 error:
     return (false);
@@ -70,7 +80,7 @@ error:
 void    resetConfig(void)
 {
     char        path[0x100];
-    config_t    *config;
+    config_t    *config = NULL;
     bool        binPath = false;
     u32         keys;
     u32         size;
@@ -99,8 +109,10 @@ void    resetConfig(void)
     memset(path, 0, 0x100);
     strJoin(path, config->binariesPath + 5, "ntr_3_4.bin");
     remove(path);
-    free(config);
+    
 exit:
+    if (config)
+        free(config);
     return;
 }
 
@@ -124,6 +136,16 @@ void    configInit(void)
         firstLaunch();
         if (!saveConfig())
             newAppTop(DEFAULT_COLOR, 0, "A problem occured while saving the settings.");
+    }
+    else
+    {
+
+        time_t current = time(NULL);
+
+        if (current - config->lastUpdateTime >= SECONDS_IN_WEEK)
+            bnConfig->checkForUpdate = true;
+        else
+            bnConfig->checkForUpdate = false;
     }
    // svcCloseHandle(fsuHandle);
     if (config->flags & LV32) bnConfig->versionToLaunch = V32;

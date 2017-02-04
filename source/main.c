@@ -22,19 +22,36 @@ int main(void)
 	drawInit();
 	romfsInit();
     ptmSysmInit();
-    amInit();
-    httpcInit(0);
+
     initUI();
     hidScanInput();
     keys = (hidKeysDown() | hidKeysHeld());
     if (keys & KEY_SELECT)
         resetConfig();
     configInit();
-    if (launchUpdater())
+
+    // If keys == X or if config say we should check an update
+    if (keys & KEY_X || bnConfig->checkForUpdate)
     {
-        newAppStatus(DEFAULT_COLOR, CENTER | BOLD | NEWLINE, "Updated !");
-        goto waitForExit;
+        // Check if the 3DS is connected
+        acInit();
+
+        u32 wifiStatus;
+        ACU_GetWifiStatus(&wifiStatus);
+
+        if (wifiStatus)
+        {
+            amInit();
+            httpcInit(0);
+            if (launchUpdater())
+            {
+                newAppStatus(DEFAULT_COLOR, CENTER | BOLD | NEWLINE, "Updated !");
+                goto waitForExit;
+            }
+        }
     }
+
+
     kernelVersion = osGetKernelVersion();
     initMainMenu();
     waitAllKeysReleased();

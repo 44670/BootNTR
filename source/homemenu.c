@@ -288,9 +288,10 @@ again:
 		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
 		ntrConfig->HomeAptStartAppletAddr = 0x12ea08;
 	}
-	else if (t == 0xe7941100)
+	else if (t == 0xe7941100 || t == 0xea0020d2)
 	{
-		// new3ds 11.1.0U
+		// old/new3ds 11.1.0U/k
+		// old/new3ds 11.2.0U/k
 		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(11, 1, 0);
 		ntrConfig->HomeMenuInjectAddr = 0x12ded0;
 		ntrConfig->HomeFSReadAddr = 0x12c19c;
@@ -300,7 +301,8 @@ again:
 	}
 	else if (t == 0xe0811101)
 	{
-		// old/new3ds 11.1.0E and new3ds 11.1.0J
+		// old/new3ds 11.1.0E / J
+		// old/new3ds 11.2.0E / J
 		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(11, 1, 0);
 		ntrConfig->HomeMenuInjectAddr = 0x12ded0;
 		ntrConfig->HomeFSReadAddr = 0x12c19c;

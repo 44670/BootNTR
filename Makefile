@@ -11,7 +11,17 @@ endif
 
 # COMMON CONFIGURATION #
 
-NAME := Boot NTR Selector
+FONZD = 0
+PABLOMK7 = 0
+
+ifeq ($(FONZD), 1)
+    NAME := BootNTRSelector-FONZD-Banner
+endif
+
+ifeq ($(PABLOMK7), 1)
+    NAME := BootNTRSelector-PabloMK7-Banner
+endif
+
 
 BUILD_DIR := build
 OUTPUT_DIR := output
@@ -23,20 +33,29 @@ EXTRA_OUTPUT_FILES :=
 LIBRARY_DIRS := $(PORTLIBS) $(CTRULIB)
 LIBRARIES := citro3d ctru png z m
 
+VERSION_MAJOR := 2
+VERSION_MINOR := 4
+VERSION_MICRO := 0
+
+
+
 BUILD_FLAGS := -march=armv6k -mtune=mpcore -mfloat-abi=hard
 BUILD_FLAGS_CC := -g -Wall -Wno-strict-aliasing -O3 -mword-relocations \
-					-fomit-frame-pointer -ffast-math $(ARCH) $(INCLUDE) -DARM11 -D_3DS $(BUILD_FLAGS)
+					-fomit-frame-pointer -ffast-math $(ARCH) $(INCLUDE) -DARM11 -D_3DS $(BUILD_FLAGS) \
+					-DFONZD_BANNER=${FONZD} -DPABLOMK7_BANNER=${PABLOMK7} \
+					-DAPP_VERSION_MAJOR=${VERSION_MAJOR} \
+					-DAPP_VERSION_MINOR=${VERSION_MINOR}
 BUILD_FLAGS_CXX := $(COMMON_FLAGS) -std=gnu++11
 RUN_FLAGS :=
 
-VERSION_MAJOR := 2
-VERSION_MINOR := 0
-VERSION_MICRO := 0
+
+
+
 
 # 3DS/Wii U CONFIGURATION #
 
 ifeq ($(TARGET),$(filter $(TARGET),3DS WIIU))
-    TITLE := $(NAME)
+    TITLE := Boot NTR Selector
     DESCRIPTION := Enhanced NTR CFW Loader
     AUTHOR := Nanquitas
 endif
@@ -44,7 +63,7 @@ endif
 # 3DS CONFIGURATION #
 
 ifeq ($(TARGET),3DS)
-    LIBRARY_DIRS += $(DEVKITPRO)/libctru
+    LIBRARY_DIRS += $(DEVKITPRO)/libctru $(DEVKITPRO)/portlibs/armv6k/
     LIBRARIES += citro3d ctru png z m
 
     PRODUCT_CODE := CTR-P-BNTR
@@ -63,8 +82,12 @@ ifeq ($(TARGET),3DS)
 
     ROMFS_DIR := romfs
     BANNER_AUDIO := resources/audio.wav
-    BANNER_IMAGE := resources/FonzD_banner.cgfx
-    #BANNER_IMAGE := resources/PabloMK7_banner.cgfx
+    ifeq ($(FONZD), 1)
+    	BANNER_IMAGE := resources/FonzD_banner.cgfx
+    endif
+    ifeq ($(PABLOMK7), 1)
+    	BANNER_IMAGE := resources/PabloMK7_banner.cgfx
+    endif
     ICON := resources/icon.png
 	LOGO := 
 endif
@@ -72,8 +95,8 @@ endif
 # Wii U CONFIGURATION #
 
 ifeq ($(TARGET),WIIU)
-    LIBRARY_DIRS +=
-    LIBRARIES +=
+    LIBRARY_DIRS += 
+    LIBRARIES += 
 
     LONG_DESCRIPTION := Enhanced NTR CFW Loader
     ICON :=
@@ -82,3 +105,16 @@ endif
 # INTERNAL #
 
 include buildtools/make_base
+
+defFONZD:	
+	$(eval FONZD=1)
+	$(eval BANNER_IMAGE:=resources/FonzD_banner.cgfx)
+
+FONZD:
+	make FONZD=1
+
+defPABLOMK7:
+	$(eval BANNER_IMAGE:=resources/PabloMK7_banner.cgfx)
+
+PABLOMK7: 
+	make PABLOMK7=1
