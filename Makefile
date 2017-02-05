@@ -35,7 +35,7 @@ LIBRARIES := citro3d ctru png z m
 
 VERSION_MAJOR := 2
 VERSION_MINOR := 4
-VERSION_MICRO := 0
+VERSION_MICRO := 1
 
 
 
@@ -44,7 +44,8 @@ BUILD_FLAGS_CC := -g -Wall -Wno-strict-aliasing -O3 -mword-relocations \
 					-fomit-frame-pointer -ffast-math $(ARCH) $(INCLUDE) -DARM11 -D_3DS $(BUILD_FLAGS) \
 					-DFONZD_BANNER=${FONZD} -DPABLOMK7_BANNER=${PABLOMK7} \
 					-DAPP_VERSION_MAJOR=${VERSION_MAJOR} \
-					-DAPP_VERSION_MINOR=${VERSION_MINOR}
+					-DAPP_VERSION_MINOR=${VERSION_MINOR} \
+					-DAPP_VERSION_REVISION=${VERSION_MICRO}
 BUILD_FLAGS_CXX := $(COMMON_FLAGS) -std=gnu++11
 RUN_FLAGS :=
 

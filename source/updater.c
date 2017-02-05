@@ -253,8 +253,11 @@ static Result parseResponseData(const char *jsonText, u32 size, bool *hasUpdate)
                     changelog = val->u.string.ptr;
             }
             if (name != NULL && assets != NULL)
-            {                
-                snprintf(versionString, sizeof(versionString), "%d.%d", APP_VERSION_MAJOR, APP_VERSION_MINOR);
+            {   
+                if (!APP_VERSION_REVISION)
+                    snprintf(versionString, sizeof(versionString), "%d.%d", APP_VERSION_MAJOR, APP_VERSION_MINOR);
+                else
+                    snprintf(versionString, sizeof(versionString), "%d.%d.%d", APP_VERSION_MAJOR, APP_VERSION_MINOR, APP_VERSION_REVISION);
                 if (strncmp(name->u.string.ptr, versionString, name->u.string.length) > 0)
                 {            
                     for (i = 0; i < assets->u.array.length; i++)
