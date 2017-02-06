@@ -35,7 +35,7 @@ LIBRARIES := citro3d ctru png z m
 
 VERSION_MAJOR := 2
 VERSION_MINOR := 4
-VERSION_MICRO := 1
+VERSION_MICRO := 2
 
 
 
@@ -107,15 +107,8 @@ endif
 
 include buildtools/make_base
 
-defFONZD:	
-	$(eval FONZD=1)
-	$(eval BANNER_IMAGE:=resources/FonzD_banner.cgfx)
-
-FONZD:
+FONZD: clean
 	make FONZD=1
 
-defPABLOMK7:
-	$(eval BANNER_IMAGE:=resources/PabloMK7_banner.cgfx)
-
-PABLOMK7: 
+PABLOMK7: clean
 	make PABLOMK7=1
