@@ -292,6 +292,7 @@ again:
 	{
 		// old/new3ds 11.1.0U/k
 		// old/new3ds 11.2.0U/k
+		// old/new3DS 11.3.0 U
 		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(11, 1, 0);
 		ntrConfig->HomeMenuInjectAddr = 0x12ded0;
 		ntrConfig->HomeFSReadAddr = 0x12c19c;
@@ -303,6 +304,7 @@ again:
 	{
 		// old/new3ds 11.1.0E / J
 		// old/new3ds 11.2.0E / J
+		// old/new 11.3.0 E
 		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(11, 1, 0);
 		ntrConfig->HomeMenuInjectAddr = 0x12ded0;
 		ntrConfig->HomeFSReadAddr = 0x12c19c;
