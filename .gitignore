@@ -4,3 +4,5 @@ CMakeLists.txt
 build
 
 ctrcommon.tar.bz2
+
+*.cia

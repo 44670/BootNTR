@@ -1,12 +1,12 @@
-#include <stdio.h>
-#include <3ds.h>
-#include "ntr_config.h"
-#include "mysvcs.h"
+#include "main.h"
+#include "gen.h"
+
 #pragma GCC diagnostic ignored "-Wformat"
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
-#define CURRENT_PROCESS_HANDLE	(0xffff8001)
-#define RESULT_ERROR (1)
+
+
+#define MAX_MAP_SIZE (0x00400000)
 
 NTR_CONFIG g_ntrConfig = {0};
 BOOTNTR_CONFIG g_bnConfig = {0};
@@ -164,182 +164,116 @@ u32 rtCheckRemoteMemoryRegionSafeForWrite(Handle hProcess, u32 addr, u32 size) {
 
 
 
-void bnInitParamsByFirmware() {
-	u32 kernelVersion = osGetKernelVersion();
-	u32 isNew3DS = 0;
-	if (kernelVersion >= SYSTEM_VERSION(2, 44, 6))
-	{
-		bool tmp;
-		
-		Result ret = APT_CheckNew3DS(&tmp);;
-		if (ret == 0)
-		{
-			if (tmp) {
-				isNew3DS = 1;
-			}
-		} 
-	}
-	ntrConfig->isNew3DS = isNew3DS;
-	ntrConfig->PMPid = 2;
-	ntrConfig->HomeMenuPid = 0xf;
-	bnConfig->SMPid = 3;
-	bnConfig->FSPid = 0;
-	
-	if (!isNew3DS) {
-		if (kernelVersion == SYSTEM_VERSION(2, 44, 6)) {
-			//TODO: add old3ds 8.0.0 firmware support 
-			ntrConfig->firmVersion = SYSTEM_VERSION(8, 0, 0);
-			bnConfig->SvcPatchAddr = 0xDFF82294;
-		}
-		if (kernelVersion == SYSTEM_VERSION(2, 46, 0)) {
-			// old3ds 9.0.0
-			ntrConfig->firmVersion = SYSTEM_VERSION(9, 0, 0);
-			ntrConfig->PMSvcRunAddr = 0x00102FC0;
-			ntrConfig->ControlMemoryPatchAddr1 = 0xdff882cc;
-			ntrConfig->ControlMemoryPatchAddr2 = 0xdff882d0;
-			
-			bnConfig->SvcPatchAddr = 0xDFF82290;
-			bnConfig->FSPatchAddr = 0x0010ED64;
-			bnConfig->SMPatchAddr = 0x00101838;
-			
-			ntrConfig->IoBasePad = 0xfffc6000;
-			ntrConfig->IoBaseLcd = 0xfffc8000;
-			ntrConfig->IoBasePdc = 0xfffc0000;
-			ntrConfig->KMMUHaxAddr = 0xfffbe000;
-			ntrConfig->KMMUHaxSize = 0x00010000;
-			ntrConfig->KProcessHandleDataOffset = 0xD4;
-			ntrConfig->KProcessPIDOffset = 0xB4;
-			ntrConfig->KProcessCodesetOffset = 0xB0;
-			
-		}
-		if (kernelVersion == SYSTEM_VERSION(2, 50, 1)) {
-			// old3ds 9.6.0
-			ntrConfig->firmVersion = SYSTEM_VERSION(9, 6, 0);
-			ntrConfig->PMSvcRunAddr = 0x00103184;
-			ntrConfig->ControlMemoryPatchAddr1 = 0xdff882D8;
-			ntrConfig->ControlMemoryPatchAddr2 = 0xdff882DC;
-			
-			bnConfig->SvcPatchAddr = 0xDFF82284;
-			bnConfig->FSPatchAddr = 0x0010EFAC;
-			bnConfig->SMPatchAddr = 0x0010189C;
-			
-			ntrConfig->IoBasePad = 0xfffc6000;
-			ntrConfig->IoBaseLcd = 0xfffc8000;
-			ntrConfig->IoBasePdc = 0xfffc0000;
-			ntrConfig->KMMUHaxAddr = 0xfffbe000;
-			ntrConfig->KMMUHaxSize = 0x00010000;
-			ntrConfig->KProcessHandleDataOffset = 0xD4;
-			ntrConfig->KProcessPIDOffset = 0xB4;
-			ntrConfig->KProcessCodesetOffset = 0xB0;
-		}
-		if (kernelVersion == SYSTEM_VERSION(2, 51, 0)) {
-			// old3ds 11.0.0
-			ntrConfig->firmVersion = SYSTEM_VERSION(11, 0, 0);
-			ntrConfig->PMSvcRunAddr = 0x00103154;
-			ntrConfig->ControlMemoryPatchAddr1 = 0xDFF88468;
-			ntrConfig->ControlMemoryPatchAddr2 = 0xDFF8846C;
-			
-			bnConfig->SvcPatchAddr = 0xDFF82288;
-			bnConfig->FSPatchAddr = 0x0010EED4;
-			bnConfig->SMPatchAddr = 0x0010189C;
-			
-			ntrConfig->IoBasePad = 0xfffc6000;
-			ntrConfig->IoBaseLcd = 0xfffc8000;
-			ntrConfig->IoBasePdc = 0xfffc0000;
-			ntrConfig->KMMUHaxAddr = 0xfffbe000;
-			ntrConfig->KMMUHaxSize = 0x00010000;
-			ntrConfig->KProcessHandleDataOffset = 0xD4;
-			ntrConfig->KProcessPIDOffset = 0xB4;
-			ntrConfig->KProcessCodesetOffset = 0xB0;
-		}
-	} else {
-		ntrConfig->IoBasePad = 0xfffc2000;
-		ntrConfig->IoBaseLcd = 0xfffc4000;
-		ntrConfig->IoBasePdc = 0xfffbc000;
-		ntrConfig->KMMUHaxAddr = 0xfffba000;
-		ntrConfig->KMMUHaxSize = 0x00010000;
-		ntrConfig->KProcessHandleDataOffset = 0xdc;
-		ntrConfig->KProcessPIDOffset = 0xBC;
-		ntrConfig->KProcessCodesetOffset = 0xB8;
-			
-		if (kernelVersion == SYSTEM_VERSION(2, 45, 5)) {
-			// new3ds 8.1
-			ntrConfig->firmVersion = SYSTEM_VERSION(8, 1, 0);
-			ntrConfig->PMSvcRunAddr = 0x0010308C;
-			ntrConfig->ControlMemoryPatchAddr1 = 0xdff88158;
-			ntrConfig->ControlMemoryPatchAddr2 = 0xdff8815C;
-			
-			bnConfig->SvcPatchAddr = 0xDFF82264;
-			bnConfig->FSPatchAddr = 0x0010ED64;
-			bnConfig->SMPatchAddr = 0x00101838;
-		}
-		if (kernelVersion == SYSTEM_VERSION(2, 46, 0)) {
-			// new3ds 9.0
-			ntrConfig->firmVersion = SYSTEM_VERSION(9, 0, 0);
-			ntrConfig->PMSvcRunAddr = 0x00102FEC;
-			ntrConfig->ControlMemoryPatchAddr1 = 0xdff884ec;
-			ntrConfig->ControlMemoryPatchAddr2 = 0xdff884f0;
-			
-			bnConfig->SvcPatchAddr = 0xDFF82260;
-			bnConfig->FSPatchAddr = 0x0010ED64;
-			bnConfig->SMPatchAddr = 0x00101838;
-		}
-		
-		if (kernelVersion == SYSTEM_VERSION(2, 49, 0)) {
-			// new3ds 9.5
-			ntrConfig->firmVersion = SYSTEM_VERSION(9, 5, 0);
-			ntrConfig->PMSvcRunAddr = 0x001030F8 ;
-			ntrConfig->ControlMemoryPatchAddr1 = 0xdff884F8;
-			ntrConfig->ControlMemoryPatchAddr2 = 0xdff884FC;
-			
-			bnConfig->SvcPatchAddr = 0xDFF8226c;
-			bnConfig->FSPatchAddr = 0x0010ED64;
-			bnConfig->SMPatchAddr = 0x00101838 ;
-		}
-		
-		if (kernelVersion == SYSTEM_VERSION(2, 50, 1)) {
-			//new3ds 9.6
-			ntrConfig->firmVersion = SYSTEM_VERSION(9, 6, 0);
-			ntrConfig->PMSvcRunAddr = 0x001030D8;
-			ntrConfig->ControlMemoryPatchAddr1 = 0xdff8850C;
-			ntrConfig->ControlMemoryPatchAddr2 = 0xdff88510;
-			
-			bnConfig->SvcPatchAddr = 0xDFF82268;
-			bnConfig->FSPatchAddr = 0x0010EFAC;
-			bnConfig->SMPatchAddr = 0x0010189C;
-		}
-		
-		if (kernelVersion == SYSTEM_VERSION(2, 50, 7)) {
-			// new3ds 10.0
-			//TODO: add new3ds 10.0 firmware support
-			ntrConfig->firmVersion = SYSTEM_VERSION(10, 0, 0);
-		}
-		
-		if (kernelVersion == SYSTEM_VERSION(2, 50, 9)) {
-			// new3ds 10.2
-			ntrConfig->firmVersion = SYSTEM_VERSION(10, 2, 0);
-			ntrConfig->PMSvcRunAddr = 0x001031E4;
-			ntrConfig->ControlMemoryPatchAddr1 = 0xdff884E4;
-			ntrConfig->ControlMemoryPatchAddr2 = 0xdff884E8;
-			
-			bnConfig->SvcPatchAddr = 0xDFF82270;
-			bnConfig->FSPatchAddr = 0x0010EED4;
-			bnConfig->SMPatchAddr = 0x0010189C;
-		}
+void bnInitParamsByFirmware();
 
-		if (kernelVersion == SYSTEM_VERSION(2, 51, 0)) {
-			// new3ds 11.0
-			ntrConfig->firmVersion = SYSTEM_VERSION(11, 0, 0);
-			ntrConfig->PMSvcRunAddr = 0x00103150;
-			ntrConfig->ControlMemoryPatchAddr1 = 0xDFF88598;
-			ntrConfig->ControlMemoryPatchAddr2 = 0xDFF8859C;
-			
-			bnConfig->SvcPatchAddr = 0xDFF8226C;
-			bnConfig->FSPatchAddr = 0x0010EED4;
-			bnConfig->SMPatchAddr = 0x0010189C;
-		}
+
+u32 findNearestSTMFD(u32 base, u32 pos) {
+	if (pos < base) {
+		return 0;
 	}
-	bnConfig->requireKernelHax = 0;
+	pos = pos - pos % 4;
+	u32 term = pos - 0x1000;
+	if (term < base) {
+		term = base;
+	}
+	while (pos >= term) {
+		if (*(u16*)(pos + 2) == 0xe92d){
+			return pos;
+		}
+		pos -= 4;
+	}
+	return 0;
+}
+
+u32 searchBytes(u32 startAddr, u32 endAddr, u8* pat, int patlen, int step) {
+	u32 lastPage = 0;
+	u32 pat0 = ((u32*)pat)[0];
+
+	while (1) {
+		if (startAddr + patlen >= endAddr) {
+				return 0;
+		}
+		if (*((u32*)(startAddr)) == pat0) {
+			if (memcmp((u32*) startAddr, pat, patlen) == 0) {
+				return startAddr;
+			}
+		}
+		startAddr += step;
+	}
+	return 0;
+}
+
+u32 locateSwapBuffer(u32 startAddr, u32 endAddr) {
+	
+	static u32 pat[] = { 0xe1833000, 0xe2044cff, 0xe3c33cff, 0xe1833004, 0xe1824f93 };
+	static u32 pat2[] = { 0xe8830e60, 0xee078f9a, 0xe3a03001, 0xe7902104 };
+	static u32 pat3[] = { 0xee076f9a, 0xe3a02001, 0xe7901104, 0xe1911f9f, 0xe3c110ff};
+
+	u32 addr = searchBytes(startAddr, endAddr, pat, sizeof(pat), 4);
+	if (!addr) {
+		addr = searchBytes(startAddr, endAddr, pat2, sizeof(pat2), 4);
+	}
+	if (!addr) {
+		addr = searchBytes(startAddr, endAddr, pat3, sizeof(pat3), 4);
+	}
+	return findNearestSTMFD(startAddr, addr);
+}
+
+u32 translateAddr(u32 mappedAddr) {
+	if (mappedAddr < 0x0f000000) {
+		return 0;
+	}
+	return mappedAddr - 0x0f000000 + 0x00100000;
+}
+
+Result analyseHomeMenu()
+{
+	Result ret=0;
+	u32 text = 0x0f000000;
+	u32 ampxi_funcoffset = 0;
+	u32 mapSize = MAX_MAP_SIZE;
+
+	MemInfo meminfo;
+	PageInfo pageinfo;
+
+	memset(&meminfo, 0, sizeof(meminfo));
+	memset(&pageinfo, 0, sizeof(pageinfo));
+
+	ret = svcQueryMemory(&meminfo, &pageinfo, (u32)text);
+	if(R_FAILED(ret))
+	{
+		printf("svcQueryMemory failed: 0x%08x.\n", (unsigned int)ret);
+		return ret;
+	}
+
+	if(meminfo.size < mapSize) mapSize = meminfo.size;
+
+	printf("mapSize: %08x, size: %08x\n", mapSize, meminfo.size);
+
+	static u8 patFsRead[] = {0xC2, 0x00, 0x02, 0x08};
+	ntrConfig->HomeFSReadAddr = translateAddr(findNearestSTMFD(text ,searchBytes(text, text + mapSize, patFsRead, sizeof(patFsRead), 4)));
+	printf("HomeFSReadAddr: %08x\n", ntrConfig->HomeFSReadAddr);
+
+	static u8 patFsHandle[] = {0xf9, 0x67, 0xa0, 0x08};
+	u32 t = searchBytes(text, text + mapSize, patFsHandle, sizeof(patFsHandle), 4);
+	if (t > 0) {
+		ntrConfig->HomeFSUHandleAddr = *(u32*)(t-4);
+	}
+	printf("HomeFSUHandleAddr: %08x\n", ntrConfig->HomeFSUHandleAddr);
+
+	static u8 patCartUpdate[] = {0x42, 0x00, 0x07, 0x00};
+	ntrConfig->HomeCardUpdateInitAddr = translateAddr(findNearestSTMFD(text ,searchBytes(text, text + mapSize, patCartUpdate, sizeof(patCartUpdate), 4)));
+	printf("HomeCardUpdateInitAddr: %08x\n", ntrConfig->HomeCardUpdateInitAddr);
+
+	static u8 patStartApplet[] = {0x40, 0x01, 0x15, 0x00};
+	ntrConfig->HomeAptStartAppletAddr = translateAddr(findNearestSTMFD(text ,searchBytes(text, text + mapSize, patStartApplet, sizeof(patStartApplet), 4)));
+	printf("HomeAptStartAppletAddr: %08x\n", ntrConfig->HomeAptStartAppletAddr);
+
+	ntrConfig->HomeMenuInjectAddr = translateAddr(locateSwapBuffer(text, text + mapSize));
+	printf("HomeMenuInjectAddr: %08x\n", ntrConfig->HomeMenuInjectAddr);
+
+
+	return 0;
 }
 
 Result bnInitParamsByHomeMenu() {
@@ -352,272 +286,17 @@ Result bnInitParamsByHomeMenu() {
 		printf("openProcess failed:%08x\n", ret);
 		return ret;
 	}
-	flushDataCache();
-	*(u32*)(tmpBuffer) = 0;
-	ret = copyRemoteMemory(CURRENT_PROCESS_HANDLE, tmpBuffer, hProcess, (void*)0x00200000, 4);
-	svc_sleepThread(500000000);
-	ret = copyRemoteMemory(CURRENT_PROCESS_HANDLE, tmpBuffer, hProcess, (void*)0x00200000, 4);
-	svc_sleepThread(500000000);
+	//Map .text+0(0x00100000) up to 0x40000, to vaddr 0x0f000000 in the current process.
+	ret = svcMapProcessMemory(hProcess, 0x0f000000, MAX_MAP_SIZE);
 	if (ret != 0) {
-		printf("copyRemoteMemory failed:%08x\n", ret);
-		return ret;
+		printf("map process memory failed:%08x\n", ret);
+		goto final;
 	}
+	analyseHomeMenu();
+	svcUnmapProcessMemory(hProcess, 0x0f000000, MAX_MAP_SIZE);
+final:
 	svc_closeHandle(hProcess);
-	t = *(u32*)(tmpBuffer);
-	printf("0x00200000 in HomeMenu: %08x\n", t);
-
-	ret = cfguInit();
-	if (ret != 0) {
-		printf("cfg:u init failed:%08x\n", ret);
-		return ret;
-	}
-	ret = CFGU_SecureInfoGetRegion(&region);
-	if (ret != 0) {
-		printf("CFGU_SecureInfoGetRegion failed:%08x\n", ret);
-		return ret;
-	}
-	if (region >= 7) {
-		printf("Wrong region:%d\n", region);
-		return -9;
-	}
-	cfguExit();
-
-	if (t == 0xe3a08001 ) {
-		// old 3ds 10.6.0-27K
-		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(10, 6, 0);
-		ntrConfig->HomeMenuInjectAddr = 0x12ded0;
-		ntrConfig->HomeFSReadAddr = 0x12c19c;
-		ntrConfig->HomeCardUpdateInitAddr = 0x118d78;
-		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
-		ntrConfig->HomeAptStartAppletAddr = 0x12ea08;
-	}
-	
-	if (t == 0xe8960140 ) {
-		// old 3ds 10.3 usa
-		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(10, 3, 0);
-		ntrConfig->HomeMenuInjectAddr = 0x12ddc4;
-		ntrConfig->HomeFSReadAddr = 0x12c090;
-		ntrConfig->HomeCardUpdateInitAddr = 0x118cc0;
-		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
-		ntrConfig->HomeAptStartAppletAddr = 0x12e8fc;
-	}
-	
-	if (t == 0xe5c580f5 ) {
-		// old 3ds 10.3 eur
-		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(10, 3, 0);
-		ntrConfig->HomeMenuInjectAddr = 0x12ddc4;
-		ntrConfig->HomeFSReadAddr = 0x12c090;
-		ntrConfig->HomeCardUpdateInitAddr = 0x118cc0;
-		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
-		ntrConfig->HomeAptStartAppletAddr = 0x12e8fc;
-	}
-	
-        if (t == 0x0a000004 ) {
-		// old 3ds 10.1 eur
-		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(10, 1, 0);
-		ntrConfig->HomeMenuInjectAddr = 0x12ddc4;
-		ntrConfig->HomeFSReadAddr = 0x12c090;
-		ntrConfig->HomeCardUpdateInitAddr = 0x118cc0;
-		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
-		ntrConfig->HomeAptStartAppletAddr = 0x12e8fc;
-	}
-	
-	if (t == 0xe1530721 ) {
-		// old 3ds 10.1 usa
-		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(10, 1, 0);
-		ntrConfig->HomeMenuInjectAddr = 0x12ddc4;
-		ntrConfig->HomeFSReadAddr = 0x12c090;
-		ntrConfig->HomeCardUpdateInitAddr = 0x118cc0;
-		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
-		ntrConfig->HomeAptStartAppletAddr = 0x12e8fc;
-	}
-	
-	if (t == 0xe59f80f4) {
-		// new3ds 9.2.0
-		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 2, 0);;
-		ntrConfig->HomeMenuInjectAddr = 0x131208;
-		ntrConfig->HomeFSReadAddr = 0x0012F6EC;
-		ntrConfig->HomeCardUpdateInitAddr = 0x139900;
-		ntrConfig->HomeFSUHandleAddr = 0x002F0EFC;
-		ntrConfig->HomeAptStartAppletAddr = 0x00131C98;
-
-	} 
-	if (t == 0xE28DD008) {
-		// new3ds 9.1.0
-		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 1, 0);;
-		ntrConfig->HomeMenuInjectAddr = 0x00131208;
-		ntrConfig->HomeFSReadAddr = 0x0012F6EC;
-		ntrConfig->HomeCardUpdateInitAddr = 0x139900;
-		ntrConfig->HomeFSUHandleAddr = 0x002F1EFC;
-		ntrConfig->HomeAptStartAppletAddr = 0x00131C98;
-	}
-	if (t == 0xE1B03F02) {
-		// new3ds 9.0.0
-		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 0, 0);;
-		ntrConfig->HomeMenuInjectAddr = 0x00130CFC;
-		ntrConfig->HomeFSReadAddr = 0x0012F224;
-		ntrConfig->HomeCardUpdateInitAddr = 0x001393F4;
-		ntrConfig->HomeFSUHandleAddr = 0x002EFEFC;
-		ntrConfig->HomeAptStartAppletAddr = 0x0013178C;
-	}
-	if (t == 0xE28F2E19) {
-		// new3ds 8.1.0
-		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(8, 1, 0);;
-		ntrConfig->HomeMenuInjectAddr = 0x00129098;
-		ntrConfig->HomeFSReadAddr = 0x0011AAB8;
-		ntrConfig->HomeCardUpdateInitAddr = 0x0013339C;
-		ntrConfig->HomeFSUHandleAddr = 0x00278E4C;
-		ntrConfig->HomeAptStartAppletAddr = 0x00129BFC;
-	}
-	if (t == 0xe59f201c ) {
-		// iQue 9.3.0
-		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 3, 0);
-		ntrConfig->HomeMenuInjectAddr = 0x13b7b0;
-		ntrConfig->HomeFSReadAddr = 0x1188e0;
-		ntrConfig->HomeCardUpdateInitAddr = 0x13434c;
-		ntrConfig->HomeFSUHandleAddr = 0x2240d4;
-		ntrConfig->HomeAptStartAppletAddr = 0x128480;
-	}
-	if (t == 0xe3a06001 ) {
-		// iQue 4.4.0
-		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(4, 4, 0);
-		ntrConfig->HomeMenuInjectAddr = 0x13c344;
-		ntrConfig->HomeFSReadAddr = 0x118888;
-		ntrConfig->HomeCardUpdateInitAddr = 0x134448;
-		ntrConfig->HomeFSUHandleAddr = 0x2210cc;
-		ntrConfig->HomeAptStartAppletAddr = 0x12844c;
-	}
-	if (t == 0xeb0083b3 ) {
-		// new3ds 9.5.0
-		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 5, 0);
-		ntrConfig->HomeMenuInjectAddr = 0x12e1f8;
-		ntrConfig->HomeFSReadAddr = 0x12c624;
-		ntrConfig->HomeCardUpdateInitAddr = 0x136a8c;
-		ntrConfig->HomeFSUHandleAddr = 0x313f7c;
-		ntrConfig->HomeAptStartAppletAddr = 0x12ec88;
-	}
-	if (t == 0xe2053001 ) {
-		// USA 9.9.0
-		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 9, 0);
-		ntrConfig->HomeMenuInjectAddr = 0x12ddc4;
-		ntrConfig->HomeFSReadAddr = 0x12c090;
-		ntrConfig->HomeCardUpdateInitAddr = 0x118cc0;
-		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
-		ntrConfig->HomeAptStartAppletAddr = 0x12e8fc;
-	}
-	
-	if (t == 0xe1a00000 ) {
-		// TW 9.8.0
-		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 8, 0);
-		ntrConfig->HomeMenuInjectAddr = 0x13ba60;
-		ntrConfig->HomeFSReadAddr = 0x1188e0;
-		ntrConfig->HomeCardUpdateInitAddr = 0x13434c;
-		ntrConfig->HomeFSUHandleAddr = 0x2240d4;
-		ntrConfig->HomeAptStartAppletAddr = 0x128480;
-	}
-	
-	if (t == 0xe12fff1e ) {
-		if (region == 5) {
-			// KR 10.1.0-23
-			ntrConfig->HomeMenuVersion = SYSTEM_VERSION(10, 1, 0);
-			ntrConfig->HomeMenuInjectAddr = 0x12ddc4;
-			ntrConfig->HomeFSReadAddr = 0x12c090;
-			ntrConfig->HomeCardUpdateInitAddr = 0x118cc0;
-			ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
-			ntrConfig->HomeAptStartAppletAddr = 0x12e8fc;
-		} else {
-			// TW 9.9.0
-			ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 9, 0);
-			ntrConfig->HomeMenuInjectAddr = 0x13c0ac;
-			ntrConfig->HomeFSReadAddr = 0x118c04;
-			ntrConfig->HomeCardUpdateInitAddr = 0x134794;
-			ntrConfig->HomeFSUHandleAddr = 0x2250e4;
-			ntrConfig->HomeAptStartAppletAddr = 0x1288c8;
-		}
-	}
-	
-	if (t == 0x0032dde8 ) {
-		// JP 9.9.0
-		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 9, 0);
-		ntrConfig->HomeMenuInjectAddr = 0x12ddc4;
-		ntrConfig->HomeFSReadAddr = 0x12c090;
-		ntrConfig->HomeCardUpdateInitAddr = 0x118cc0;
-		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
-		ntrConfig->HomeAptStartAppletAddr = 0x12e8fc;
-	}
-	
-	if (t == 0xe1530005 ) {
-		// JP 9.6.0
-		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 6, 0);
-		ntrConfig->HomeMenuInjectAddr = 0x12ddf4;
-		ntrConfig->HomeFSReadAddr = 0x12c0c0;
-		ntrConfig->HomeCardUpdateInitAddr = 0x118cf0;
-		ntrConfig->HomeFSUHandleAddr = 0x32efac;
-		ntrConfig->HomeAptStartAppletAddr = 0x12e92c;
-	}
-	
-	if (t == 0xe1a02004 ) {
-		// USA 9.4.0
-		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 4, 0);
-		ntrConfig->HomeMenuInjectAddr = 0x12e204;
-		ntrConfig->HomeFSReadAddr = 0x12c630;
-		ntrConfig->HomeCardUpdateInitAddr = 0x136a98;
-		ntrConfig->HomeFSUHandleAddr = 0x313f7c;
-		ntrConfig->HomeAptStartAppletAddr = 0x12ec94;
-	}
-	
-	if (t == 0xe1966009 ) {
-		//europe 9.7.0
-		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 7, 0);
-		ntrConfig->HomeMenuInjectAddr = 0x12dd98;
-		ntrConfig->HomeFSReadAddr = 0x12c064;
-		ntrConfig->HomeCardUpdateInitAddr = 0x118c94;
-		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
-		ntrConfig->HomeAptStartAppletAddr = 0x12e8d0;
-	}
-
-
-	if (t == 0xe28f3fde ) {
-		// USA 8.1.0-9U
-		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(8,1,0);
-		ntrConfig->HomeMenuInjectAddr = 0x13f2d8;
-		ntrConfig->HomeFSReadAddr = 0x11a994;
-		ntrConfig->HomeCardUpdateInitAddr = 0x13719c;
-		ntrConfig->HomeFSUHandleAddr = 0x238df4;
-		ntrConfig->HomeAptStartAppletAddr = 0x12aac0;
-	}
-
-
-	if (t == 0xe1a0231c ) {
-		// Korea 9.9.0
-		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(9, 9, 0);
-		ntrConfig->HomeMenuInjectAddr = 0x12dd98;
-		ntrConfig->HomeFSReadAddr = 0x12c064;
-		ntrConfig->HomeCardUpdateInitAddr = 0x118c94;
-		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
-		ntrConfig->HomeAptStartAppletAddr = 0x12e8d0;
-	}
-	
-	if (t == 0xea00001f ) {
-		//  10.4.0-29J
-		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(10,4,0);
-		ntrConfig->HomeMenuInjectAddr = 0x12ded0;
-		ntrConfig->HomeFSReadAddr = 0x12c19c;
-		ntrConfig->HomeCardUpdateInitAddr = 0x118d78;
-		ntrConfig->HomeFSUHandleAddr = 0x32efa4;
-		ntrConfig->HomeAptStartAppletAddr = 0x12ea08;
-	}
-	if (t == 0xe1a00006 ) {
-		// new3ds 10.5.0U
-		ntrConfig->HomeMenuVersion = SYSTEM_VERSION(10, 5, 0);
-		ntrConfig->HomeMenuInjectAddr = 0x12ded0;
-		ntrConfig->HomeFSReadAddr = 0x12c19c;
-		ntrConfig->HomeCardUpdateInitAddr = 0x118d78;
-		ntrConfig->HomeFSUHandleAddr = 0x32dfa4;
-		ntrConfig->HomeAptStartAppletAddr = 0x12ea08;
-	}
-
-	return 0;
+	return ret;
 }
 
 
@@ -629,166 +308,13 @@ void flushDataCache() {
 	}
 }
 
-u32 kernelParams[32];
-
-
-void doFlushCache() {
-		FlushAllCache();
-		InvalidateEntireInstructionCache();
-		InvalidateEntireDataCache();
-		flushDataCache();
-		FlushAllCache();
-		InvalidateEntireInstructionCache();
-		InvalidateEntireDataCache();
-}
-
-
-void doStallCpu() {
-	vu32 i;
-	for (i = 0; i < 0x00100000; i++) {
-		
-	}
-}
-
-typedef struct{
-	void (*invalidateDataCache)(void *, u32);
-	void (*storeDataCache)(void *, u32);
-	void (*flushDataCache)(void *, u32);
-	void (*flushInstructionCache)(void *, u32);
-} dbgKernelCacheInterface;
-
-void kFlushDataCache(void*, u32);
-
-dbgKernelCacheInterface cacheInterface_NEW81 = {
-	//for new 3ds 8.1
-	(void*)0xFFF24C9C,
-	(void*)0xFFF1CF7C,
-	(void*)0xFFF1CCA0,
-	(void*)0xFFF1F04C
-};
-
-dbgKernelCacheInterface cacheInterface_NEW92 = {
-	//for new 3ds 9.2
-	(void*)0xFFF25768,
-	(void*)0xFFF1D9D4,
-	(void*)0xFFF1D67C,
-	(void*)0xFFF1FEEC
-};
-
-dbgKernelCacheInterface cacheInterface_NEW95 = {
-	//for new 3ds 9.5
-	(void*)0xFFF25BD8,
-	(void*)0xFFF1D9AC,
-	(void*)0xFFF1D654,
-	(void*)0xFFF1FCE8
-};
-
-dbgKernelCacheInterface cacheInterface_NEW96 = {
-	//for new3ds 9.6
-	(void*)0xFFF25C24,
-	(void*)0xFFF1D9D4,
-	(void*)0xFFF1D67C,
-	(void*)0xFFF1FD10
-};
-
-dbgKernelCacheInterface cacheInterface_NEW102 = {
-	//for new3ds 10.2
-	(void*)0xFFF25BFC,
-	(void*)0xFFF1D9AC,
-	(void*)0xFFF1D654,
-	(void*)0xFFF1FCE8
-};
-
-dbgKernelCacheInterface cacheInterface_NEW110 = {
-	//for new 3ds 11.0
-	(void*)0xFFF26174,
-	(void*)0xFFF1DEF0,
-	(void*)0xFFF1DB98,
-	(void*)0xFFF2022C
-};
-
-dbgKernelCacheInterface cacheInterface_Old90 = {
-	//for old 3ds 9.0
-	(void*)0xFFF24B54,
-	(void*)0xFFF1CC5C,
-	(void*)0xFFF1C9F4,
-	(void*)0xFFF1F47C
-};
-
-dbgKernelCacheInterface cacheInterface_Old96 = {
-	//for old 3ds 9.6
-	(void*)0xFFF24FF0,
-	(void*)0xFFF1CF98,
-	(void*)0xFFF1CD30,
-	(void*)0xFFF1F748
-};
-
-dbgKernelCacheInterface cacheInterface_Old110 = {
-	//for old 3ds 11.0
-	(void*)0xFFF2552C,
-	(void*)0xFFF1D758,
-	(void*)0xFFF1D4F0,
-	(void*)0xFFF1FC50
-};
-
-void kernelCallback() {
-	u32 svc_patch_addr = g_bnConfig.SvcPatchAddr;
-	vu32 i;
-	
-	if (kernelParams[0] == 1) {
-		u32 firmVersion = ntrConfig->firmVersion;
-		u32 isNew3DS = ntrConfig->isNew3DS;
-		dbgKernelCacheInterface * cache = (void*)0;
-		if (isNew3DS)
-		{
-			if (firmVersion == SYSTEM_VERSION(8, 1, 0))
-				cache = &cacheInterface_NEW81;
-			else if (firmVersion == SYSTEM_VERSION(9, 2, 0))
-				cache = &cacheInterface_NEW92;
-			else if (firmVersion == SYSTEM_VERSION(9, 5, 0))
-				cache = &cacheInterface_NEW95;
-			else if (firmVersion == SYSTEM_VERSION(9, 6, 0))
-				cache = &cacheInterface_NEW96;
-			else if (firmVersion == SYSTEM_VERSION(10, 2, 0))
-				cache = &cacheInterface_NEW102;
-			else if (firmVersion == SYSTEM_VERSION(11, 0, 0))
-				cache = &cacheInterface_NEW110;
-		}
-		else
-		{
-			if (firmVersion == SYSTEM_VERSION(9, 0, 0))
-				cache = &cacheInterface_Old90;
-			else if (firmVersion == SYSTEM_VERSION(9, 6, 0))
-				cache = &cacheInterface_Old96;
-			else if (firmVersion == SYSTEM_VERSION(11, 0, 0))
-				cache = &cacheInterface_Old110;
-		}
-		*(int *)(svc_patch_addr + 8) = 0xE1A00000; //NOP
-		*(int *)(svc_patch_addr) = 0xE1A00000; //NOP
-		kFlushDataCache(svc_patch_addr, 0x10);//
-		if (cache)
-		{
-			cache->invalidateDataCache(svc_patch_addr, 0x10);//
-			cache->flushInstructionCache(svc_patch_addr - 0xDFF80000 + 0xFFF00000, 0x10);//
-		}
-	}
-}
-
-void testSvcBackdoor() {
-	kernelParams[0] = 0;
-	svc_backDoor((void*) backdoorHandler);
-}
-
 
 
 Result bnPatchAccessCheck() {
 	Result ret;
 
-	svc_sleepThread(3000000000);
 	showMsgPaused("patching svc check");
-	kernelParams[0] = 1;
-	svc_backDoor((void*) backdoorHandler);
-	svc_sleepThread(1000000000);
+	svcBackdoor(backdoorHandler);
 	showMsgPaused("svc check patched");
 
 	
@@ -901,6 +427,28 @@ Result validateHomeMenuParams() {
 	return 0;
 }
 
+int waitKey() {
+	showMsg("Waiting for user input...");
+		// Main loop
+	while (aptMainLoop())
+	{
+		hidScanInput();
+
+		u32 kDown = hidKeysDown();
+
+		if (kDown) {
+			return kDown;
+		}
+		
+		// Flush and swap framebuffers
+		gfxFlushBuffers();
+		gfxSwapBuffers();
+		gspWaitForVBlank();
+	}
+	return 0;
+
+}
+
 Result bnBootNTR() {	
 	Result ret;
 	
@@ -938,14 +486,7 @@ Result bnBootNTR() {
 	}
 	*/
 
-	
 
-
-	
-	showMsg("testing svc_backDoor");
-	testSvcBackdoor();
-	showMsgPaused("testSvcBackdoor OK");
-	
 	
 	if (ntrConfig->firmVersion) {
 
@@ -958,7 +499,7 @@ Result bnBootNTR() {
 		showMsgPaused("bnPatchAccessCheck OK");
 	
 	} else {
-		showMsgPaused("unknown FIRM, access-checks could not be patched");
+		showMsgPaused("ERROR: unknown FIRM, access-checks could not be patched");
 	}
 
 	ret = copyRemoteMemory(CURRENT_PROCESS_HANDLE, tmpBuffer, CURRENT_PROCESS_HANDLE, tmpBuffer + 0x10, 0x10);
@@ -972,21 +513,27 @@ Result bnBootNTR() {
 
 
 	bnInitParamsByHomeMenu();
+	ntrConfig->HomeMenuVersion = SYSTEM_VERSION(1, 0, 0);
 	if (validateHomeMenuParams() != 0) {
 		// Home menu Params is not complete, should be considered as unsupported
 		ntrConfig->HomeMenuVersion = 0;
 	}
 	if (ntrConfig->HomeMenuVersion == 0) {
-		showMsgPaused("unknown Home Menu");
+		showMsgPaused("ERROR: unknown Home Menu");
 	} 
-	
-	
+
 	// load and execute ntr.bin, if firmware/home menu is unsupported, it will start ram dumping
-	ret = bnLoadAndExecuteNTR();
-	
 	if ((ntrConfig->HomeMenuVersion == 0)  || (ntrConfig->firmVersion == 0)) {
-		return RESULT_ERROR;
+		showMsg("Press X if you want to start ram dumping.");
+		int key = waitKey();
+		if (key & KEY_X) {
+			ret = bnLoadAndExecuteNTR();
+		}
+		ret = RESULT_ERROR;
+	} else {
+		ret = bnLoadAndExecuteNTR();
 	}
+	
 	return ret;
 }
 
@@ -1001,7 +548,7 @@ int main() {
 	consoleInit(GFX_BOTTOM, NULL);
 
 
-	printf("BootNTR 2.4\n");
+	printf("BootNTR 3.0\n");
 	ntrConfig = &g_ntrConfig;
 	bnConfig = &g_bnConfig;
 	ret = bnBootNTR();
@@ -1010,7 +557,15 @@ int main() {
 		svcSleepThread(1000000000);
 		isSuccess = 1;
 	} else {
-		printf("bnBootNTR failed\n");
+		printf("Boot NTR CFW failed\n");
+	}
+	int autoExit = 0;
+	if (isSuccess && (APP_MEMTYPE == 0)) {
+		autoExit = 1;
+	}
+	if (autoExit) {
+		printf("Exiting...\n");
+		goto final;
 	}
 	printf("Press Home button to return to the menu.\n");
 
@@ -1031,6 +586,7 @@ int main() {
 		gspWaitForVBlank();
 	}
 
+final:
 
 	gfxExit();
 	return 0;
