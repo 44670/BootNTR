@@ -3,6 +3,6 @@
 Boots NTR CFW.
 
 
-# Latest Build
+# Latest Build and NTR CFW Binary (ntr.bin)
 
-https://github.com/44670/BootNTR/raw/master/release/BootNTR.cia
+https://github.com/44670/BootNTR/releases
