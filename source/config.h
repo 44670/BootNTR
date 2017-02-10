@@ -9,7 +9,7 @@
     (((major)<<24)|((minor)<<16)|((revision)<<8))
 #endif
 
-#define CURRENT_CONFIG_VERSION  SYSTEM_VERSION(1, 0, 2)
+#define CURRENT_CONFIG_VERSION  SYSTEM_VERSION(1, 0, 3)
 
 #define SECONDS_IN_WEEK     604800
 #define SECONDS_IN_DAY      86400
@@ -31,6 +31,7 @@ typedef struct  config_s
     char        binariesPath[0x100];
     char        pluginPath[0x100];
     time_t      lastUpdateTime;
+    time_t      lastUpdateTime3;
 
 }               config_t;
 
@@ -67,6 +68,8 @@ typedef struct  ntrConfig_s
     u32         arm11BinStart;
     u32         arm11BinSize;
     u32         ShowDbgFunc;
+    u32         memorymode;
+    char        path[0x100];
 }               ntrConfig_t;
 
 typedef struct  bootNtrConfig_s

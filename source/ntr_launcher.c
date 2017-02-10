@@ -55,6 +55,7 @@ u32 loadNTRBin(void)
     FILE                *ntr;
     u32                 ret;
     char                path[0x100];
+
     static const char   *ntrVersionStrings[3] =
     {
         "ntr_3_2.bin",
@@ -66,6 +67,16 @@ u32 loadNTRBin(void)
         strJoin(path, "/", "ntr.bin");
     else
         strJoin(path, bnConfig->config->binariesPath + 5, ntrVersionStrings[bnConfig->versionToLaunch]);
+
+    if (bnConfig->versionToLaunch == V34)
+    {
+        strJoin(ntrConfig->path, bnConfig->config->binariesPath + 5, ntrVersionStrings[bnConfig->versionToLaunch]);
+    #if EXTENDEDMODE
+        ntrConfig->memorymode = 3;
+    #else
+        ntrConfig->memorymode = 0;
+    #endif
+    }
     
     // Get size
     ntr = fopen(path, "rb");
@@ -117,6 +128,10 @@ Result		bnLoadAndExecuteNTR(void)
 error:
 	return (RESULT_ERROR);
 }
+void        showDbg(char *str)
+{
+     newAppTop(DEFAULT_COLOR, TINY | SKINNY, str);
+}
 
 Result		bnBootNTR(void)
 {
@@ -144,7 +159,9 @@ Result		bnBootNTR(void)
     
     // Free temp buffer
     linearFree(linearAddress);
-
+#if DEBUG
+    ntrConfig->ShowDbgFunc = (u32)showDbg;
+#endif
     // Load NTR
 	ret = bnLoadAndExecuteNTR();
 	check_third(ret, LOAD_FAILED);

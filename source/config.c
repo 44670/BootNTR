@@ -136,21 +136,31 @@ void    configInit(void)
         firstLaunch();
         if (!saveConfig())
             newAppTop(DEFAULT_COLOR, 0, "A problem occured while saving the settings.");
+    #if EXTENDEDMODE
+        bnConfig->versionToLaunch = V34;
+    #endif
     }
     else
     {
 
         time_t current = time(NULL);
-
-        if (current - config->lastUpdateTime >= SECONDS_IN_WEEK)
+#if EXTENDEDMODE
+        if (current - config->lastUpdateTime3 >= SECONDS_IN_WEEK)
+#else
+        if (current - config->lastUpdateTime >= SECONDS_IN_WEEK)            
+#endif
             bnConfig->checkForUpdate = true;
         else
             bnConfig->checkForUpdate = false;
     }
    // svcCloseHandle(fsuHandle);
+#if EXTENDEDMODE
+    bnConfig->versionToLaunch = V34;
+#else
     if (config->flags & LV32) bnConfig->versionToLaunch = V32;
     else if (config->flags & LV33) bnConfig->versionToLaunch = V33;
     else if (config->flags & LV34) bnConfig->versionToLaunch = V34;
+#endif
 error:
     return;
 }

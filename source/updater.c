@@ -365,8 +365,11 @@ bool launchUpdater(void)
     update = false;
     updateData = (updateData_t *)calloc(1, sizeof(updateData_t));
     if (!updateData) goto error;
-    
+#if EXTENDEDMODE
+    bnConfig->config->lastUpdateTime3 = time(NULL);
+#else
     bnConfig->config->lastUpdateTime = time(NULL);
+#endif
     initUpdater();
     newAppTop(COLOR_BLANK, NEWLINE, "");
     newAppTop(COLOR_BLANK, 0, "Checking for update");
