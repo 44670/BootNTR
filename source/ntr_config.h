@@ -30,7 +30,14 @@ typedef struct _NTR_CONFIG {
 	u32 arm11BinStart;
 	u32 arm11BinSize;
 	u32 ShowDbgFunc;
+
+	u32 memMode;
+	char ntrFilePath[32];
 } NTR_CONFIG;
+
+#define NTR_MEMMODE_DEFAULT (0)
+#define NTR_MEMMODE_BASE (3)
+
 
 typedef struct _BOOTNTR_CONFIG {
 	u32 FSPatchAddr;

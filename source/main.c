@@ -349,12 +349,13 @@ Result bnPatchAccessCheck() {
 
 Result bnLoadAndExecuteNTR() {
 	u32 ret;
-	
-	
+	char pathBuf[64];
+	sprintf(pathBuf, "sdmc:%s", ntrConfig->ntrFilePath);
+
 //	fsInit();
-	FILE *file = fopen("sdmc:/ntr.bin","rb");
+	FILE *file = fopen(pathBuf,"rb");
 	if (file == 0) {
-		printf("open ntr.bin failed\n");
+		printf("open %s failed\n", ntrConfig->ntrFilePath);
 		return RESULT_ERROR;
 	}
 	fseek(file,0,SEEK_END);
@@ -514,6 +515,7 @@ Result bnBootNTR() {
 
 	bnInitParamsByHomeMenu();
 	ntrConfig->HomeMenuVersion = SYSTEM_VERSION(1, 0, 0);
+	
 	if (validateHomeMenuParams() != 0) {
 		// Home menu Params is not complete, should be considered as unsupported
 		ntrConfig->HomeMenuVersion = 0;
@@ -521,6 +523,20 @@ Result bnBootNTR() {
 	if (ntrConfig->HomeMenuVersion == 0) {
 		showMsgPaused("ERROR: unknown Home Menu");
 	} 
+
+	ntrConfig->memMode = NTR_MEMMODE_DEFAULT;
+	if (!ntrConfig->isNew3DS) {
+		strcpy(ntrConfig->ntrFilePath, "/ntr.o3ds.bin");
+		if (APP_MEMTYPE != 0) {
+			ntrConfig->memMode = NTR_MEMMODE_BASE;
+		}
+	} else {
+		strcpy(ntrConfig->ntrFilePath, "/ntr.n3ds.bin");
+	}
+
+	
+	
+
 
 	// load and execute ntr.bin, if firmware/home menu is unsupported, it will start ram dumping
 	if ((ntrConfig->HomeMenuVersion == 0)  || (ntrConfig->firmVersion == 0)) {
@@ -548,7 +564,7 @@ int main() {
 	consoleInit(GFX_BOTTOM, NULL);
 
 
-	printf("BootNTR 3.0\n");
+	printf("BootNTR 3.1\n");
 	ntrConfig = &g_ntrConfig;
 	bnConfig = &g_bnConfig;
 	ret = bnBootNTR();
