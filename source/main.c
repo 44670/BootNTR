@@ -11,23 +11,6 @@ char			  *g_secondary_error = NULL;
 char			  *g_third_error = NULL;
 bool			  g_exit = false;
 
-void action_launch_title_update(void) 
-{
-    Result res = 0;
-
-    if(R_SUCCEEDED(res = APT_PrepareToDoApplicationJump(0, 0x0004000000164800ul, 1))) {
-        u8 param[0x300];
-        u8 hmac[0x20];
-
-        res = APT_DoApplicationJump(param, sizeof(param), hmac);
-    }
-
-    if(R_FAILED(res)) 
-    {
-        newAppStatus(DEFAULT_COLOR, TINY, "Failed launch");
-    }
-}
-
 int main(void)
 {
     u32         keys;
@@ -54,7 +37,6 @@ int main(void)
 
         u32 wifiStatus;
         ACU_GetWifiStatus(&wifiStatus);
-        acExit();
         if (wifiStatus)
         {
             amInit();
@@ -62,12 +44,9 @@ int main(void)
             if (launchUpdater())
             {
                 newAppStatus(DEFAULT_COLOR, CENTER | BOLD | NEWLINE, "Updated !");
-                amExit();
-                httpcExit();
                 goto waitForExit;
             }            
-            amExit();
-            httpcExit();
+
         }
     }
 
@@ -149,6 +128,9 @@ exit:
     configExit();
     exitMainMenu();
     exitUI();
+    acExit();
+    amExit();
+    httpcExit();
 	romfsExit();
 	drawExit();
 	gfxExit();

@@ -17,7 +17,7 @@ EXTENDEDMODE = 0
 
 ifeq ($(EXTENDEDMODE), 1)
     ifeq ($(FONZD), 1)
-	    NAME := BootNTRSelectorMode-3-FONZD-Banner
+	    NAME := BootNTRSelector-Mode-3-FONZD-Banner
 	endif
 
 	ifeq ($(PABLOMK7), 1)
