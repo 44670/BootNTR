@@ -133,12 +133,14 @@ int     mainMenu(void)
     {
         keys = hidKeysDown() | hidKeysHeld();
         if (keys == (KEY_L | KEY_R | KEY_X | KEY_DUP)) goto dumpMode;
+#if EXTENDEDMODE == 0
         if (keys)
         {
             noTimer = true;
             removeAppStatus();
             updateUI();
         }
+#endif
         if (abort_and_exit()) goto abort;
         if (!noTimer)
         {

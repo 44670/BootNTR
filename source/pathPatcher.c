@@ -144,7 +144,10 @@ Result  loadAndPatch(version_t version)
         strJoin(outPath, binPath, outNtrVersionStrings[version]);
         strJoin(fixedPath[BINARY], binPath, ntrVersionStrings[version]);
         strJoin(fixedPath[PLUGIN], plgPath, fixedName[PLUGIN]);
-        strJoin(fixedPath[DEBUG], binPath, ntrVersionStrings[version]);
+        if (version == V34)
+            strJoin(fixedPath[DEBUG], binPath, outNtrVersionStrings[version]);
+        else
+            strJoin(fixedPath[DEBUG], binPath, ntrVersionStrings[version]);
         strJoin(fixedPath[KERNEL], binPath, fixedName[KERNEL]);
         strJoin(fixedPath[FS], binPath, fixedName[FS]);
         strJoin(fixedPath[PM], binPath, fixedName[PM]);
