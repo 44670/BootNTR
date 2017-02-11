@@ -156,6 +156,7 @@ void    configInit(void)
    // svcCloseHandle(fsuHandle);
 #if EXTENDEDMODE
     bnConfig->versionToLaunch = V34;
+    config->flags = LV34;
 #else
     if (config->flags & LV32) bnConfig->versionToLaunch = V32;
     else if (config->flags & LV33) bnConfig->versionToLaunch = V33;
