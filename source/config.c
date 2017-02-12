@@ -123,45 +123,49 @@ void    configInit(void)
 
     srvGetServiceHandle(&fsuHandle, "fs:USER");
     FSUSER_Initialize(fsuHandle);
+
     memset(&g_ntrConfig, 0, sizeof(g_ntrConfig));
     memset(&g_bnConfig, 0, sizeof(g_bnConfig));
+
     ntrConfig = &g_ntrConfig;
     bnConfig = &g_bnConfig;
     ntrConfig->fsUserHandle = fsuHandle;
+    g_bnConfig.isMode3 = EXTENDEDMODE;
+
     config = (config_t *)calloc(1, sizeof(config_t));
-    if (!config) goto error;
+    if (!config) goto error;    
     bnConfig->config = config;
     if (!loadConfigFromFile(config))
     {
         firstLaunch();
         if (!saveConfig())
             newAppTop(DEFAULT_COLOR, 0, "A problem occured while saving the settings.");
-    #if EXTENDEDMODE
-        bnConfig->versionToLaunch = V34;
-    #endif
+        if (g_bnConfig.isMode3)
+            g_bnConfig.versionToLaunch = V34;
     }
     else
     {
 
         time_t current = time(NULL);
-#if EXTENDEDMODE
-        if (current - config->lastUpdateTime3 >= SECONDS_IN_WEEK)
-#else
-        if (current - config->lastUpdateTime >= SECONDS_IN_WEEK)            
-#endif
+        time_t last = g_bnConfig.isMode3 ? config->lastUpdateTime3 : config->lastUpdateTime;
+
+        if (current - last >= SECONDS_IN_WEEK)            
             bnConfig->checkForUpdate = true;
         else
             bnConfig->checkForUpdate = false;
     }
-   // svcCloseHandle(fsuHandle);
-#if EXTENDEDMODE
-    bnConfig->versionToLaunch = V34;
-    config->flags = LV34;
-#else
-    if (config->flags & LV32) bnConfig->versionToLaunch = V32;
-    else if (config->flags & LV33) bnConfig->versionToLaunch = V33;
-    else if (config->flags & LV34) bnConfig->versionToLaunch = V34;
-#endif
+
+    if (g_bnConfig.isMode3)
+    {
+        bnConfig->versionToLaunch = V34;
+        config->flags = LV34;        
+    }
+    else
+    {
+        if (config->flags & LV32) bnConfig->versionToLaunch = V32;
+        else if (config->flags & LV33) bnConfig->versionToLaunch = V33;
+        else if (config->flags & LV34) bnConfig->versionToLaunch = V34;        
+    }
 error:
     return;
 }
@@ -174,11 +178,15 @@ void    configExit(void)
 
     version = bnConfig->versionToLaunch;
     config = bnConfig->config;
-    if (version == V32) flags = LV32;
-    else if (version == V33) flags = LV33;
-    else if (version == V34) flags = LV34;
-    else flags = 0;
-    config->flags = flags;
+    if (!g_bnConfig.isMode3)
+    {
+        if (version == V32) flags = LV32;
+        else if (version == V33) flags = LV33;
+        else if (version == V34) flags = LV34;
+        else flags = 0;
+        config->flags = flags;        
+    }
+
     saveConfig();
     free(config);
 }
