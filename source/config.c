@@ -120,9 +120,12 @@ void    configInit(void)
 {
     config_t    *config;
     Handle      fsuHandle;
+    bool        isNew3DS = false;;
+
 
     srvGetServiceHandle(&fsuHandle, "fs:USER");
     FSUSER_Initialize(fsuHandle);
+    APT_CheckNew3DS(&isNew3DS);
 
     memset(&g_ntrConfig, 0, sizeof(g_ntrConfig));
     memset(&g_bnConfig, 0, sizeof(g_bnConfig));
@@ -131,6 +134,8 @@ void    configInit(void)
     bnConfig = &g_bnConfig;
     ntrConfig->fsUserHandle = fsuHandle;
     g_bnConfig.isMode3 = EXTENDEDMODE;
+    g_bnConfig.isDebug = DEBUGMODE;
+    g_bnConfig.isNew3DS = isNew3DS;
 
     config = (config_t *)calloc(1, sizeof(config_t));
     if (!config) goto error;    

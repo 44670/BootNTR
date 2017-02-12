@@ -14,21 +14,18 @@ endif
 FONZD = 0
 PABLOMK7 = 0
 EXTENDEDMODE = 0
+DEBUG = 0
 
 ifeq ($(EXTENDEDMODE), 1)
     ifeq ($(FONZD), 1)
 	    NAME := BootNTRSelector-Mode-3-FONZD-Banner
-	endif
-
-	ifeq ($(PABLOMK7), 1)
+	else
 	    NAME := BootNTRSelector-Mode3-PabloMK7-Banner
 	endif
 else
     ifeq ($(FONZD), 1)
 	    NAME := BootNTRSelector-FONZD-Banner
-	endif
-
-	ifeq ($(PABLOMK7), 1)
+	else
 	    NAME := BootNTRSelector-PabloMK7-Banner
 	endif
 endif
@@ -46,7 +43,7 @@ LIBRARIES := citro3d ctru png z m
 
 VERSION_MAJOR := 2
 VERSION_MINOR := 7
-VERSION_MICRO := 1
+VERSION_MICRO := 2
 
 
 
@@ -57,7 +54,9 @@ BUILD_FLAGS_CC := -g -Wall -Wno-strict-aliasing -O3 -mword-relocations \
 					-DAPP_VERSION_MAJOR=${VERSION_MAJOR} \
 					-DAPP_VERSION_MINOR=${VERSION_MINOR} \
 					-DAPP_VERSION_REVISION=${VERSION_MICRO} \
-					-DEXTENDEDMODE=${EXTENDEDMODE}
+					-DEXTENDEDMODE=${EXTENDEDMODE} \
+					-DDEBUGMODE=${DEBUG}
+
 BUILD_FLAGS_CXX := $(COMMON_FLAGS) -std=gnu++11
 RUN_FLAGS :=
 
@@ -109,8 +108,7 @@ ifeq ($(TARGET),3DS)
     BANNER_AUDIO := resources/audio.wav
     ifeq ($(FONZD), 1)
     	BANNER_IMAGE := resources/FonzD_banner.cgfx
-    endif
-    ifeq ($(PABLOMK7), 1)
+    else
     	BANNER_IMAGE := resources/PabloMK7_banner.cgfx
     endif
     ifeq ($(EXTENDEDMODE), 1)
@@ -118,8 +116,6 @@ ifeq ($(TARGET),3DS)
     else
     	ICON := resources/icon.png
     endif
-    
-	LOGO := 
 endif
 
 # INTERNAL #

@@ -28,6 +28,7 @@ static void print(const char *str, ...)
     vsnprintf(buffer, 0x100, str, vlist);
     va_end(vlist);
     newAppTop(COLOR_BLANK, SKINNY, buffer);
+    updateUI();
 }
 
 static void initUpdater(void)

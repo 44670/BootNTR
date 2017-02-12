@@ -84,6 +84,8 @@ typedef struct  bootNtrConfig_s
     config_t    *config;
     bool        checkForUpdate;
     bool        isMode3;
+    bool        isDebug;
+    bool        isNew3DS;
 }               bootNtrConfig_t;
 
 void    configInit(void);

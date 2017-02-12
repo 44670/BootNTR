@@ -56,15 +56,18 @@ u32 loadNTRBin(void)
     u32                 ret;
     char                path[0x100];
 
-    static const char   *ntrVersionStrings[3] =
+    static const char   *ntrVersionStrings[4] =
     {
         "ntr_3_2.bin",
         "ntr_3_3.bin",
-        "ntr_3_4.bin"
+        "ntr_3_4.bin",
+        "ntr_3_4u.bin"
     };
 
     if (bnConfig->versionToLaunch == V32)
         strJoin(path, "/", "ntr.bin");
+    else if (bnConfig->isMode3 && !bnConfig->isNew3DS)
+        strJoin(path, bnConfig->config->binariesPath + 5, ntrVersionStrings[3]);
     else
         strJoin(path, bnConfig->config->binariesPath + 5, ntrVersionStrings[bnConfig->versionToLaunch]);
 
@@ -159,9 +162,9 @@ Result		bnBootNTR(void)
     
     // Free temp buffer
     linearFree(linearAddress);
-#if DEBUG
-    ntrConfig->ShowDbgFunc = (u32)showDbg;
-#endif
+
+    if (bnConfig->isDebug)
+        ntrConfig->ShowDbgFunc = (u32)showDbg;
     // Load NTR
 	ret = bnLoadAndExecuteNTR();
 	check_third(ret, LOAD_FAILED);

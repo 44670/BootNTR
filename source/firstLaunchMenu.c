@@ -329,7 +329,8 @@ static void    setFiles(void)
         else
             newAppTop(COLOR_LIMEGREEN, SKINNY, "Creating directory: Success");
         updateUI();
-    }        
+    }
+
     if (!fileExists(bnConfig->config->pluginPath + 5))
     {
         newAppTop(COLOR_BLANK, SKINNY, "%s, doesn't exist", bnConfig->config->pluginPath);
@@ -349,7 +350,8 @@ static void    setFiles(void)
     newAppTop(COLOR_BLANK, SKINNY, "Setting up 3.2...");
     updateUI();
     ret = loadAndPatch(V32);
-    removeAppTop();
+    if (!bnConfig->isDebug)
+        removeAppTop();
     if (ret)
         newAppTop(COLOR_SALMON, SKINNY, "Setting up 3.2... Error.");
     else
@@ -359,7 +361,8 @@ static void    setFiles(void)
     newAppTop(COLOR_BLANK, SKINNY, "Setting up 3.3...");
     updateUI();
     ret = loadAndPatch(V33);
-    removeAppTop();
+    if (!bnConfig->isDebug)
+        removeAppTop();
     if (ret)
         newAppTop(COLOR_SALMON, SKINNY, "Setting up 3.3... Error.");
     else
@@ -369,12 +372,28 @@ static void    setFiles(void)
     newAppTop(COLOR_BLANK, SKINNY, "Setting up 3.4...");
     updateUI();
     ret = loadAndPatch(V34);
-    removeAppTop();
+    if (!bnConfig->isDebug)
+        removeAppTop();
     if (ret)
         newAppTop(COLOR_SALMON, SKINNY, "Setting up 3.4... Error.");
     else
         newAppTop(COLOR_LIMEGREEN, SKINNY, "Setting up 3.4... Done.");
     updateUI();
+
+    if (!bnConfig->isNew3DS)
+    {
+        newAppTop(COLOR_BLANK, SKINNY, "Setting up 3.4 unpatched...");
+        updateUI();
+        ret = loadAndPatch(V34);
+        if (!bnConfig->isDebug)
+            removeAppTop();
+        if (ret)
+            newAppTop(COLOR_SALMON, SKINNY, "Setting up 3.4 unpatched... Error.");
+        else
+            newAppTop(COLOR_LIMEGREEN, SKINNY, "Setting up 3.4... Done.");
+        updateUI();
+    }
+
 
     newAppTop(COLOR_LIMEGREEN, 0, "Finished");
     updateUI();

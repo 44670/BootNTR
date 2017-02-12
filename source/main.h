@@ -12,26 +12,24 @@
 #include "graphics.h"
 #include "mysvcs.h"
 
-#define TIMER               3
+
 
 #if EXTENDEDMODE
-
+    
+    #define TIMER               1
     #if  FONZD_BANNER
-    #define CIA_VERSION         "BootNTRSelector-Mode3-FONZD-Banner.cia"
-    #endif 
-
-    #if  PABLOMK7_BANNER
-    #define CIA_VERSION         "BootNTRSelector-Mode3-PabloMK7-Banner.cia"
+        #define CIA_VERSION         "BootNTRSelector-Mode3-FONZD-Banner.cia"
+    #else
+        #define CIA_VERSION         "BootNTRSelector-Mode3-PabloMK7-Banner.cia"
     #endif
 
 #else
+    #define TIMER               3
 
     #if  FONZD_BANNER
-    #define CIA_VERSION         "BootNTRSelector-FONZD-Banner.cia"
-    #endif 
-
-    #if  PABLOMK7_BANNER
-    #define CIA_VERSION         "BootNTRSelector-PabloMK7-Banner.cia"
+        #define CIA_VERSION         "BootNTRSelector-FONZD-Banner.cia"
+    #else
+        #define CIA_VERSION         "BootNTRSelector-PabloMK7-Banner.cia"
     #endif
 
 #endif

@@ -5,33 +5,14 @@
 #include <time.h>
 
 extern bootNtrConfig_t  *bnConfig;
-#if EXTENDEDMODE == 0
+
 static button_t         *V32Button;
 static button_t         *V33Button;
 static button_t         *V34Button;
 static sprite_t         *desiredVersionSprite;
 static sprite_t         *tinyButtonBGSprite;
-#endif
 static sprite_t         *pressExitSprite;
 static bool             userTouch = false;
-
-#if EXTENDEDMODE
-
-void    initMainMenu(void)
-{    
-    newSpriteFromPNG(&pressExitSprite, "romfs:/sprites/textSprites/pressBExit.png");
-
-    setSpritePos(pressExitSprite, 180.0f, 217.0f);
-
-    changeBottomFooter(pressExitSprite);
-}
-
-void    exitMainMenu(void)
-{
-    deleteSprite(pressExitSprite);
-}
-
-#else 
 
 void    selectVersion(u32 mode)
 {
@@ -57,45 +38,53 @@ void    selectVersion(u32 mode)
 
 void    initMainMenu(void)
 {
-    sprite_t *sprite;
+    if (!bnConfig->isMode3)
+    {
+        sprite_t *sprite;
 
-    newSpriteFromPNG(&desiredVersionSprite, "romfs:/sprites/textSprites/touchDesiredVersion.png");    
-    newSpriteFromPNG(&tinyButtonBGSprite, "romfs:/sprites/tinyButtonBackground.png");
+        newSpriteFromPNG(&desiredVersionSprite, "romfs:/sprites/textSprites/touchDesiredVersion.png");    
+        newSpriteFromPNG(&tinyButtonBGSprite, "romfs:/sprites/tinyButtonBackground.png");
+
+        setSpritePos(desiredVersionSprite, 34.0f, 7.0f);
+
+        changeBottomHeader(desiredVersionSprite);
+
+        newSpriteFromPNG(&sprite, "romfs:/sprites/textSprites/32Version.png");
+        V32Button = newButton(11.0f, 35.0f, selectVersion, 1, tinyButtonBGSprite, sprite);
+        newSpriteFromPNG(&sprite, "romfs:/sprites/textSprites/33Version.png");
+        V33Button = newButton(11.0f, 94.0f, selectVersion, 2, tinyButtonBGSprite, sprite);
+        newSpriteFromPNG(&sprite, "romfs:/sprites/textSprites/34Version.png");
+        V34Button = newButton(11.0f, 152.0f, selectVersion, 3, tinyButtonBGSprite, sprite);
+
+        V32Button->show(V32Button);
+        V33Button->show(V33Button);
+        V34Button->show(V34Button);
+        addBottomObject(V32Button);
+        addBottomObject(V33Button);
+        addBottomObject(V34Button);        
+    }
+
     newSpriteFromPNG(&pressExitSprite, "romfs:/sprites/textSprites/pressBExit.png");
 
-    setSpritePos(desiredVersionSprite, 34.0f, 7.0f);
     setSpritePos(pressExitSprite, 180.0f, 217.0f);
 
-    changeBottomFooter(pressExitSprite);
-    changeBottomHeader(desiredVersionSprite);
+    changeBottomFooter(pressExitSprite); 
 
-    newSpriteFromPNG(&sprite, "romfs:/sprites/textSprites/32Version.png");
-    V32Button = newButton(11.0f, 35.0f, selectVersion, 1, tinyButtonBGSprite, sprite);
-    newSpriteFromPNG(&sprite, "romfs:/sprites/textSprites/33Version.png");
-    V33Button = newButton(11.0f, 94.0f, selectVersion, 2, tinyButtonBGSprite, sprite);
-    newSpriteFromPNG(&sprite, "romfs:/sprites/textSprites/34Version.png");
-    V34Button = newButton(11.0f, 152.0f, selectVersion, 3, tinyButtonBGSprite, sprite);
-
-    V32Button->show(V32Button);
-    V33Button->show(V33Button);
-    V34Button->show(V34Button);
-    addBottomObject(V32Button);
-    addBottomObject(V33Button);
-    addBottomObject(V34Button);
 }
 
 void    exitMainMenu(void)
 {
-    destroyButton(V32Button);
-    destroyButton(V33Button);
-    destroyButton(V34Button);
-    deleteSprite(tinyButtonBGSprite);
-    deleteSprite(desiredVersionSprite);
+    if (!bnConfig->isMode3)
+    {
+        destroyButton(V32Button);
+        destroyButton(V33Button);
+        destroyButton(V34Button);
+        deleteSprite(tinyButtonBGSprite);
+        deleteSprite(desiredVersionSprite);
+    }
+
     deleteSprite(pressExitSprite);
 }
-
-#endif
-
 
 
 static const char * versionString[] =
@@ -114,7 +103,7 @@ int     mainMenu(void)
     bool        noTimer;
 
     waitAllKeysReleased();
-    if (!bnConfig->config->flags) noTimer = true;
+    if (!bnConfig->isMode3 && !bnConfig->config->flags) noTimer = true;
     else noTimer = false;
     appInfoDisableAutoUpdate();
     if (!noTimer)
@@ -125,22 +114,17 @@ int     mainMenu(void)
         updateUI();
     }    
     keys = 0;
-#if EXTENDEDMODE
-    while (1)
-#else
+
     while (userTouch == false)
-#endif
     {
         keys = hidKeysDown() | hidKeysHeld();
         if (keys == (KEY_L | KEY_R | KEY_X | KEY_DUP)) goto dumpMode;
-#if EXTENDEDMODE == 0
-        if (keys)
+        if (keys && !bnConfig->isMode3)
         {
             noTimer = true;
             removeAppStatus();
             updateUI();
         }
-#endif
         if (abort_and_exit()) goto abort;
         if (!noTimer)
         {
@@ -162,9 +146,11 @@ int     mainMenu(void)
     appInfoEnableAutoUpdate();
     newAppStatus(DEFAULT_COLOR, CENTER | TINY | SKINNY, "Loading %s ...", versionString[bnConfig->versionToLaunch]);
     return (1);
+
 abort:
     appInfoEnableAutoUpdate();
     return (0);
+    
 dumpMode:
     removeAppStatus();
     appInfoEnableAutoUpdate();

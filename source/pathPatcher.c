@@ -59,11 +59,12 @@ static const char *ntrVersionStrings[4] =
     "ntr.n3ds.bin"
 };
 
-static const char *outNtrVersionStrings[3] =
+static const char *outNtrVersionStrings[4] =
 {
     "ntr_3_2.bin",
     "ntr_3_3.bin",
     "ntr_3_4.bin",
+    "ntr_3_4u.bin"
 };
 
 static void patchBinary(u8 *mem, int size)
@@ -85,7 +86,8 @@ static void patchBinary(u8 *mem, int size)
         offset = memfind(mem, size, str, strlength);
         if (offset == 0)
         {
-            newAppTop(DEFAULT_COLOR, TINY, "Not found \"%s\".", str);
+            if (bnConfig->isDebug)
+                newAppTop(DEFAULT_COLOR, TINY, "Not found \"%s\".", str);
             continue;
         }
 
@@ -97,8 +99,11 @@ static void patchBinary(u8 *mem, int size)
         patchMe = (u32 *)memfind(mem, size, (u8 *)&offset, 4); // Find xref
         if (patchMe == 0)
         {
-            newAppTop(DEFAULT_COLOR, TINY, "Pointer for \"%s\"", str);
-            newAppTop(DEFAULT_COLOR, TINY, "is missing!Aborting.\n");
+            if (bnConfig->isDebug)
+            {
+                newAppTop(DEFAULT_COLOR, TINY, "Pointer for \"%s\"", str);
+                newAppTop(DEFAULT_COLOR, TINY, "is missing!Aborting.\n");                
+            }
             break;
         }
 
@@ -116,6 +121,8 @@ static void patchBinary(u8 *mem, int size)
 
 Result  loadAndPatch(version_t version)
 {
+    static  int     unpatched = 0;
+
     FILE    *ntr;
     int     size;
     int     newSize;
@@ -124,12 +131,11 @@ Result  loadAndPatch(version_t version)
     char    inPath[0x100];
     char    outPath[0x100];
     u8      *mem;    
-    bool    isNew3DS = false;
-
-    APT_CheckNew3DS(&isNew3DS);
+    bool    isNew3DS = bnConfig->isNew3DS;
 
     binPath = bnConfig->config->binariesPath;
     plgPath = bnConfig->config->pluginPath; 
+
     if (version == V34 && isNew3DS)
         strJoin(inPath, "romfs:/", ntrVersionStrings[version + 1]);
     else
@@ -141,13 +147,22 @@ Result  loadAndPatch(version_t version)
 
     if (version != V32)
     {
-        strJoin(outPath, binPath, outNtrVersionStrings[version]);
-        strJoin(fixedPath[BINARY], binPath, ntrVersionStrings[version]);
         strJoin(fixedPath[PLUGIN], plgPath, fixedName[PLUGIN]);
-        if (version == V34)
+
+        if (version != V34 || !unpatched)
+        {
+            strJoin(outPath, binPath, outNtrVersionStrings[version]);
+            strJoin(fixedPath[BINARY], binPath, outNtrVersionStrings[version]);
             strJoin(fixedPath[DEBUG], binPath, outNtrVersionStrings[version]);
+        }
+        else if (version == V34 && unpatched)
+        {
+            strJoin(outPath, binPath, outNtrVersionStrings[3]);
+            strJoin(fixedPath[BINARY], binPath, outNtrVersionStrings[3]);
+            strJoin(fixedPath[DEBUG], binPath, originalPath[DEBUG]);
+        }
         else
-            strJoin(fixedPath[DEBUG], binPath, ntrVersionStrings[version]);
+            goto error;
         strJoin(fixedPath[KERNEL], binPath, fixedName[KERNEL]);
         strJoin(fixedPath[FS], binPath, fixedName[FS]);
         strJoin(fixedPath[PM], binPath, fixedName[PM]);
@@ -178,6 +193,10 @@ Result  loadAndPatch(version_t version)
     fwrite(mem, newSize, 1, ntr);
     fclose(ntr);
     free(mem);
+
+    if (version == V34)
+        unpatched++;
+
     return(0);
 error:
     return(RESULT_ERROR);
