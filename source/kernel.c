@@ -89,10 +89,10 @@ dbgKernelCacheInterface cacheInterface_NEW112 =
 dbgKernelCacheInterface cacheInterface_NEW113 = 
 {
 	//for new 3ds 11.3
-	(void*)0XFFF27400,
-	(void*)0XFFF1E15C,
-	(void*)0XFFF1DE04,
-	(void*)0XFFF20498
+	(void*)0xFFF27400,
+	(void*)0xFFF1E15C,
+	(void*)0xFFF1DE04,
+	(void*)0xFFF20498
 };
 
 dbgKernelCacheInterface cacheInterface_NEW114 =

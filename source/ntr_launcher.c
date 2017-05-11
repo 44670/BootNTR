@@ -60,8 +60,8 @@ u32 loadNTRBin(void)
     {
         "ntr_3_2.bin",
         "ntr_3_3.bin",
-        "ntr_3_4.bin",
-        "ntr_3_4u.bin"
+        "ntr_3_5.bin",
+        "ntr_3_5u.bin"
     };
 
     if (bnConfig->versionToLaunch == V32)
@@ -71,7 +71,7 @@ u32 loadNTRBin(void)
     else
         strJoin(path, bnConfig->config->binariesPath + 5, ntrVersionStrings[bnConfig->versionToLaunch]);
 
-    if (bnConfig->versionToLaunch == V34)
+    if (bnConfig->versionToLaunch == V35)
     {
         strJoin(ntrConfig->path, bnConfig->config->binariesPath + 5, ntrVersionStrings[bnConfig->versionToLaunch]);
     #if EXTENDEDMODE

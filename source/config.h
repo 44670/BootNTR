@@ -9,7 +9,7 @@
     (((major)<<24)|((minor)<<16)|((revision)<<8))
 #endif
 
-#define CURRENT_CONFIG_VERSION  SYSTEM_VERSION(1, 0, 6)
+#define CURRENT_CONFIG_VERSION  SYSTEM_VERSION(1, 0, 7)
 
 #define SECONDS_IN_WEEK     604800
 #define SECONDS_IN_DAY      86400
@@ -20,7 +20,7 @@ enum
 {
     LV32 = BIT(0),
     LV33 = BIT(1),
-    LV34 = BIT(2),
+    LV35 = BIT(2),
     CUSTOM_PLUGIN_PATH = BIT(3)
 }configFlags;
 

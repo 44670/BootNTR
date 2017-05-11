@@ -107,7 +107,7 @@ void    resetConfig(void)
     strJoin(path, config->binariesPath + 5, "ntr_3_3.bin");
     remove(path);
     memset(path, 0, 0x100);
-    strJoin(path, config->binariesPath + 5, "ntr_3_4.bin");
+    strJoin(path, config->binariesPath + 5, "ntr_3_5.bin");
     remove(path);
     
 exit:
@@ -146,7 +146,7 @@ void    configInit(void)
         if (!saveConfig())
             newAppTop(DEFAULT_COLOR, 0, "A problem occured while saving the settings.");
         if (g_bnConfig.isMode3)
-            g_bnConfig.versionToLaunch = V34;
+            g_bnConfig.versionToLaunch = V35;
     }
     else
     {
@@ -162,14 +162,13 @@ void    configInit(void)
 
     if (g_bnConfig.isMode3)
     {
-        bnConfig->versionToLaunch = V34;
-        config->flags = LV34;        
+        bnConfig->versionToLaunch = V35;  
     }
     else
     {
         if (config->flags & LV32) bnConfig->versionToLaunch = V32;
         else if (config->flags & LV33) bnConfig->versionToLaunch = V33;
-        else if (config->flags & LV34) bnConfig->versionToLaunch = V34;        
+        else if (config->flags & LV35) bnConfig->versionToLaunch = V35;        
     }
 error:
     return;
@@ -187,7 +186,7 @@ void    configExit(void)
     {
         if (version == V32) flags = LV32;
         else if (version == V33) flags = LV33;
-        else if (version == V34) flags = LV34;
+        else if (version == V35) flags = LV35;
         else flags = 0;
         config->flags = flags;        
     }

@@ -8,7 +8,7 @@ extern bootNtrConfig_t  *bnConfig;
 
 static button_t         *V32Button;
 static button_t         *V33Button;
-static button_t         *V34Button;
+static button_t         *V35Button;
 static sprite_t         *desiredVersionSprite;
 static sprite_t         *tinyButtonBGSprite;
 static sprite_t         *pressExitSprite;
@@ -18,7 +18,7 @@ void    selectVersion(u32 mode)
 {
     V32Button->disable(V32Button);
     V33Button->disable(V33Button);
-    V34Button->disable(V34Button);
+    V35Button->disable(V35Button);
     userTouch = true;
     switch(mode)
     {
@@ -29,7 +29,7 @@ void    selectVersion(u32 mode)
             bnConfig->versionToLaunch = V33;
             break;
         case 3:
-            bnConfig->versionToLaunch = V34;
+            bnConfig->versionToLaunch = V35;
             break;
         default:
             break;
@@ -53,15 +53,15 @@ void    initMainMenu(void)
         V32Button = newButton(11.0f, 35.0f, selectVersion, 1, tinyButtonBGSprite, sprite);
         newSpriteFromPNG(&sprite, "romfs:/sprites/textSprites/33Version.png");
         V33Button = newButton(11.0f, 94.0f, selectVersion, 2, tinyButtonBGSprite, sprite);
-        newSpriteFromPNG(&sprite, "romfs:/sprites/textSprites/34Version.png");
-        V34Button = newButton(11.0f, 152.0f, selectVersion, 3, tinyButtonBGSprite, sprite);
+        newSpriteFromPNG(&sprite, "romfs:/sprites/textSprites/35Version.png");
+        V35Button = newButton(11.0f, 152.0f, selectVersion, 3, tinyButtonBGSprite, sprite);
 
         V32Button->show(V32Button);
         V33Button->show(V33Button);
-        V34Button->show(V34Button);
+        V35Button->show(V35Button);
         addBottomObject(V32Button);
         addBottomObject(V33Button);
-        addBottomObject(V34Button);        
+        addBottomObject(V35Button);        
     }
 
     newSpriteFromPNG(&pressExitSprite, "romfs:/sprites/textSprites/pressBExit.png");
@@ -78,7 +78,7 @@ void    exitMainMenu(void)
     {
         destroyButton(V32Button);
         destroyButton(V33Button);
-        destroyButton(V34Button);
+        destroyButton(V35Button);
         deleteSprite(tinyButtonBGSprite);
         deleteSprite(desiredVersionSprite);
     }
@@ -91,7 +91,7 @@ static const char * versionString[] =
 {
     "3.2",
     "3.3",
-    "3.4"
+    "3.5"
 };
 
 int     mainMenu(void)

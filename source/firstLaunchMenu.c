@@ -369,28 +369,28 @@ static void    setFiles(void)
         newAppTop(COLOR_LIMEGREEN, SKINNY, "Setting up 3.3... Done.");
     updateUI();
 
-    newAppTop(COLOR_BLANK, SKINNY, "Setting up 3.4...");
+    newAppTop(COLOR_BLANK, SKINNY, "Setting up 3.5...");
     updateUI();
-    ret = loadAndPatch(V34);
+    ret = loadAndPatch(V35);
     if (!bnConfig->isDebug)
         removeAppTop();
     if (ret)
-        newAppTop(COLOR_SALMON, SKINNY, "Setting up 3.4... Error.");
+        newAppTop(COLOR_SALMON, SKINNY, "Setting up 3.5... Error.");
     else
-        newAppTop(COLOR_LIMEGREEN, SKINNY, "Setting up 3.4... Done.");
+        newAppTop(COLOR_LIMEGREEN, SKINNY, "Setting up 3.5... Done.");
     updateUI();
 
     if (!bnConfig->isNew3DS)
     {
-        newAppTop(COLOR_BLANK, SKINNY, "Setting up 3.4 unpatched...");
+        newAppTop(COLOR_BLANK, SKINNY, "Setting up 3.5 unpatched...");
         updateUI();
-        ret = loadAndPatch(V34);
+        ret = loadAndPatch(V35);
         if (!bnConfig->isDebug)
             removeAppTop();
         if (ret)
-            newAppTop(COLOR_SALMON, SKINNY, "Setting up 3.4 unpatched... Error.");
+            newAppTop(COLOR_SALMON, SKINNY, "Setting up 3.5 unpatched... Error.");
         else
-            newAppTop(COLOR_LIMEGREEN, SKINNY, "Setting up 3.4... Done.");
+            newAppTop(COLOR_LIMEGREEN, SKINNY, "Setting up 3.5... Done.");
         updateUI();
     }
 
