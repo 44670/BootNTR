@@ -1,6 +1,5 @@
 #include "main.h"
 
-
 extern NTR_CONFIG      *ntrConfig;
 extern BOOTNTR_CONFIG  *bnConfig;
 extern u8               *tmpBuffer;
@@ -95,6 +94,17 @@ Result	bnInitParamsByFirmware(void)
             ntrConfig->PMSvcRunAddr = 0x00103154;
             ntrConfig->ControlMemoryPatchAddr1 = 0xDFF884E4;
             ntrConfig->ControlMemoryPatchAddr2 = 0xDFF884E8;
+            bnConfig->SvcPatchAddr = 0xDFF82288;
+            bnConfig->FSPatchAddr = 0x0010F024;
+            bnConfig->SMPatchAddr = 0x0010189C;
+        }
+        else if (kernelVersion == SYSTEM_VERSION(2, 54, 0))
+        {
+            // old3ds 11.4.0
+            ntrConfig->firmVersion = SYSTEM_VERSION(11, 4, 0);
+            ntrConfig->PMSvcRunAddr = 0x00103154;
+            ntrConfig->ControlMemoryPatchAddr1 = 0xDFF88514;
+            ntrConfig->ControlMemoryPatchAddr2 = 0xDFF88518;
             bnConfig->SvcPatchAddr = 0xDFF82288;
             bnConfig->FSPatchAddr = 0x0010F024;
             bnConfig->SMPatchAddr = 0x0010189C;
@@ -214,6 +224,17 @@ Result	bnInitParamsByFirmware(void)
             ntrConfig->PMSvcRunAddr = 0x00103150;
             ntrConfig->ControlMemoryPatchAddr1 = 0xDFF885FC; 
             ntrConfig->ControlMemoryPatchAddr2 = 0xDFF88600;
+            bnConfig->SvcPatchAddr = 0xDFF8226C;
+            bnConfig->FSPatchAddr = 0x0010F024; 
+            bnConfig->SMPatchAddr = 0x0010189C;
+        }
+        else if (kernelVersion == SYSTEM_VERSION(2, 54, 0))
+        {
+            // new3ds 11.4
+            ntrConfig->firmVersion = SYSTEM_VERSION(11, 4, 0);
+            ntrConfig->PMSvcRunAddr = 0x00103150;
+            ntrConfig->ControlMemoryPatchAddr1 = 0xDFF8862C; 
+            ntrConfig->ControlMemoryPatchAddr2 = 0xDFF88630;
             bnConfig->SvcPatchAddr = 0xDFF8226C;
             bnConfig->FSPatchAddr = 0x0010F024; 
             bnConfig->SMPatchAddr = 0x0010189C;

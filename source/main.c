@@ -564,7 +564,7 @@ int main() {
 	consoleInit(GFX_BOTTOM, NULL);
 
 
-	printf("BootNTR 3.1\n");
+	printf("BootNTR 3.2\n");
 	ntrConfig = &g_ntrConfig;
 	bnConfig = &g_bnConfig;
 	ret = bnBootNTR();
