@@ -1,6 +1,6 @@
 # BootNTR
 
-Boots NTR CFW.
+Makes NTR open-source
 
 # About Mode3 Build
 
