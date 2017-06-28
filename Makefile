@@ -28,9 +28,9 @@ APP_PRODUCT_CODE := $(shell echo $(APP_PRODUCT_CODE) | cut -c1-16)
 APP_UNIQUE_ID := $(shell echo $(APP_UNIQUE_ID) | cut -c1-7)
 
 BUILD := build
-SOURCES := source 
+SOURCES := source
 DATA := data
-INCLUDES := $(SOURCES) include 
+INCLUDES := $(SOURCES) include
 ICON := resources/icon.png
 
 #---------------------------------------------------------------------------------
@@ -59,21 +59,6 @@ endif
 
 RSF_3DS = $(CTRCOMMON)/tools/template-3ds.rsf
 RSF_CIA = ../template-cia.rsf
-
-ifeq ($(OS),Windows_NT)
-	MAKEROM = $(CTRCOMMON)/tools/makerom.exe
-	BANNERTOOL = $(CTRCOMMON)/tools/bannertool.exe
-else
-	UNAME_S := $(shell uname -s)
-	ifeq ($(UNAME_S),Linux)
-		MAKEROM = $(CTRCOMMON)/tools/makerom-linux
-		BANNERTOOL = $(CTRCOMMON)/tools/bannertool-linux
-	endif
-	ifeq ($(UNAME_S),Darwin)
-		MAKEROM = $(CTRCOMMON)/tools/makerom-mac
-		BANNERTOOL = $(CTRCOMMON)/tools/bannertool-mac
-	endif
-endif
 
 ifneq ("$(wildcard $(TOPDIR)/resources/banner.cgfx)","")
 	BANNER_IMAGE := $(TOPDIR)/resources/banner.cgfx
@@ -134,6 +119,8 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 
 export APP_ICON := $(TOPDIR)/$(ICON)
 
+export _3DSXFLAGS += --smdh=$(OUTPUT).smdh
+
 .PHONY: $(BUILD) clean all
 
 #---------------------------------------------------------------------------------
@@ -145,6 +132,7 @@ $(BUILD):
 
 #---------------------------------------------------------------------------------
 clean:
+
 	@echo clean ...
 	@rm -fr $(BUILD) $(OUTPUT_D)
 
@@ -164,26 +152,23 @@ $(OUTPUT_D):
 	@[ -d $@ ] || mkdir -p $@
 
 banner.bnr: $(BANNER_IMAGE) $(TOPDIR)/resources/audio.wav
-	@$(BANNERTOOL) makebanner $(BANNER_IMAGE_ARG) -a $(TOPDIR)/resources/audio.wav -o banner.bnr > /dev/null
+	@bannertool makebanner $(BANNER_IMAGE_ARG) -a $(TOPDIR)/resources/audio.wav -o banner.bnr > /dev/null
 
 icon.icn: $(TOPDIR)/resources/icon.png
-	@$(BANNERTOOL) makesmdh -s "$(APP_TITLE)" -l "$(APP_TITLE)" -p "$(APP_AUTHOR)" -i $(TOPDIR)/resources/icon.png -o icon.icn > /dev/null
+	@bannertool makesmdh -s "$(APP_TITLE)" -l "$(APP_TITLE)" -p "$(APP_AUTHOR)" -i $(TOPDIR)/resources/icon.png -o icon.icn > /dev/null
 
 $(OUTPUT).elf: $(OFILES)
 
-stripped.elf: $(OUTPUT).elf
-	@cp $(OUTPUT).elf stripped.elf
-	@$(PREFIX)strip stripped.elf
+$(OUTPUT).3dsx: $(OUTPUT).elf $(OUTPUT).smdh
 
-
-$(OUTPUT).cia: stripped.elf banner.bnr icon.icn
-	@$(MAKEROM) -f cia -o $(OUTPUT).cia -rsf $(RSF_CIA) -target t -exefslogo -elf stripped.elf -icon icon.icn -banner banner.bnr -DAPP_TITLE="$(APP_TITLE)" -DAPP_PRODUCT_CODE="$(APP_PRODUCT_CODE)" -DAPP_UNIQUE_ID="$(APP_UNIQUE_ID)"
+$(OUTPUT).cia: $(OUTPUT).elf banner.bnr icon.icn
+	@makerom -f cia -o $(OUTPUT).cia -rsf $(RSF_CIA) -target t -exefslogo -elf $(OUTPUT).elf -icon icon.icn -banner banner.bnr -DAPP_TITLE="$(APP_TITLE)" -DAPP_PRODUCT_CODE="$(APP_PRODUCT_CODE)" -DAPP_UNIQUE_ID="$(APP_UNIQUE_ID)"
 	@echo "built ... $(notdir $@)"
 
-$(OUTPUT).zip: $(OUTPUT_D) $(OUTPUT).elf  $(OUTPUT).smdh  $(OUTPUT).cia
+$(OUTPUT).zip: $(OUTPUT_D) $(OUTPUT).cia $(OUTPUT).3dsx
 	@cd $(OUTPUT_D); \
 	mkdir -p 3ds/$(OUTPUT_N); \
-	zip -r $(OUTPUT_N).zip  $(OUTPUT_N).cia  > /dev/null; \
+	zip -r $(OUTPUT_N).zip  $(OUTPUT_N).3dsx $(OUTPUT_N).cia  > /dev/null; \
 	rm -r 3ds
 	@echo "built ... $(notdir $@)"
 
@@ -194,18 +179,6 @@ $(OUTPUT).zip: $(OUTPUT_D) $(OUTPUT).elf  $(OUTPUT).smdh  $(OUTPUT).cia
 #---------------------------------------------------------------------------------
 	@echo $(notdir $<)
 	@$(bin2o)
-
-# WARNING: This is not the right way to do this! TODO: Do it right!
-#---------------------------------------------------------------------------------
-%.vsh.o	:	%.vsh
-#---------------------------------------------------------------------------------
-	@echo $(notdir $<)
-	@python $(AEMSTRO)/aemstro_as.py $< ../$(notdir $<).shbin
-	@bin2s ../$(notdir $<).shbin | $(PREFIX)as -o $@
-	@echo "extern const u8" `(echo $(notdir $<).shbin | sed -e 's/^\([0-9]\)/_\1/' | tr . _)`"_end[];" > `(echo $(notdir $<).shbin | tr . _)`.h
-	@echo "extern const u8" `(echo $(notdir $<).shbin | sed -e 's/^\([0-9]\)/_\1/' | tr . _)`"[];" >> `(echo $(notdir $<).shbin | tr . _)`.h
-	@echo "extern const u32" `(echo $(notdir $<).shbin | sed -e 's/^\([0-9]\)/_\1/' | tr . _)`_size";" >> `(echo $(notdir $<).shbin | tr . _)`.h
-	@rm ../$(notdir $<).shbin
 
 -include $(DEPENDS)
 
