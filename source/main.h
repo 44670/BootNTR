@@ -22,7 +22,6 @@
     #else
         #define CIA_VERSION         "BootNTRSelector-Mode3-PabloMK7-Banner.cia"
     #endif
-
 #else
     #define TIMER               3
 
@@ -31,7 +30,6 @@
     #else
         #define CIA_VERSION         "BootNTRSelector-PabloMK7-Banner.cia"
     #endif
-
 #endif
 
 
@@ -109,7 +107,7 @@ typedef enum    version_e
 {
     V32 = 0,
     V33 = 1,
-    V35 = 2,
+    V36 = 2,
 }               version_t;
 
 /*

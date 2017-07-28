@@ -56,24 +56,19 @@ u32 loadNTRBin(void)
     u32                 ret;
     char                path[0x100];
 
-    static const char   *ntrVersionStrings[4] =
-    {
-        "ntr_3_2.bin",
-        "ntr_3_3.bin",
-        "ntr_3_5.bin",
-        "ntr_3_5u.bin"
-    };
+
+    extern const char   *outNtrVersionStrings[4];
 
     if (bnConfig->versionToLaunch == V32)
         strJoin(path, "/", "ntr.bin");
     else if (bnConfig->isMode3 && !bnConfig->isNew3DS)
-        strJoin(path, bnConfig->config->binariesPath + 5, ntrVersionStrings[3]);
+        strJoin(path, bnConfig->config->binariesPath + 5, outNtrVersionStrings[3]);
     else
-        strJoin(path, bnConfig->config->binariesPath + 5, ntrVersionStrings[bnConfig->versionToLaunch]);
+        strJoin(path, bnConfig->config->binariesPath + 5, outNtrVersionStrings[bnConfig->versionToLaunch]);
 
-    if (bnConfig->versionToLaunch == V35)
+    if (bnConfig->versionToLaunch == V36)
     {
-        strJoin(ntrConfig->path, bnConfig->config->binariesPath + 5, ntrVersionStrings[bnConfig->versionToLaunch]);
+        strJoin(ntrConfig->path, bnConfig->config->binariesPath + 5, outNtrVersionStrings[bnConfig->versionToLaunch]);
     #if EXTENDEDMODE
         ntrConfig->memorymode = 3;
     #else

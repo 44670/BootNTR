@@ -5,8 +5,8 @@ static ntrConfig_t      g_ntrConfig = { 0 };
 bootNtrConfig_t         *bnConfig;
 ntrConfig_t             *ntrConfig;
 
-static const char   *configPath = "/Nintendo 3DS/EBNTR/config";
-static const char   *configDir = "/Nintendo 3DS/EBNTR/";
+static const char   *configPath = "/3ds/BootNTRSelector/config";
+static const char   *configDir = "/3ds/BootNTRSelector/";
 
 bool    checkPath(void)
 {
@@ -107,7 +107,7 @@ void    resetConfig(void)
     strJoin(path, config->binariesPath + 5, "ntr_3_3.bin");
     remove(path);
     memset(path, 0, 0x100);
-    strJoin(path, config->binariesPath + 5, "ntr_3_5.bin");
+    strJoin(path, config->binariesPath + 5, "ntr_3_6.bin");
     remove(path);
     
 exit:
@@ -146,13 +146,18 @@ void    configInit(void)
         if (!saveConfig())
             newAppTop(DEFAULT_COLOR, 0, "A problem occured while saving the settings.");
         if (g_bnConfig.isMode3)
-            g_bnConfig.versionToLaunch = V35;
+            g_bnConfig.versionToLaunch = V36;
     }
     else
     {
 
         time_t current = time(NULL);
-        time_t last = g_bnConfig.isMode3 ? config->lastUpdateTime3 : config->lastUpdateTime;
+        time_t last;
+        
+        if (envIsHomebrew())
+            last = config->lastUpdateTime3dsx;
+        else
+            last = g_bnConfig.isMode3 ? config->lastUpdateTime3 : config->lastUpdateTime;
 
         if (current - last >= SECONDS_IN_WEEK)            
             bnConfig->checkForUpdate = true;
@@ -162,13 +167,13 @@ void    configInit(void)
 
     if (g_bnConfig.isMode3)
     {
-        bnConfig->versionToLaunch = V35;  
+        bnConfig->versionToLaunch = V36;  
     }
     else
     {
         if (config->flags & LV32) bnConfig->versionToLaunch = V32;
         else if (config->flags & LV33) bnConfig->versionToLaunch = V33;
-        else if (config->flags & LV35) bnConfig->versionToLaunch = V35;        
+        else if (config->flags & LV36) bnConfig->versionToLaunch = V36;        
     }
 error:
     return;
@@ -186,7 +191,7 @@ void    configExit(void)
     {
         if (version == V32) flags = LV32;
         else if (version == V33) flags = LV33;
-        else if (version == V35) flags = LV35;
+        else if (version == V36) flags = LV36;
         else flags = 0;
         config->flags = flags;        
     }

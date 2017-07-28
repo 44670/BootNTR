@@ -5,7 +5,7 @@
 
 extern bootNtrConfig_t  *bnConfig;
 static const char       *rootPath = "sdmc:/";
-static const char       *hblPath = "sdmc:/3ds/ntr/";
+static const char       *hblPath = "sdmc:/3ds/BootNTRSelector/";
 static bool             pathError = false;
 static char             *p_globalPath;
 static char             *p_pluginPath;
@@ -317,6 +317,7 @@ void secondSettings(void)
 static void    setFiles(void)
 {
     int     ret;
+
     if (!fileExists(bnConfig->config->binariesPath + 5))
     {
         newAppTop(COLOR_BLANK, SKINNY, "%s, doesn't exist", bnConfig->config->binariesPath);
@@ -371,26 +372,26 @@ static void    setFiles(void)
 
     newAppTop(COLOR_BLANK, SKINNY, "Setting up 3.5...");
     updateUI();
-    ret = loadAndPatch(V35);
+    ret = loadAndPatch(V36);
     if (!bnConfig->isDebug)
         removeAppTop();
     if (ret)
-        newAppTop(COLOR_SALMON, SKINNY, "Setting up 3.5... Error.");
+        newAppTop(COLOR_SALMON, SKINNY, "Setting up 3.6... Error.");
     else
-        newAppTop(COLOR_LIMEGREEN, SKINNY, "Setting up 3.5... Done.");
+        newAppTop(COLOR_LIMEGREEN, SKINNY, "Setting up 3.6... Done.");
     updateUI();
 
     if (!bnConfig->isNew3DS)
     {
-        newAppTop(COLOR_BLANK, SKINNY, "Setting up 3.5 unpatched...");
+        newAppTop(COLOR_BLANK, SKINNY, "Setting up 3.6 unpatched...");
         updateUI();
-        ret = loadAndPatch(V35);
+        ret = loadAndPatch(V36);
         if (!bnConfig->isDebug)
             removeAppTop();
         if (ret)
-            newAppTop(COLOR_SALMON, SKINNY, "Setting up 3.5 unpatched... Error.");
+            newAppTop(COLOR_SALMON, SKINNY, "Setting up 3.6 unpatched... Error.");
         else
-            newAppTop(COLOR_LIMEGREEN, SKINNY, "Setting up 3.5... Done.");
+            newAppTop(COLOR_LIMEGREEN, SKINNY, "Setting up 3.6... Done.");
         updateUI();
     }
 

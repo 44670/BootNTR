@@ -42,7 +42,7 @@ LIBRARY_DIRS := $(PORTLIBS) $(CTRULIB)
 LIBRARIES := citro3d ctru png z m
 
 VERSION_MAJOR := 2
-VERSION_MINOR := 8
+VERSION_MINOR := 9
 VERSION_MICRO := 0
 
 
@@ -135,8 +135,8 @@ FONZD: cleanupdater
 PABLOMK7: cleanupdater 
 	make PABLOMK7=1
 
-FONZDM3: cleanupdater 
+FONZDM3: clean 
 	make FONZD=1 EXTENDEDMODE=1
 
-PABLOMK7M3: cleanupdater 
+PABLOMK7M3: clean 
 	make PABLOMK7=1 EXTENDEDMODE=1

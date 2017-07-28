@@ -59,12 +59,12 @@ static const char *ntrVersionStrings[4] =
     "ntr.n3ds.bin"
 };
 
-static const char *outNtrVersionStrings[4] =
+const char *outNtrVersionStrings[4] =
 {
     "ntr_3_2.bin",
     "ntr_3_3.bin",
-    "ntr_3_5.bin",
-    "ntr_3_5u.bin"
+    "ntr_3_6.bin",
+    "ntr_3_6u.bin"
 };
 
 static void patchBinary(u8 *mem, int size)
@@ -136,7 +136,7 @@ Result  loadAndPatch(version_t version)
     binPath = bnConfig->config->binariesPath;
     plgPath = bnConfig->config->pluginPath; 
 
-    if (version == V35 && isNew3DS)
+    if (version == V36 && isNew3DS)
         strJoin(inPath, "romfs:/", ntrVersionStrings[version + 1]);
     else
         strJoin(inPath, "romfs:/", ntrVersionStrings[version]);        
@@ -149,13 +149,13 @@ Result  loadAndPatch(version_t version)
     {
         strJoin(fixedPath[PLUGIN], plgPath, fixedName[PLUGIN]);
 
-        if (version != V35 || !unpatched)
+        if (version != V36 || !unpatched)
         {
             strJoin(outPath, binPath, outNtrVersionStrings[version]);
             strJoin(fixedPath[BINARY], binPath, outNtrVersionStrings[version]);
             strJoin(fixedPath[DEBUG], binPath, outNtrVersionStrings[version]);
         }
-        else if (version == V35 && unpatched)
+        else if (version == V36 && unpatched)
         {
             strJoin(outPath, binPath, outNtrVersionStrings[3]);
             strJoin(fixedPath[BINARY], binPath, outNtrVersionStrings[3]);
@@ -194,7 +194,7 @@ Result  loadAndPatch(version_t version)
     fclose(ntr);
     free(mem);
 
-    if (version == V35)
+    if (version == V36)
         unpatched++;
 
     return(0);

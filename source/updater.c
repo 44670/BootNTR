@@ -131,17 +131,38 @@ static Result downloadUpdate(u32 handle, u32 *bytesRead, void *buffer, u32 size)
 
 static Result startInstall(u32 *handle)
 {
-    return (AM_StartCiaInstall(MEDIATYPE_SD, handle));
+    if (!envIsHomebrew())
+        return (AM_StartCiaInstall(MEDIATYPE_SD, handle));
+
+    FS_Path archivePath = fsMakePath(PATH_EMPTY, NULL);
+    FS_Path tempFile = fsMakePath(PATH_ASCII, "/3ds/BootNTRSelector/BootNTRSelector_update");
+
+    return (FSUSER_OpenFileDirectly(handle, ARCHIVE_SDMC, archivePath, tempFile, 7, FS_WRITE_UPDATE_TIME));
 }
 
 static Result cancelInstall(u32 handle)
 {
-    return (AM_CancelCIAInstall(handle));
+    if (!envIsHomebrew())
+        return (AM_CancelCIAInstall(handle));
+
+    FS_Path tempFile = fsMakePath(PATH_ASCII, "/3ds/BootNTRSelector/BootNTRSelector_update");
+
+    FSFILE_Close(handle);
+    return (FSUSER_DeleteFile(ARCHIVE_SDMC, tempFile));
 }
 
 static Result endInstall(u32 handle)
 {
-    return (AM_FinishCiaInstall(handle));
+    if (!envIsHomebrew())
+        return (AM_FinishCiaInstall(handle));
+
+    FS_Path tempFile = fsMakePath(PATH_ASCII, "/3ds/BootNTRSelector/BootNTRSelector_update");
+    FS_Path finalFile = fsMakePath(PATH_ASCII, "/3ds/BootNTRSelector/BootNTRSelector.3dsx");
+    
+    FSFILE_Close(handle);
+    FSUSER_DeleteFile(ARCHIVE_SDMC, finalFile);
+    return (FSUSER_RenameFile(ARCHIVE_SDMC, tempFile, ARCHIVE_SDMC, finalFile));
+
 }
 
 static Result installUpdate(void)
@@ -278,7 +299,17 @@ static Result parseResponseData(const char *jsonText, u32 size, bool *hasUpdate)
                             }
                             if (assetName != NULL && assetUrl != NULL)
                             {
-                                if (strncmp(assetName->u.string.ptr, CIA_VERSION, assetName->u.string.length) == 0)
+                                // If the current app is the 3dsx search for the 3dsx
+                                if (envIsHomebrew())
+                                {
+                                    if (strncmp(assetName->u.string.ptr, "BootNTRSelector.3dsx", assetName->u.string.length) == 0)
+                                    {
+                                        url = assetUrl->u.string.ptr;
+                                        break;
+                                    }
+                                }
+                                // Else search for the cia of the current version (banner and mode3)
+                                else if (strncmp(assetName->u.string.ptr, CIA_VERSION, assetName->u.string.length) == 0)
                                 {
                                     url = assetUrl->u.string.ptr;
                                     break;
@@ -366,11 +397,13 @@ bool launchUpdater(void)
     update = false;
     updateData = (updateData_t *)calloc(1, sizeof(updateData_t));
     if (!updateData) goto error;
-#if EXTENDEDMODE
-    bnConfig->config->lastUpdateTime3 = time(NULL);
-#else
-    bnConfig->config->lastUpdateTime = time(NULL);
-#endif
+    if (envIsHomebrew())
+        bnConfig->config->lastUpdateTime3dsx = time(NULL);
+    else if (bnConfig->isMode3)
+        bnConfig->config->lastUpdateTime3 = time(NULL);
+    else
+        bnConfig->config->lastUpdateTime = time(NULL);
+
     initUpdater();
     newAppTop(COLOR_BLANK, NEWLINE, "");
     newAppTop(COLOR_BLANK, 0, "Checking for update");
