@@ -18,7 +18,7 @@ DEBUG = 0
 
 ifeq ($(EXTENDEDMODE), 1)
     ifeq ($(FONZD), 1)
-	    NAME := BootNTRSelector-Mode-3-FONZD-Banner
+	    NAME := BootNTRSelector-Mode3-FONZD-Banner
 	else
 	    NAME := BootNTRSelector-Mode3-PabloMK7-Banner
 	endif
