@@ -78,6 +78,7 @@ error:
 
 u32     patchRemoteProcess(u32 pid, u32 addr, u8 *buf, u32 len)
 {
+    if (addr == 0) return 0;
     u32     hProcess;
     u32     ret;
 
