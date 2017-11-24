@@ -244,6 +244,12 @@ Result	bnInitParamsByFirmware(void)
         else 
             goto unsupported;
 	}
+
+	s64 out;
+	svcGetSystemInfo(&out, 0x1000, 0);
+	u8 major = GET_VERSION_MAJOR((u32)out);
+	if (major >= 9) bnConfig->SMPatchAddr = 0;
+
 	bnConfig->requireKernelHax = 0;
     return (0);
 unsupported:
