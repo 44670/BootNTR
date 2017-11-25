@@ -246,7 +246,7 @@ Result	bnInitParamsByFirmware(void)
 	}
 
 	s64 out;
-	svcGetSystemInfo(&out, 0x1000, 0);
+	svcGetSystemInfo(&out, 0x10000, 0);
 	u8 major = GET_VERSION_MAJOR((u32)out);
 	if (major >= 9) bnConfig->SMPatchAddr = 0;
 
