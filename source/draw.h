@@ -13,49 +13,49 @@
 
 //#define CITRA //Citra doesn't like the setTextColor
 
-#define CLEAR_COLOR			0x68B0D8FF
-#define SCREEN_POS(x, y)	(screenPos_t)((x << 16) | (y))
-#define POS_X(screenPos)	(float)(screenPos >> 16)
-#define POS_Y(screenPos)	(float)(screenPos & 0xFFFF)
+#define CLEAR_COLOR         0x68B0D8FF
+#define SCREEN_POS(x, y)    (screenPos_t)((x << 16) | (y))
+#define POS_X(screenPos)    (float)(screenPos >> 16)
+#define POS_Y(screenPos)    (float)(screenPos & 0xFFFF)
 
 // Used to transfer the final rendered display to the framebuffer
 #define DISPLAY_TRANSFER_FLAGS \
-	(GX_TRANSFER_FLIP_VERT(0) | GX_TRANSFER_OUT_TILED(0) | GX_TRANSFER_RAW_COPY(0) | \
-	GX_TRANSFER_IN_FORMAT(GX_TRANSFER_FMT_RGBA8) | GX_TRANSFER_OUT_FORMAT(GX_TRANSFER_FMT_RGB8) | \
-	GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_NO))
+    (GX_TRANSFER_FLIP_VERT(0) | GX_TRANSFER_OUT_TILED(0) | GX_TRANSFER_RAW_COPY(0) | \
+    GX_TRANSFER_IN_FORMAT(GX_TRANSFER_FMT_RGBA8) | GX_TRANSFER_OUT_FORMAT(GX_TRANSFER_FMT_RGB8) | \
+    GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_NO))
 
 // Used to convert textures to 3DS tiled format
 // Note: vertical flip flag set so 0,0 is top left of texture
 #define TEXTURE_TRANSFER_FLAGS \
-	(GX_TRANSFER_FLIP_VERT(1) | GX_TRANSFER_OUT_TILED(1) | GX_TRANSFER_RAW_COPY(0) | \
-	GX_TRANSFER_IN_FORMAT(GX_TRANSFER_FMT_RGBA8) | GX_TRANSFER_OUT_FORMAT(GX_TRANSFER_FMT_RGBA8) | \
-	GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_NO))
+    (GX_TRANSFER_FLIP_VERT(1) | GX_TRANSFER_OUT_TILED(1) | GX_TRANSFER_RAW_COPY(0) | \
+    GX_TRANSFER_IN_FORMAT(GX_TRANSFER_FMT_RGBA8) | GX_TRANSFER_OUT_FORMAT(GX_TRANSFER_FMT_RGBA8) | \
+    GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_NO))
 
 typedef struct
 {
-	float	position[3];
-	float	texcoord[2];
-}			textVertex_s;   
+    float   position[3];
+    float   texcoord[2];
+}           textVertex_s;   
 
-typedef struct	drawTarget_s    
+typedef struct  drawTarget_s    
 {
-	C3D_RenderTarget	*target;
-	C3D_Mtx				projection;
-}				drawTarget_t;
+    C3D_RenderTarget    *target;
+    C3D_Mtx             projection;
+}               drawTarget_t;
 typedef struct
 {
-	float	posX;
-	float	posY;
-}			cursor_t;
+    float   posX;
+    float   posY;
+}           cursor_t;
 
-typedef struct	sprite_s
+typedef struct  sprite_s
 {
-	C3D_Tex			texture;
-	float			posX;
-	float			posY;
-	float			height;
-	float			width;
-}				sprite_t;
+    C3D_Tex         texture;
+    float           posX;
+    float           posY;
+    float           height;
+    float           width;
+}               sprite_t;
 
 typedef u32 screenPos_t;
 
@@ -76,19 +76,19 @@ void        deleteSprite(sprite_t *sprite);
 void        setSpritePos(sprite_t *sprite, float posX, float posY);
 void        drawSprite(sprite_t *sprite);
 
-#define COLOR_BLUE	        0xFFFF0000
-#define COLOR_RED	        0xFF0000FF
-#define COLOR_GREEN	        0xFF00FF00
-#define COLOR_BLANK	        0xFFFFFFFF
-#define COLOR_BLACK	        0xFF000000
-#define COLOR_GREY	        0xFF989898
+#define COLOR_BLUE          0xFFFF0000
+#define COLOR_RED           0xFF0000FF
+#define COLOR_GREEN         0xFF00FF00
+#define COLOR_BLANK         0xFFFFFFFF
+#define COLOR_BLACK         0xFF000000
+#define COLOR_GREY          0xFF989898
 #define COLOR_ORANGE        0xFF00A5FF
 #define COLOR_LIMEGREEN     0xFF32CD32
 #define COLOR_SALMON        0xFF7280FA
 #define COLOR_SILVER        0xFFC0C0C0
 #define COLOR_CORAL         0xFF507FFF
 
-#define COLOR_DARKGREEN	    0xFF006400
+#define COLOR_DARKGREEN     0xFF006400
 
 
 

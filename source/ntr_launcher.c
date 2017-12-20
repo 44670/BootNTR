@@ -1,13 +1,13 @@
 #include "main.h"
 #include "config.h"
 
-extern ntrConfig_t		*ntrConfig;
-extern bootNtrConfig_t	*bnConfig;
-extern u8				*tmpBuffer;
+extern ntrConfig_t      *ntrConfig;
+extern bootNtrConfig_t  *bnConfig;
+extern u8               *tmpBuffer;
 extern bool              g_exit;
-extern char				*g_primary_error;
-extern char				*g_secondary_error;
-extern char				*g_third_error;
+extern char             *g_primary_error;
+extern char             *g_secondary_error;
+extern char             *g_third_error;
 
 int         isNTRAlreadyLaunched(void)
 {
@@ -28,23 +28,31 @@ error:
     return (RESULT_ERROR);
 }
 
-Result		bnPatchAccessCheck(void)
+Result      bnPatchAccessCheck(void)
 {
-	Result	ret;
-	u8		smPatchBuf[] = { 0x02, 0x00, 0xA0, 0xE3, 0x1E, 0xFF, 0x2F, 0xE1 };
-	u32		fsPatchValue = 0x47702001;
+    s64     out;
+    Result  ret;
+    u8      smPatchBuf[] = { 0x02, 0x00, 0xA0, 0xE3, 0x1E, 0xFF, 0x2F, 0xE1 };
+    u32     fsPatchValue = 0x47702001;
 
-	svcBackdoor(backdoorHandler);
-	// do a dma copy to get the finish state value on current console
-	ret = copyRemoteMemory(CURRENT_PROCESS_HANDLE, (u32)tmpBuffer, CURRENT_PROCESS_HANDLE, (u32)tmpBuffer + 0x10, 0x10);
-	check_sec(ret, REMOTECOPY_FAILURE);
-	ret = patchRemoteProcess(bnConfig->SMPid, bnConfig->SMPatchAddr, smPatchBuf, 8);
-	check_sec(ret, SMPATCH_FAILURE);
-	ret = patchRemoteProcess(bnConfig->FSPid, bnConfig->FSPatchAddr, (u8 *)&fsPatchValue, 4);
-	check_sec(ret, FSPATCH_FAILURE);
-	return (0);
+    // Patch firm
+    svcBackdoor(backdoorHandler);
+
+    // If cfw is Luma3DS 9 and higher, skip services patchs
+    if (R_SUCCEEDED(svcGetSystemInfo(&out, 0x10000, 0))
+        && GET_VERSION_MAJOR((u32)out) >= 9)
+        return (0);
+
+    // Do a dma copy to get the finish state value on current console
+    ret = copyRemoteMemory(CURRENT_PROCESS_HANDLE, (u32)tmpBuffer, CURRENT_PROCESS_HANDLE, (u32)tmpBuffer + 0x10, 0x10);
+    check_sec(ret, REMOTECOPY_FAILURE);
+    ret = patchRemoteProcess(bnConfig->SMPid, bnConfig->SMPatchAddr, smPatchBuf, 8);
+    check_sec(ret, SMPATCH_FAILURE);
+    ret = patchRemoteProcess(bnConfig->FSPid, bnConfig->FSPatchAddr, (u8 *)&fsPatchValue, 4);
+    check_sec(ret, FSPATCH_FAILURE);
+    return (0);
 error:
-	return (RESULT_ERROR);
+    return (RESULT_ERROR);
 }
 
 u32 loadNTRBin(void)
@@ -66,9 +74,11 @@ u32 loadNTRBin(void)
     else
         strJoin(path, bnConfig->config->binariesPath + 5, outNtrVersionStrings[bnConfig->versionToLaunch]);
 
+    if (bnConfig->versionToLaunch == V32)
+        strcpy(ntrConfig->path, path);
     if (bnConfig->versionToLaunch == V36)
     {
-        strJoin(ntrConfig->path, bnConfig->config->binariesPath + 5, outNtrVersionStrings[bnConfig->versionToLaunch]);
+        strcpy(ntrConfig->path, path);
     #if EXTENDEDMODE
         ntrConfig->memorymode = 3;
     #else
@@ -97,54 +107,56 @@ u32 loadNTRBin(void)
     u8 *temp = (u8 *)calloc(1, alignedSize);
     fread(temp, size, 1, ntr);
     fclose(ntr);
-    svcFlushProcessDataCache(getCurrentProcessHandle(), temp, size);
+    svcFlushProcessDataCache(getCurrentProcessHandle(), temp, alignedSize);
 
-    copyRemoteMemory(getCurrentProcessHandle(), (u32)mem, getCurrentProcessHandle(), (u32)temp, size);
-    copyRemoteMemory(getCurrentProcessHandle(), (u32)mem + alignedSize, getCurrentProcessHandle(), (u32)temp, size);
+    svcInvalidateProcessDataCache(getCurrentProcessHandle(), mem, alignedSize * 2);
+    memcpy(mem, temp, size);
+    memcpy(mem + alignedSize, temp, size);
+    svcFlushProcessDataCache(getCurrentProcessHandle(), mem, alignedSize *2);
     free(temp);
     return ((u32)mem);
 error:
     return (RESULT_ERROR);
 }
 
-Result		bnLoadAndExecuteNTR(void)
+Result      bnLoadAndExecuteNTR(void)
 {
-	u32		outAddr;
-	u32		*bootArgs;
+    u32     outAddr;
+    u32     *bootArgs;
 
     outAddr = loadNTRBin();
     if (outAddr == RESULT_ERROR) 
-	{
-	        goto error;
-	}
-	bootArgs = (u32 *)(outAddr + 4);
-	bootArgs[0] = 0;
-	bootArgs[1] = 0xb00d;
-	bootArgs[2] = (u32)ntrConfig;
-	((funcType)(outAddr))();
-	return (0);
+    {
+            goto error;
+    }
+    bootArgs = (u32 *)(outAddr + 4);
+    bootArgs[0] = 0;
+    bootArgs[1] = 0xb00d;
+    bootArgs[2] = (u32)ntrConfig;
+    ((funcType)(outAddr))();
+    return (0);
 error:
-	return (RESULT_ERROR);
+    return (RESULT_ERROR);
 }
 void        showDbg(char *str)
 {
      newAppTop(DEFAULT_COLOR, TINY | SKINNY, str);
 }
 
-Result		bnBootNTR(void)
+Result      bnBootNTR(void)
 {
-	Result  ret;
+    Result  ret;
     u8      *linearAddress;
 
     linearAddress = NULL;
     
     // Set firm params
     check_prim(bnInitParamsByFirmware(), UNKNOWN_FIRM);
-	
+    
     // Alloc temp buffer
     linearAddress = (u8 *)linearMemAlign(TMPBUFFER_SIZE, 0x1000);
     tmpBuffer = linearAddress;
-	check_prim(!tmpBuffer, LINEARMEMALIGN_FAILURE);
+    check_prim(!tmpBuffer, LINEARMEMALIGN_FAILURE);
     rtCheckRemoteMemoryRegionSafeForWrite(getCurrentProcessHandle(), (u32)tmpBuffer, TMPBUFFER_SIZE);
     ret = isNTRAlreadyLaunched();
     check_prim(ret, NTR_ALREADY_LAUNCHED);
@@ -158,15 +170,17 @@ Result		bnBootNTR(void)
     // Free temp buffer
     linearFree(linearAddress);
 
-    if (bnConfig->isDebug)
+    // Show debug logs from NTR if X is hold
+    hidScanInput();
+    if (bnConfig->isDebug || (hidKeysDown() | hidKeysHeld()) & KEY_X)
         ntrConfig->ShowDbgFunc = (u32)showDbg;
     // Load NTR
-	ret = bnLoadAndExecuteNTR();
-	check_third(ret, LOAD_FAILED);
-	return (ret);
+    ret = bnLoadAndExecuteNTR();
+    check_third(ret, LOAD_FAILED);
+    return (ret);
 error:
     if (linearAddress) linearFree(linearAddress);
-	return (RESULT_ERROR);
+    return (RESULT_ERROR);
 }
 
 static char *dumpString[] =
@@ -223,7 +237,7 @@ void        printDumpLog(char *str)
 
 void        launchNTRDumpMode(void)
 {
-    u32		isNew3DS = 0;
+    u32     isNew3DS = 0;
     char    buffer[0x20];
 
     APT_CheckNew3DS((bool *)&isNew3DS);

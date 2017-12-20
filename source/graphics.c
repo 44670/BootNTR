@@ -2,10 +2,10 @@
 #include "drawableObject.h"
 #include "button.h"
 
-sprite_t	     *bottomSprite;
-sprite_t	     *topSprite;
+sprite_t         *bottomSprite;
+sprite_t         *topSprite;
 
-static sprite_t	        *botStatusSprite;
+static sprite_t         *botStatusSprite;
 static sprite_t         *topInfoSprite;
 static drawableScreen_t *botScreen;
 static drawableScreen_t *topScreen;

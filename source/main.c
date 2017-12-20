@@ -5,11 +5,11 @@
 #include <time.h>
 
 extern bootNtrConfig_t *bnConfig;
-u8				  *tmpBuffer;
-char			  *g_primary_error = NULL;
-char			  *g_secondary_error = NULL;
-char			  *g_third_error = NULL;
-bool			  g_exit = false;
+u8                *tmpBuffer;
+char              *g_primary_error = NULL;
+char              *g_secondary_error = NULL;
+char              *g_third_error = NULL;
+bool              g_exit = false;
 
 int main(void)
 {
@@ -17,9 +17,9 @@ int main(void)
     u32         kernelVersion;
     int         ret;
 
-	gfxInitDefault();
-	drawInit();
-	romfsInit();
+    gfxInitDefault();
+    drawInit();
+    romfsInit();
     ptmSysmInit();
 
     initUI();
@@ -88,8 +88,8 @@ int main(void)
 
         }        
     }
-	if (g_exit || ret)
-	{
+    if (g_exit || ret)
+    {
         newAppStatus(DEFAULT_COLOR, CENTER | BOLD | NEWLINE, "Load failed !");
         if (!g_third_error) newAppStatus(DEFAULT_COLOR, CENTER | BOLD, "\uE00A");
         if (g_primary_error != NULL)
@@ -123,7 +123,7 @@ waitForExit:
             if (keys)
                 break;
         }
-	}
+    }
 exit:
     configExit();
     exitMainMenu();
@@ -131,11 +131,11 @@ exit:
     acExit();
     amExit();
     httpcExit();
-	romfsExit();
-	drawExit();
-	gfxExit();
+    romfsExit();
+    drawExit();
+    gfxExit();
     if (!g_exit)
         PTMSYSM_RebootAsync(0);
     ptmSysmExit();
-	return (0);
+    return (0);
 }

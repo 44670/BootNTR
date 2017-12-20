@@ -1,11 +1,11 @@
 #include "main.h"
 #include "config.h"
 
-extern ntrConfig_t		*ntrConfig;
+extern ntrConfig_t      *ntrConfig;
 extern bootNtrConfig_t  *bnConfig;
-extern char				*g_primary_error;
-extern char				*g_secondary_error;
-extern char				*g_third_error;
+extern char             *g_primary_error;
+extern char             *g_secondary_error;
+extern char             *g_third_error;
 
 #define RELOC_COUNT     9
 #define BASE            0x100100

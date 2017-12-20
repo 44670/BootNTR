@@ -78,7 +78,8 @@ error:
 
 u32     patchRemoteProcess(u32 pid, u32 addr, u8 *buf, u32 len)
 {
-    if (addr == 0) return 0;
+    if (!addr || !buf) return 0;
+
     u32     hProcess;
     u32     ret;
 
@@ -104,7 +105,6 @@ u32     rtGetPageOfAddress(u32 addr)
 {
     return ((addr / 0x1000) * 0x1000);
 }
-
 
 u32     rtCheckRemoteMemoryRegionSafeForWrite(Handle hProcess, u32 addr, u32 size)
 {

@@ -5,55 +5,55 @@
 #define MAX_BREAKPOINT 64
 
 typedef struct _RT_LOCK {
-	vu32 value;
+    vu32 value;
 } RT_LOCK;
 
 
-#define NS_CONFIGURE_ADDR	0x06000000
+#define NS_CONFIGURE_ADDR   0x06000000
 
 typedef struct _RT_HOOK {
-	u32 model;
-	u32 isEnabled;
-	u32 funcAddr;
-	u32 bakCode[16];
-	u32 jmpCode[16];
-	u32 callCode[16];
+    u32 model;
+    u32 isEnabled;
+    u32 funcAddr;
+    u32 bakCode[16];
+    u32 jmpCode[16];
+    u32 callCode[16];
 } RT_HOOK;
 
 typedef struct _NS_BREAKPOINT {
-	u32 type;
-	u32 flag;
-	u32 addr;
-	RT_HOOK hook;
-	u32 stubCode[32];
-	u32 isEnabled;
+    u32 type;
+    u32 flag;
+    u32 addr;
+    RT_HOOK hook;
+    u32 stubCode[32];
+    u32 isEnabled;
 } NS_BREAKPOINT;
 
 
 
 typedef struct _NS_CONFIG {
-	u32 initMode;
-	u32 startupCommand;
-	u32 hSOCU;
+    u32 initMode;
+    u32 startupCommand;
+    u32 hSOCU;
 
-	u8* debugBuf; 
-	u32 debugBufSize;
-	u32 debugPtr;
-	u32 debugReady;
+    u8* debugBuf; 
+    u32 debugBufSize;
+    u32 debugPtr;
+    u32 debugReady;
 
-	RT_LOCK debugBufferLock;
+    RT_LOCK debugBufferLock;
 
-	u32 startupInfo[32];
-	u32 allowDirectScreenAccess;
-	u32 exitFlag;
+    u32 startupInfo[32];
+    u32 allowDirectScreenAccess;
+    u32 exitFlag;
 
-	u32 sharedFunc[100];
+    u32 sharedFunc[100];
 
 } NS_CONFIG;
 
 
 
-void nsDbgPrint (const char*	fmt,	...	);
+void nsDbgPrint (const char*    fmt,    ... );
 
 void rtInitLock(RT_LOCK *lock) ;
 void rtAcquireLock(RT_LOCK *lock) ;
