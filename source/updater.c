@@ -162,7 +162,6 @@ static Result endInstall(u32 handle)
     FSFILE_Close(handle);
     FSUSER_DeleteFile(ARCHIVE_SDMC, finalFile);
     return (FSUSER_RenameFile(ARCHIVE_SDMC, tempFile, ARCHIVE_SDMC, finalFile));
-
 }
 
 static Result installUpdate(void)
@@ -239,6 +238,32 @@ exit:
     return;
 }
 
+bool    CheckVersion(const char *releaseName)
+{
+    int     major = 0;
+    int     minor = 0;
+    int     revision = 0;
+    char    *next = NULL;
+
+    if (releaseName && *releaseName == 'v')
+        releaseName++;
+
+    major = strtol(releaseName, &next, 10);
+    if (next && *next == '.')
+        next++;
+    else
+        return major > APP_VERSION_MAJOR;
+
+    minor = strtol(next, &next, 10);
+    if (next && *next == '.')
+        next++;
+    else
+        return major >= APP_VERSION_MAJOR && minor > APP_VERSION_MINOR;
+
+    revision = strtol(next, NULL, 10);
+    return major >= APP_VERSION_MAJOR && minor >= APP_VERSION_MINOR && revision > APP_VERSION_REVISION;
+}
+
 static Result parseResponseData(const char *jsonText, u32 size, bool *hasUpdate)
 {
     int         i;
@@ -276,12 +301,8 @@ static Result parseResponseData(const char *jsonText, u32 size, bool *hasUpdate)
             }
             if (name != NULL && assets != NULL)
             {   
-                if (!APP_VERSION_REVISION)
-                    snprintf(versionString, sizeof(versionString), "%d.%d", APP_VERSION_MAJOR, APP_VERSION_MINOR);
-                else
-                    snprintf(versionString, sizeof(versionString), "%d.%d.%d", APP_VERSION_MAJOR, APP_VERSION_MINOR, APP_VERSION_REVISION);
-                if (strncmp(name->u.string.ptr, versionString, name->u.string.length) > 0)
-                {            
+                if (CheckVersion(name->u.string.ptr))
+                {
                     for (i = 0; i < assets->u.array.length; i++)
                     {
                         val = assets->u.array.values[i];
