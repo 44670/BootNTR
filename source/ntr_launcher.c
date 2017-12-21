@@ -38,18 +38,20 @@ Result      bnPatchAccessCheck(void)
     // Patch firm
     svcBackdoor(backdoorHandler);
 
-    // If cfw is Luma3DS 9 and higher, skip services patchs
+    // Do a dma copy to get the finish state value on current console
+    ret = copyRemoteMemory(CURRENT_PROCESS_HANDLE, (u32)tmpBuffer, CURRENT_PROCESS_HANDLE, (u32)tmpBuffer + 0x10, 0x10);
+    check_sec(ret, REMOTECOPY_FAILURE);
+
+    ret = patchRemoteProcess(bnConfig->FSPid, bnConfig->FSPatchAddr, (u8 *)&fsPatchValue, 4);
+    check_sec(ret, FSPATCH_FAILURE);
+
+    // If cfw is Luma3DS 9 and higher, skip sm patch
     if (R_SUCCEEDED(svcGetSystemInfo(&out, 0x10000, 0))
         && GET_VERSION_MAJOR((u32)out) >= 9)
         return (0);
 
-    // Do a dma copy to get the finish state value on current console
-    ret = copyRemoteMemory(CURRENT_PROCESS_HANDLE, (u32)tmpBuffer, CURRENT_PROCESS_HANDLE, (u32)tmpBuffer + 0x10, 0x10);
-    check_sec(ret, REMOTECOPY_FAILURE);
     ret = patchRemoteProcess(bnConfig->SMPid, bnConfig->SMPatchAddr, smPatchBuf, 8);
     check_sec(ret, SMPATCH_FAILURE);
-    ret = patchRemoteProcess(bnConfig->FSPid, bnConfig->FSPatchAddr, (u8 *)&fsPatchValue, 4);
-    check_sec(ret, FSPATCH_FAILURE);
     return (0);
 error:
     return (RESULT_ERROR);
