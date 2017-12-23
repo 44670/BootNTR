@@ -25,15 +25,15 @@ enum
 
 static const char  *originalPath[RELOC_COUNT] =
 {
-        "/ntr.bin",
-        "/plugin/%s",
-        "/debug.flag",
-        "/axiwram.dmp",
-        "/pid0.dmp",
-        "/pid2.dmp",
-        "/pid3.dmp",
-        "/pidf.dmp",
-        "/arm11.bin"
+    "/ntr.bin",
+    "/plugin/%s",
+    "/debug.flag",
+    "/axiwram.dmp",
+    "/pid0.dmp",
+    "/pid2.dmp",
+    "/pid3.dmp",
+    "/pidf.dmp",
+    "/arm11.bin"
 };
 
 static const char *fixedName[RELOC_COUNT] =
@@ -59,12 +59,11 @@ static const char *ntrVersionStrings[4] =
     "ntr.n3ds.bin"
 };
 
-const char *outNtrVersionStrings[4] =
+const char *outNtrVersionStrings[3] =
 {
     "ntr_3_2.bin",
     "ntr_3_3.bin",
-    "ntr_3_6.bin",
-    "ntr_3_6u.bin"
+    "ntr_3_6.bin"
 };
 
 static void patchBinary(u8 *mem, int size)
@@ -77,10 +76,14 @@ static void patchBinary(u8 *mem, int size)
     u32     patchOffset;
     u32     *patchRel;
     u32     strlength;
-    
+
     expand = 0;
     for (i = 0; i < RELOC_COUNT; i++)
     {
+        // Skip auto enable debugger on O3DS
+        if (i == 2 && !bnConfig->isNew3DS)
+            continue;
+
         str = (char *)originalPath[i];
         strlength = strlen(str);
         offset = memfind(mem, size, str, strlength);
@@ -102,7 +105,7 @@ static void patchBinary(u8 *mem, int size)
             if (bnConfig->isDebug)
             {
                 newAppTop(DEFAULT_COLOR, TINY, "Pointer for \"%s\"", str);
-                newAppTop(DEFAULT_COLOR, TINY, "is missing!Aborting.\n");                
+                newAppTop(DEFAULT_COLOR, TINY, "is missing!Aborting.\n");
             }
             break;
         }
@@ -115,14 +118,12 @@ static void patchBinary(u8 *mem, int size)
 
         patchRel = (u32 *)(&mem[(u32)patchMe]);
         // Rebase new pointer
-        *patchRel = patchOffset + BASE;           
+        *patchRel = patchOffset + BASE;
     }
 }
 
 Result  loadAndPatch(version_t version)
 {
-    static  int     unpatched = 0;
-
     FILE    *ntr;
     int     size;
     int     newSize;
@@ -130,17 +131,14 @@ Result  loadAndPatch(version_t version)
     char    *plgPath;
     char    inPath[0x100];
     char    outPath[0x100];
-    u8      *mem;    
+    u8      *mem;
     bool    isNew3DS = bnConfig->isNew3DS;
 
     binPath = bnConfig->config->binariesPath;
-    plgPath = bnConfig->config->pluginPath; 
+    plgPath = bnConfig->config->pluginPath;
 
-    if (version == V36 && isNew3DS)
-        strJoin(inPath, "romfs:/", ntrVersionStrings[version + 1]);
-    else
-        strJoin(inPath, "romfs:/", ntrVersionStrings[version]);        
-    
+    if (version == V36)
+        strJoin(inPath, "romfs:/", ntrVersionStrings[version + isNew3DS]);
 
     if (!strncmp("sdmc:", binPath, 5)) binPath += 5;
     if (!strncmp("sdmc:", plgPath, 5)) plgPath += 5;
@@ -148,21 +146,9 @@ Result  loadAndPatch(version_t version)
     if (version != V32)
     {
         strJoin(fixedPath[PLUGIN], plgPath, fixedName[PLUGIN]);
-
-        if (version != V36 || !unpatched)
-        {
-            strJoin(outPath, binPath, outNtrVersionStrings[version]);
-            strJoin(fixedPath[BINARY], binPath, outNtrVersionStrings[version]);
-            strJoin(fixedPath[DEBUG], binPath, outNtrVersionStrings[version]);
-        }
-        else if (version == V36 && unpatched)
-        {
-            strJoin(outPath, binPath, outNtrVersionStrings[3]);
-            strJoin(fixedPath[BINARY], binPath, outNtrVersionStrings[3]);
-            strJoin(fixedPath[DEBUG], binPath, originalPath[DEBUG]);
-        }
-        else
-            goto error;
+        strJoin(outPath, binPath, outNtrVersionStrings[version]);
+        strJoin(fixedPath[BINARY], binPath, outNtrVersionStrings[version]);
+        strJoin(fixedPath[DEBUG], binPath, outNtrVersionStrings[version]);
         strJoin(fixedPath[KERNEL], binPath, fixedName[KERNEL]);
         strJoin(fixedPath[FS], binPath, fixedName[FS]);
         strJoin(fixedPath[PM], binPath, fixedName[PM]);
@@ -170,6 +156,7 @@ Result  loadAndPatch(version_t version)
         strJoin(fixedPath[HOMEMENU], binPath, fixedName[HOMEMENU]);
         strJoin(fixedPath[ARM], binPath, fixedName[ARM]);
     }
+    // 3.2
     else
     {
         strcpy(outPath, originalPath[BINARY]);
@@ -193,9 +180,6 @@ Result  loadAndPatch(version_t version)
     fwrite(mem, newSize, 1, ntr);
     fclose(ntr);
     free(mem);
-
-    if (version == V36)
-        unpatched++;
 
     return(0);
 error:

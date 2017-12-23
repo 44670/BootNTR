@@ -13,7 +13,6 @@
 #include "mysvcs.h"
 
 
-
 #if EXTENDEDMODE
     
     #define TIMER               1

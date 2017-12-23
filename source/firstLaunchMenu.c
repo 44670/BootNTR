@@ -79,7 +79,7 @@ void    initSettingsMenu(void)
     newSpriteFromPNG(&pressBackSprite, "romfs:/sprites/textSprites/pressBBack.png");
     newSpriteFromPNG(&desiredChoiceSprite, "romfs:/sprites/textSprites/touchDesiredChoice.png");
     setSpritePos(desiredChoiceSprite, 34.0f, 6.0f);
-    setSpritePos(pressBackSprite, 180.0f, 216.0f);    
+    setSpritePos(pressBackSprite, 180.0f, 216.0f);
     changeBottomFooter(pressBackSprite);
     changeBottomHeader(desiredChoiceSprite);
 
@@ -237,7 +237,7 @@ again:
                 if (strncmp("sdmc:/plugin", p_pluginPath, 12))
                     showWarning();
                 return;
-            }                
+            }
             goto again;
         }
         else if (keys & KEY_B)
@@ -345,7 +345,7 @@ static void    setFiles(void)
             newAppTop(COLOR_LIMEGREEN, SKINNY, "Creating directory: Success");
         updateUI();
     }
-        
+
     newAppTop(COLOR_BLANK, NEWLINE | SKINNY, "Setting up files...");
 
     newAppTop(COLOR_BLANK, SKINNY, "Setting up 3.2...");
@@ -381,6 +381,7 @@ static void    setFiles(void)
         newAppTop(COLOR_LIMEGREEN, SKINNY, "Setting up 3.6... Done.");
     updateUI();
 
+    /*
     if (!bnConfig->isNew3DS)
     {
         newAppTop(COLOR_BLANK, SKINNY, "Setting up 3.6 unpatched...");
@@ -393,7 +394,7 @@ static void    setFiles(void)
         else
             newAppTop(COLOR_LIMEGREEN, SKINNY, "Setting up 3.6... Done.");
         updateUI();
-    }
+    } */
 
 
     newAppTop(COLOR_LIMEGREEN, 0, "Finished");
@@ -403,7 +404,7 @@ static void    setFiles(void)
 }
 
 void firstLaunch(void)
-{ 
+{
     u32         status;
 
     updateUI();

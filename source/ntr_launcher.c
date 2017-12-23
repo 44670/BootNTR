@@ -67,12 +67,10 @@ u32 loadNTRBin(void)
     char                path[0x100];
 
 
-    extern const char   *outNtrVersionStrings[4];
+    extern const char   *outNtrVersionStrings[3];
 
     if (bnConfig->versionToLaunch == V32)
         strJoin(path, "/", "ntr.bin");
-    else if (bnConfig->isMode3 && !bnConfig->isNew3DS)
-        strJoin(path, bnConfig->config->binariesPath + 5, outNtrVersionStrings[3]);
     else
         strJoin(path, bnConfig->config->binariesPath + 5, outNtrVersionStrings[bnConfig->versionToLaunch]);
 
