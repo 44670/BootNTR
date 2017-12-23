@@ -30,7 +30,7 @@ else
 	endif
 endif
 
-	
+
 BUILD_DIR := build
 OUTPUT_DIR := output
 INCLUDE_DIRS := $(SOURCE_DIRS) include
@@ -38,11 +38,11 @@ SOURCE_DIRS := source source/json
 
 EXTRA_OUTPUT_FILES :=
 
-LIBRARY_DIRS := $(PORTLIBS) $(CTRULIB)	
+LIBRARY_DIRS := $(PORTLIBS) $(CTRULIB)
 LIBRARIES := citro3d ctru png z m
 
 VERSION_MAJOR := 2
-VERSION_MINOR := 10
+VERSION_MINOR := 11
 VERSION_MICRO := 0
 
 
@@ -129,14 +129,14 @@ re:
 	@rm -rf $(BUILD_DIR)
 	@echo cleaned build dir
 
-FONZD: cleanupdater 	
+FONZD: cleanupdater
 	make FONZD=1
 
-PABLOMK7: cleanupdater 
+PABLOMK7: cleanupdater
 	make PABLOMK7=1
 
-FONZDM3: clean 
+FONZDM3: clean
 	make FONZD=1 EXTENDEDMODE=1
 
-PABLOMK7M3: clean 
+PABLOMK7M3: clean
 	make PABLOMK7=1 EXTENDEDMODE=1

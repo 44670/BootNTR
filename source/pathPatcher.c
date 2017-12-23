@@ -137,8 +137,7 @@ Result  loadAndPatch(version_t version)
     binPath = bnConfig->config->binariesPath;
     plgPath = bnConfig->config->pluginPath;
 
-    if (version == V36)
-        strJoin(inPath, "romfs:/", ntrVersionStrings[version + isNew3DS]);
+    strJoin(inPath, "romfs:/", ntrVersionStrings[version + (version == V36 && isNew3DS)]);
 
     if (!strncmp("sdmc:", binPath, 5)) binPath += 5;
     if (!strncmp("sdmc:", plgPath, 5)) plgPath += 5;

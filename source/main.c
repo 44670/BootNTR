@@ -45,7 +45,7 @@ int main(void)
             {
                 newAppStatus(DEFAULT_COLOR, CENTER | BOLD | NEWLINE, "Updated !");
                 goto waitForExit;
-            }            
+            }
 
         }
     }
@@ -64,7 +64,7 @@ int main(void)
             newAppStatus(DEFAULT_COLOR, CENTER | BOLD | NEWLINE, "Success !");
 
         #if EXTENDEDMODE
-            
+
             newAppStatus(DEFAULT_COLOR, CENTER | TINY | SKINNY | NEWLINE, "Press Home to launch");
             newAppStatus(DEFAULT_COLOR, CENTER | TINY | SKINNY, "your game.");
             updateUI();
@@ -86,7 +86,7 @@ int main(void)
             goto exit;
         #endif
 
-        }        
+        }
     }
     if (g_exit || ret)
     {
@@ -104,7 +104,7 @@ int main(void)
             }
             else
                 newAppStatus(DEFAULT_COLOR, TINY | CENTER, "#%s", g_primary_error);
-        }            
+        }
         if (g_secondary_error != NULL)
             newAppStatus(DEFAULT_COLOR, TINY | CENTER, "#%s", g_secondary_error);
         if (g_third_error != NULL)

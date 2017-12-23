@@ -144,6 +144,7 @@ void    exitSettingsMenu(void)
 {
     clearBottomScreen();
     clearTopScreen();
+    updateUI();
     destroyButton(binariesPathButton);
     destroyButton(pluginsPathButton);
     destroyButton(createCustomButton);
@@ -399,8 +400,9 @@ static void    setFiles(void)
 
     newAppTop(COLOR_LIMEGREEN, 0, "Finished");
     updateUI();
+    wait(2);
     clearTop(1);
-    wait(3);
+    //wait(3);
 }
 
 void firstLaunch(void)
@@ -435,4 +437,3 @@ again:
     appInfoEnableAutoUpdate();
     updateUI();
 }
-
