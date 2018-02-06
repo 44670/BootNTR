@@ -371,7 +371,7 @@ static void    setFiles(void)
         newAppTop(COLOR_LIMEGREEN, SKINNY, "Setting up 3.3... Done.");
     updateUI();
 
-    newAppTop(COLOR_BLANK, SKINNY, "Setting up 3.5...");
+    newAppTop(COLOR_BLANK, SKINNY, "Setting up 3.6...");
     updateUI();
     ret = loadAndPatch(V36);
     if (!bnConfig->isDebug)
