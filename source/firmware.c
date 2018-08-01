@@ -111,6 +111,17 @@ Result  bnInitParamsByFirmware(void)
             bnConfig->FSPatchAddr = 0x0010F024;
             bnConfig->SMPatchAddr = 0x0010189C;
         }
+		else if (kernelVersion == SYSTEM_VERSION(2, 55, 0))
+		{
+			// old3ds 11.4.0
+			ntrConfig->firmVersion = SYSTEM_VERSION(11, 8, 0);
+			ntrConfig->PMSvcRunAddr = 0x00103154;
+			ntrConfig->ControlMemoryPatchAddr1 = 0xDFF88514;
+			ntrConfig->ControlMemoryPatchAddr2 = 0xDFF88518;
+			bnConfig->SvcPatchAddr = 0xDFF82288;
+			bnConfig->FSPatchAddr = 0x0010F024;
+			bnConfig->SMPatchAddr = 0x0010189C;
+		}
         else 
             goto unsupported;
     }
@@ -241,6 +252,17 @@ Result  bnInitParamsByFirmware(void)
             bnConfig->FSPatchAddr = 0x0010F024; 
             bnConfig->SMPatchAddr = 0x0010189C;
         }
+		else if (kernelVersion == SYSTEM_VERSION(2, 55, 0))
+		{
+			// old3ds 11.4.0
+			ntrConfig->firmVersion = SYSTEM_VERSION(11, 8, 0);
+			ntrConfig->PMSvcRunAddr = 0x00103154;
+			ntrConfig->ControlMemoryPatchAddr1 = 0xDFF88514;
+			ntrConfig->ControlMemoryPatchAddr2 = 0xDFF88518;
+			bnConfig->SvcPatchAddr = 0xDFF82288;
+			bnConfig->FSPatchAddr = 0x0010F024;
+			bnConfig->SMPatchAddr = 0x0010189C;
+		}
         else 
             goto unsupported;
     }
