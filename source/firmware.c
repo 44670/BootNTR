@@ -100,9 +100,9 @@ Result  bnInitParamsByFirmware(void)
             bnConfig->FSPatchAddr = 0x0010F024;
             bnConfig->SMPatchAddr = 0x0010189C;
         }
-        else if (kernelVersion == SYSTEM_VERSION(2, 54, 0))
+        else if (kernelVersion == SYSTEM_VERSION(2, 54, 0) || kernelVersion == SYSTEM_VERSION(2, 55, 0))
         {
-            // old3ds 11.4.0
+            // old3ds 11.4.0 and 11.8
             ntrConfig->firmVersion = SYSTEM_VERSION(11, 4, 0);
             ntrConfig->PMSvcRunAddr = 0x00103154;
             ntrConfig->ControlMemoryPatchAddr1 = 0xDFF88514;
@@ -111,17 +111,6 @@ Result  bnInitParamsByFirmware(void)
             bnConfig->FSPatchAddr = 0x0010F024;
             bnConfig->SMPatchAddr = 0x0010189C;
         }
-		else if (kernelVersion == SYSTEM_VERSION(2, 55, 0))
-		{
-			// old3ds 11.4.0
-			ntrConfig->firmVersion = SYSTEM_VERSION(11, 8, 0);
-			ntrConfig->PMSvcRunAddr = 0x00103154;
-			ntrConfig->ControlMemoryPatchAddr1 = 0xDFF88514;
-			ntrConfig->ControlMemoryPatchAddr2 = 0xDFF88518;
-			bnConfig->SvcPatchAddr = 0xDFF82288;
-			bnConfig->FSPatchAddr = 0x0010F024;
-			bnConfig->SMPatchAddr = 0x0010189C;
-		}
         else 
             goto unsupported;
     }
@@ -241,9 +230,9 @@ Result  bnInitParamsByFirmware(void)
             bnConfig->FSPatchAddr = 0x0010F024; 
             bnConfig->SMPatchAddr = 0x0010189C;
         }
-        else if (kernelVersion == SYSTEM_VERSION(2, 54, 0))
+        else if (kernelVersion == SYSTEM_VERSION(2, 54, 0) || kernelVersion == SYSTEM_VERSION(2, 55, 0))
         {
-            // new3ds 11.4
+            // new3ds 11.4 and 11.8
             ntrConfig->firmVersion = SYSTEM_VERSION(11, 4, 0);
             ntrConfig->PMSvcRunAddr = 0x00103150;
             ntrConfig->ControlMemoryPatchAddr1 = 0xDFF8862C; 
@@ -252,17 +241,6 @@ Result  bnInitParamsByFirmware(void)
             bnConfig->FSPatchAddr = 0x0010F024; 
             bnConfig->SMPatchAddr = 0x0010189C;
         }
-		else if (kernelVersion == SYSTEM_VERSION(2, 55, 0))
-		{
-			// old3ds 11.4.0
-			ntrConfig->firmVersion = SYSTEM_VERSION(11, 8, 0);
-			ntrConfig->PMSvcRunAddr = 0x00103154;
-			ntrConfig->ControlMemoryPatchAddr1 = 0xDFF88514;
-			ntrConfig->ControlMemoryPatchAddr2 = 0xDFF88518;
-			bnConfig->SvcPatchAddr = 0xDFF82288;
-			bnConfig->FSPatchAddr = 0x0010F024;
-			bnConfig->SMPatchAddr = 0x0010189C;
-		}
         else 
             goto unsupported;
     }
