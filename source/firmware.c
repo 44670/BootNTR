@@ -100,10 +100,13 @@ Result  bnInitParamsByFirmware(void)
             bnConfig->FSPatchAddr = 0x0010F024;
             bnConfig->SMPatchAddr = 0x0010189C;
         }
-        else if (kernelVersion == SYSTEM_VERSION(2, 54, 0))
+        else if (kernelVersion == SYSTEM_VERSION(2, 54, 0) || kernelVersion == SYSTEM_VERSION(2, 55, 0))
         {
-            // old3ds 11.4.0
-            ntrConfig->firmVersion = SYSTEM_VERSION(11, 4, 0);
+            // old3ds 11.4.0 and 11.8
+			if (kernelVersion == SYSTEM_VERSION(2, 54, 0))
+				ntrConfig->firmVersion = SYSTEM_VERSION(11, 4, 0);
+			else
+				ntrConfig->firmVersion = SYSTEM_VERSION(11, 8, 0);
             ntrConfig->PMSvcRunAddr = 0x00103154;
             ntrConfig->ControlMemoryPatchAddr1 = 0xDFF88514;
             ntrConfig->ControlMemoryPatchAddr2 = 0xDFF88518;
@@ -230,10 +233,13 @@ Result  bnInitParamsByFirmware(void)
             bnConfig->FSPatchAddr = 0x0010F024; 
             bnConfig->SMPatchAddr = 0x0010189C;
         }
-        else if (kernelVersion == SYSTEM_VERSION(2, 54, 0))
+        else if (kernelVersion == SYSTEM_VERSION(2, 54, 0) || kernelVersion == SYSTEM_VERSION(2, 55, 0))
         {
-            // new3ds 11.4
-            ntrConfig->firmVersion = SYSTEM_VERSION(11, 4, 0);
+            // new3ds 11.4 and 11.8
+			if (kernelVersion == SYSTEM_VERSION(2, 54, 0))
+				ntrConfig->firmVersion = SYSTEM_VERSION(11, 4, 0);
+			else
+				ntrConfig->firmVersion = SYSTEM_VERSION(11, 8, 0);
             ntrConfig->PMSvcRunAddr = 0x00103150;
             ntrConfig->ControlMemoryPatchAddr1 = 0xDFF8862C; 
             ntrConfig->ControlMemoryPatchAddr2 = 0xDFF88630;

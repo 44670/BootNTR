@@ -12,7 +12,7 @@ endif
 # COMMON CONFIGURATION #
 
 FONZD = 0
-PABLOMK7 = 0
+PABLOMK7 = 1
 EXTENDEDMODE = 0
 DEBUG = 0
 
@@ -42,7 +42,7 @@ LIBRARY_DIRS := $(PORTLIBS) $(CTRULIB)
 LIBRARIES := citro3d ctru png z m
 
 VERSION_MAJOR := 2
-VERSION_MINOR := 11
+VERSION_MINOR := 12
 VERSION_MICRO := 0
 
 
@@ -79,7 +79,7 @@ endif
 # 3DS CONFIGURATION #
 
 ifeq ($(TARGET),3DS)
-    LIBRARY_DIRS += $(DEVKITPRO)/libctru $(DEVKITPRO)/portlibs/armv6k/
+    LIBRARY_DIRS += $(DEVKITPRO)/libctru $(DEVKITPRO)/portlibs/3ds/
     LIBRARIES += citro3d ctru png z m
 
     PRODUCT_CODE := CTR-P-BNTR
