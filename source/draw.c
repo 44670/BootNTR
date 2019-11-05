@@ -29,14 +29,14 @@ unsigned int nextPow2(unsigned int v)
     return (v >= TEX_MIN_SIZE ? v : TEX_MIN_SIZE);
 }
 
-static void addTextVertex(float vx, float vy, float tx, float ty)
+static void addTextVertex(float vx, float vy, float vz, float tx, float ty)
 {
     textVertex_s    *vtx;
 
     vtx = &textVtxArray[textVtxArrayPos++];
     vtx->position[0] = vx;
     vtx->position[1] = vy;
-    vtx->position[2] = 0.5f;
+    vtx->position[2] = 0.0f;
     vtx->texcoord[0] = tx;
     vtx->texcoord[1] = ty;
 }
@@ -52,15 +52,69 @@ void printVertex(textVertex_s *vtx)
         );
 }
 
-static void bindTexture(C3D_Tex *texture)
-{
-    C3D_TexEnv  *env;
+static void resetC3Denv() {
+	C3D_TexEnv *env;
+	for (int i = 0; i < 4; i++) {
+		env = C3D_GetTexEnv(i);
+		C3D_TexEnvInit(env);
+	}
+}
 
-    C3D_TexBind(0, texture);
-    env = C3D_GetTexEnv(0);
-    C3D_TexEnvSrc(env, C3D_Both, GPU_TEXTURE0, 0, 0);
-    C3D_TexEnvOp(env, C3D_Both, 0, 0, 0);
-    C3D_TexEnvFunc(env, C3D_Both, GPU_REPLACE);
+static void bindImageGreyScale(C3D_Tex *texture, u32 texture_color) {
+	//((0.3 * R) + (0.59 * G) + (0.11 * B)). -> 0xFF1C964C
+	C3D_TexEnv  *env;
+	u32 greyMask = 0xFF1C964C;
+	resetC3Denv();
+
+	C3D_TexBind(0, texture);
+	env = C3D_GetTexEnv(0);
+	C3D_TexEnvSrc(env, C3D_RGB, GPU_TEXTURE0, GPU_CONSTANT, 0);
+	C3D_TexEnvSrc(env, C3D_Alpha, GPU_TEXTURE0, 0, 0);
+	C3D_TexEnvOpRgb(env, 0, 0, 0);
+	C3D_TexEnvOpAlpha(env, 0, 0, 0);
+	C3D_TexEnvFunc(env, C3D_RGB, GPU_MODULATE);
+	C3D_TexEnvFunc(env, C3D_Alpha, GPU_REPLACE);
+	C3D_TexEnvColor(env, texture_color);
+	env = C3D_GetTexEnv(1);
+	C3D_TexEnvSrc(env, C3D_RGB, GPU_PREVIOUS, GPU_CONSTANT, 0);
+	C3D_TexEnvSrc(env, C3D_Alpha, GPU_PREVIOUS, 0, 0);
+	C3D_TexEnvOpRgb(env, 0, 0, 0);
+	C3D_TexEnvOpAlpha(env, 0, 0, 0);
+	C3D_TexEnvFunc(env, C3D_RGB, GPU_MODULATE);
+	C3D_TexEnvFunc(env, C3D_Alpha, GPU_REPLACE);
+	C3D_TexEnvColor(env, greyMask);
+	C3D_TexEnvBufUpdate(C3D_RGB, 0b0010);
+	env = C3D_GetTexEnv(2);
+	C3D_TexEnvSrc(env, C3D_RGB, GPU_PREVIOUS, GPU_PREVIOUS, 0);
+	C3D_TexEnvSrc(env, C3D_Alpha, GPU_PREVIOUS, 0, 0);
+	C3D_TexEnvOpRgb(env, GPU_TEVOP_RGB_SRC_R, GPU_TEVOP_RGB_SRC_G, 0);
+	C3D_TexEnvOpAlpha(env, 0, 0, 0);
+	C3D_TexEnvFunc(env, C3D_RGB, GPU_ADD);
+	C3D_TexEnvFunc(env, C3D_Alpha, GPU_REPLACE);
+	env = C3D_GetTexEnv(3);
+	C3D_TexEnvSrc(env, C3D_RGB, GPU_PREVIOUS, GPU_PREVIOUS_BUFFER, 0);
+	C3D_TexEnvSrc(env, C3D_Alpha, GPU_PREVIOUS, 0, 0);
+	C3D_TexEnvOpRgb(env, 0, GPU_TEVOP_RGB_SRC_B, 0);
+	C3D_TexEnvOpAlpha(env, 0, 0, 0);
+	C3D_TexEnvFunc(env, C3D_RGB, GPU_ADD);
+	C3D_TexEnvFunc(env, C3D_Alpha, GPU_REPLACE);
+}
+
+static void bindTexture(C3D_Tex *texture, u32 texture_color)
+{
+	C3D_TexEnv  *env;
+	resetC3Denv();
+
+	C3D_TexBind(0, texture);
+	env = C3D_GetTexEnv(0);
+	C3D_TexEnvBufUpdate(C3D_RGB, 0);
+	C3D_TexEnvSrc(env, C3D_RGB, GPU_TEXTURE0, GPU_CONSTANT, 0);
+	C3D_TexEnvSrc(env, C3D_Alpha, GPU_TEXTURE0, 0, 0);
+	C3D_TexEnvOpRgb(env, 0, 0, 0);
+	C3D_TexEnvOpAlpha(env, 0, 0, 0);
+	C3D_TexEnvFunc(env, C3D_RGB, GPU_MODULATE);
+	C3D_TexEnvFunc(env, C3D_Alpha, GPU_REPLACE);
+	C3D_TexEnvColor(env, texture_color);
 }
 
 void setSpritePos(sprite_t *sprite, float posX, float posY)
@@ -81,7 +135,7 @@ void drawSprite(sprite_t *sprite)
     int         arrayIndex;
     C3D_Tex     *texture;
 
-    if (!sprite) return;
+    if (!sprite || sprite->isHidden) return;
     texture = &sprite->texture;
     height = sprite->height;
     width = sprite->width;
@@ -90,20 +144,69 @@ void drawSprite(sprite_t *sprite)
     u = width / (float)texture->width;
     v = height / (float)texture->height;
 
-    //Bind the sprite's texture
-    bindTexture(texture);
+	width = floor(width * sprite->amount);
+	u *= sprite->amount;
+
     C3D_BufInfo *bufInfo = C3D_GetBufInfo();
     BufInfo_Init(bufInfo);
     BufInfo_Add(bufInfo, textVtxArray, sizeof(textVertex_s), 2, 0x10);
     //Set the vertices
     arrayIndex = textVtxArrayPos;
-    addTextVertex(x, y + height, 0.0f, v); //left bottom
-    addTextVertex(x + width, y + height, u, v); //right bottom
-    addTextVertex(x, y, 0.0f, 0.0f); //left top
-    addTextVertex(x + width, y, u, 0.0f); //right top   
+    addTextVertex(x, y + height, sprite->depth, 0.0f, v); //left bottom
+    addTextVertex(x + width, y + height, sprite->depth, u, v); //right bottom
+    addTextVertex(x, y, sprite->depth, 0.0f, 0.0f); //left top
+    addTextVertex(x + width, y, sprite->depth, u, 0.0f); //right top
+
+	//Bind the sprite's texture
+	if (sprite->isGreyedOut) {
+		bindImageGreyScale(texture, sprite->drawColor);
+	}
+	else {
+		bindTexture(texture, sprite->drawColor);
+	}
 
     //Draw 
     C3D_DrawArrays(GPU_TRIANGLE_STRIP, arrayIndex, 4);
+}
+
+void drawRectangle(rectangle_t *rectangle)
+{
+	float       height;
+	float       width;
+	float       x;
+	float       y;
+	int         arrayIndex;
+	C3D_TexEnv  *env;
+
+	if (!rectangle) return;
+	height = rectangle->height;
+	width = ceil(rectangle->width * rectangle->amount);
+	x = rectangle->posX;
+	y = rectangle->posY;
+
+	C3D_BufInfo *bufInfo = C3D_GetBufInfo();
+	BufInfo_Init(bufInfo);
+	BufInfo_Add(bufInfo, textVtxArray, sizeof(textVertex_s), 2, 0x10);
+	//Set the vertices
+	arrayIndex = textVtxArrayPos;
+	addTextVertex(x, y + height, rectangle->depth, 0.0f, 1.f); //left bottom
+	addTextVertex(x + width, y + height, rectangle->depth, 1.f, 1.f); //right bottom
+	addTextVertex(x, y, rectangle->depth, 0.0f, 0.0f); //left top
+	addTextVertex(x + width, y, rectangle->depth, 1.f, 0.0f); //right top
+
+	resetC3Denv();
+	env = C3D_GetTexEnv(0);
+	C3D_TexBind(0, &(rectangle->sprite->texture));
+	C3D_TexEnvBufUpdate(C3D_RGB, 0);
+	C3D_TexEnvSrc(env, C3D_RGB, GPU_TEXTURE0, 0, 0);
+	C3D_TexEnvSrc(env, C3D_Alpha, GPU_CONSTANT, 0, 0);
+	C3D_TexEnvOpRgb(env, 0, 0, 0);
+	C3D_TexEnvOpAlpha(env, 0, 0, 0);
+	C3D_TexEnvFunc(env, C3D_Both, GPU_REPLACE);
+	C3D_TexEnvColor(env, 0xFFFFFFFF);
+
+	//Draw 
+	C3D_DrawArrays(GPU_TRIANGLE_STRIP, arrayIndex, 4);
 }
 
 sprite_t *newSprite(int width, int height)
@@ -126,6 +229,11 @@ sprite_t *newSprite(int width, int height)
 
     sprite->width = (float)width;
     sprite->height = (float)height;
+	sprite->drawColor = 0xFFFFFFFF;
+	sprite->isGreyedOut = false;
+	sprite->isHidden = false;
+	sprite->depth = 0.0f;
+	sprite->amount = 1.f;
     return (sprite);
 texInitError:
     free(sprite);
@@ -171,12 +279,12 @@ static void sceneInit(void)
     C3D_DepthTest(true, GPU_GEQUAL, GPU_WRITE_ALL);
 
     // Load the glyph texture sheets
-    glyphInfo = fontGetGlyphInfo();
+    glyphInfo = fontGetGlyphInfo(NULL);
     glyphSheets = malloc(sizeof(C3D_Tex) * glyphInfo->nSheets);
     for (i = 0; i < glyphInfo->nSheets; i++)
     {
         tex = &glyphSheets[i];
-        tex->data = fontGetGlyphSheetTex(i);
+        tex->data = fontGetGlyphSheetTex(NULL, i);
         tex->fmt = glyphInfo->sheetFmt;
         tex->size = glyphInfo->sheetSize;
         tex->width = glyphInfo->sheetWidth;
@@ -207,13 +315,13 @@ void drawInit(void)
 
     // Initialize the top render target
     target = C3D_RenderTargetCreate(240, 400, GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8);
-    C3D_RenderTargetSetClear(target, C3D_CLEAR_ALL, CLEAR_COLOR, 0);
+	C3D_RenderTargetClear(target, C3D_CLEAR_ALL, CLEAR_COLOR, 0);
     C3D_RenderTargetSetOutput(target, GFX_TOP, GFX_LEFT, DISPLAY_TRANSFER_FLAGS);
     top.target = target;
 
     // Initialize the bottom render target
     target = C3D_RenderTargetCreate(240, 320, GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8);
-    C3D_RenderTargetSetClear(target, C3D_CLEAR_ALL, CLEAR_COLOR, 0);
+	C3D_RenderTargetClear(target, C3D_CLEAR_ALL, CLEAR_COLOR, 0);
     C3D_RenderTargetSetOutput(target, GFX_BOTTOM, GFX_LEFT, DISPLAY_TRANSFER_FLAGS);
     bottom.target = target;
 
@@ -235,7 +343,6 @@ void drawEndFrame(void)
 
 void drawExit(void)
 {
-    drawEndFrame();
     sceneExit();
     C3D_Fini();
 }
@@ -248,7 +355,8 @@ void setTextColor(u32 color)
     env = C3D_GetTexEnv(0);
     C3D_TexEnvSrc(env, C3D_RGB, GPU_CONSTANT, 0, 0);
     C3D_TexEnvSrc(env, C3D_Alpha, GPU_TEXTURE0, GPU_CONSTANT, 0);
-    C3D_TexEnvOp(env, C3D_Both, 0, 0, 0);
+	C3D_TexEnvOpRgb(env, 0, 0, 0);
+	C3D_TexEnvOpAlpha(env, 0, 0, 0);
     C3D_TexEnvFunc(env, C3D_RGB, GPU_REPLACE);
     C3D_TexEnvFunc(env, C3D_Alpha, GPU_MODULATE);
     C3D_TexEnvColor(env, color);
@@ -276,8 +384,8 @@ void getTextSizeInfos(float *width, float scaleX, float scaleY, const char *text
         c += units;
         if (code > 0)
         {
-            glyphIndex = fontGlyphIndexFromCodePoint(code);
-            fontCalcGlyphPos(&data, glyphIndex, GLYPH_POS_CALC_VTXCOORD, scaleX, scaleY);
+            glyphIndex = fontGlyphIndexFromCodePoint(NULL, code);
+            fontCalcGlyphPos(&data, NULL, glyphIndex, GLYPH_POS_CALC_VTXCOORD, scaleX, scaleY);
             w += data.xAdvance;
         }
     } while (code > 0);
@@ -309,8 +417,10 @@ void    findBestSize(float *sizeX, float *sizeY, float posXMin, float posXMax, f
     if (sizeY) *sizeY = scale;
 }
 
+
 void renderText(float x, float y, float scaleX, float scaleY, bool baseline, const char *text, cursor_t *cursor)
 {
+	float 			depth = 0;
     u32             flags;
     u32             code;
     int             lastSheet;
@@ -340,12 +450,12 @@ void renderText(float x, float y, float scaleX, float scaleY, bool baseline, con
         if (code == '\n')
         {
             x = firstX;
-            y += scaleY * fontGetInfo()->lineFeed;
+            y += scaleY * fontGetInfo(NULL)->lineFeed;
         }
         else if (code > 0)
         {
-            glyphIdx = fontGlyphIndexFromCodePoint(code);
-            fontCalcGlyphPos(&data, glyphIdx, flags, scaleX, scaleY);
+            glyphIdx = fontGlyphIndexFromCodePoint(NULL, code);
+            fontCalcGlyphPos(&data, NULL, glyphIdx, flags, scaleX, scaleY);
 
             // Bind the correct texture sheet
             if (data.sheetIndex != lastSheet)
@@ -359,10 +469,10 @@ void renderText(float x, float y, float scaleX, float scaleY, bool baseline, con
                 break; // We can't render more characters
 
                        // Add the vertices to the array
-            addTextVertex(x + data.vtxcoord.left, y + data.vtxcoord.bottom, data.texcoord.left, data.texcoord.bottom);
-            addTextVertex(x + data.vtxcoord.right, y + data.vtxcoord.bottom, data.texcoord.right, data.texcoord.bottom);
-            addTextVertex(x + data.vtxcoord.left, y + data.vtxcoord.top, data.texcoord.left, data.texcoord.top);
-            addTextVertex(x + data.vtxcoord.right, y + data.vtxcoord.top, data.texcoord.right, data.texcoord.top);
+            addTextVertex(x + data.vtxcoord.left, y + data.vtxcoord.bottom, depth, data.texcoord.left, data.texcoord.bottom);
+            addTextVertex(x + data.vtxcoord.right, y + data.vtxcoord.bottom, depth, data.texcoord.right, data.texcoord.bottom);
+            addTextVertex(x + data.vtxcoord.left, y + data.vtxcoord.top, depth, data.texcoord.left, data.texcoord.top);
+            addTextVertex(x + data.vtxcoord.right, y + data.vtxcoord.top, depth, data.texcoord.right, data.texcoord.top);
 
             // Draw the glyph
             C3D_DrawArrays(GPU_TRIANGLE_STRIP, arrayIndex, 4);

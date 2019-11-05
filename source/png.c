@@ -27,9 +27,8 @@ Result textureTile32(C3D_Tex *texture)
     }    
     GSPGPU_FlushDataCache(tmp, width * height * 4);
     GSPGPU_FlushDataCache(texture->data, width * height * 4);
-    C3D_SafeDisplayTransfer((u32 *)tmp, GX_BUFFER_DIM(width, height), \
+	C3D_SyncDisplayTransfer((u32 *)tmp, GX_BUFFER_DIM(width, height), \
         (u32*)texture->data, GX_BUFFER_DIM(width, height), TEXTURE_TRANSFER_FLAGS);
-    gspWaitForPPF();
     linearFree(tmp);
     return (MAKERESULT(RL_SUCCESS, RS_SUCCESS, RM_COMMON, RD_SUCCESS));
 error:

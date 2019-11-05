@@ -44,7 +44,6 @@ void    initUI(void)
         sprintf(appVersion, "Version: %d.%d", APP_VERSION_MAJOR, APP_VERSION_MINOR);
     else
         sprintf(appVersion, "Version: %d.%d.%d", APP_VERSION_MAJOR, APP_VERSION_MINOR, APP_VERSION_REVISION);
-    updateUI();
 }
 
 void    exitUI(void)

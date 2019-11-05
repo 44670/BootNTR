@@ -1,10 +1,12 @@
 #include "appInfo.h"
+#include "graphics.h"
 
-static bool autoUpdate = true;
+static bool autoUpdate = false;
 static bool showBackground = true;
+extern appInfoObject_t  *appTop;
 
 void    appInfoDisableAutoUpdate(void)
-{
+{ 
     autoUpdate = false;
 }
 
@@ -58,6 +60,7 @@ void    deleteAppInfoObject(appInfoObject_t *object)
 
 void    appInfoSetTextBoundaries(appInfoObject_t *object, float posX, float posY)
 {
+
     if (!object) return;
     object->boundX = posX;
     object->boundY = posY;
@@ -167,6 +170,56 @@ void    clearAppInfo(appInfoObject_t *object, bool updateScreen)
         updateUI();
 }
 
+void drawMultilineText(u32 color, u32 flags, char* txt) {
+	float textWidth;
+	float totalWidth = appTop->boundX - appTop->cursor.posX;
+	float scaleX, scaleY;
+	//Set the font size
+	if (flags & BIG) scaleX = scaleY = 0.6f;
+	else if (flags & MEDIUM) scaleX = scaleY = 0.55f;
+	else if (flags & SMALL) scaleX = scaleY = 0.45f;
+	else if (flags & TINY) scaleX = scaleY = 0.4f;
+	else scaleX = scaleY = 0.5f;
+
+	int textLen = strlen(txt) + 1;
+	char* copy = malloc(textLen);
+	char* copyCurr = copy;
+	memset(copy, 0, textLen);
+	char* breakpos = copy;
+	char* txtCurr = txt;
+	while (*txtCurr != '\0') {
+		*copyCurr = *txtCurr;
+		if (*copyCurr == ' ') breakpos = copyCurr;
+		getTextSizeInfos(&textWidth, scaleX, scaleY, copy);
+		if (textWidth >= totalWidth) {
+			if (breakpos == copy) {
+				*(copyCurr - 1) = '\0';
+				newAppTop(color, flags, copy);
+				memset(copy, 0, textLen);
+				copyCurr = copy;
+				breakpos = copy;
+				txtCurr--;
+			}
+			else {
+				*breakpos = '\0';
+				newAppTop(color, flags, copy);
+				memset(copy, 0, textLen);
+				txtCurr = (txtCurr - (copyCurr - breakpos)) + 1;
+				copyCurr = copy;
+				breakpos = copy;
+			}
+		}
+		else {
+			copyCurr++;
+			txtCurr++;
+		}
+	}
+	if (copy != copyCurr) {
+		newAppTop(color, flags, copy);
+	}
+	free(copy);
+}
+
 static void getDrawParameters(appInfoObject_t *object, int index, float *sizeX, float *sizeY)
 {
     appInfoEntry_t  *entry;
@@ -213,7 +266,7 @@ static void getDrawParameters(appInfoObject_t *object, int index, float *sizeX, 
     }
 
     if (flags & NEWLINE)
-        cursor->posY += 0.3f * fontGetInfo()->lineFeed;
+        cursor->posY += 0.3f * fontGetInfo(NULL)->lineFeed;
     
     //Return the size
     *sizeX = scaleX;
@@ -232,12 +285,12 @@ void    drawAppInfoEntry(appInfoObject_t  *object, int index)
     cursor = &object->cursor;
     sizeX = sizeY = 0.0f;
     getDrawParameters(object, index, &sizeX, &sizeY);
-    lineFeed = sizeY * fontGetInfo()->lineFeed;
+    lineFeed = sizeY * fontGetInfo(NULL)->lineFeed;
     setTextColor(entry->color);
     renderText(cursor->posX, cursor->posY, sizeX, sizeY, false, entry->buffer, cursor);
     cursor->posY += lineFeed;
 exit:
-    return;
+    return; 
 }
 
 void    drawAppInfo(appInfoObject_t *object)

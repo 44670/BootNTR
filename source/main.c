@@ -30,7 +30,7 @@ int main(void)
     configInit();
 
     // If keys == X or if config say we should check an update
-    if (keys & KEY_X || bnConfig->checkForUpdate)
+    /*if (keys & KEY_X || bnConfig->checkForUpdate)
     {
         // Check if the 3DS is connected
         acInit();
@@ -48,12 +48,11 @@ int main(void)
             }
 
         }
-    }
-
+    }*/
 
     kernelVersion = osGetKernelVersion();
-    initMainMenu();
     waitAllKeysReleased();
+	initMainMenu();
     ret = mainMenu();
     if (ret == 2) goto waitForExit;
     if (!g_exit)
