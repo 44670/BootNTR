@@ -65,6 +65,7 @@ typedef uint8_t   u8;
 #define FILE_COPY_ERROR             (char *)s_error[16]
 #define LOAD_FAILED                 (char *)s_error[17]
 #define NTR_ALREADY_LAUNCHED        (char *)s_error[18]
+#define CUSTOM_PM_PATCH_FAIL        (char *)s_error[19]
 
 static const char * const s_error[] =
 {
@@ -87,7 +88,7 @@ static const char * const s_error[] =
     "FILE_COPY_ERROR",
     "LOAD_AND_EXECUTE",
     "NTR is already running"
-
+	"CUSTOM_PM_PATCH_FAIL"
 };
 
 typedef struct  updateData_s

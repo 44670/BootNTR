@@ -86,12 +86,6 @@ void    resetConfig(void)
     u32         keys;
     //u32         size;
 
-    do
-    {
-      updateUI();
-      keys = (hidKeysDown() | hidKeysHeld());
-    } while (keys & KEY_SELECT);
-
     if (!fileExists(configPath)) goto exit;
     config = (config_t *)calloc(1, sizeof(config_t));
     if (!config)

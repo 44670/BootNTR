@@ -43,7 +43,7 @@ LIBRARIES := citro3d ctru png z m
 
 VERSION_MAJOR := 2
 VERSION_MINOR := 13
-VERSION_MICRO := 0
+VERSION_MICRO := 1
 
 
 

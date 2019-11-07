@@ -38,6 +38,10 @@ void    selectVersion(u32 mode)
 
 void    initMainMenu(void)
 {
+	static bool inited = false;
+	if (inited) return;
+	inited = true;
+
     if (!bnConfig->isMode3)
     {
         sprite_t *sprite;
@@ -54,14 +58,7 @@ void    initMainMenu(void)
         newSpriteFromPNG(&sprite, "romfs:/sprites/textSprites/33Version.png");
         V33Button = newButton(11.0f, 94.0f, selectVersion, 2, tinyButtonBGSprite, sprite);
         newSpriteFromPNG(&sprite, "romfs:/sprites/textSprites/36Version.png");
-        V36Button = newButton(11.0f, 152.0f, selectVersion, 3, tinyButtonBGSprite, sprite);
-
-        V32Button->show(V32Button);
-        V33Button->show(V33Button);
-        V36Button->show(V36Button);
-        addBottomObject(V32Button);
-        addBottomObject(V33Button);
-        addBottomObject(V36Button);        
+        V36Button = newButton(11.0f, 152.0f, selectVersion, 3, tinyButtonBGSprite, sprite);      
     }
 
     newSpriteFromPNG(&pressExitSprite, "romfs:/sprites/textSprites/pressBExit.png");
@@ -101,6 +98,17 @@ int     mainMenu(void)
     int         timerBak;
     u32         keys;
     bool        noTimer;
+
+	static bool first = true;
+	if (first) {
+		V32Button->show(V32Button);
+		V33Button->show(V33Button);
+		V36Button->show(V36Button);
+		addBottomObject(V32Button);
+		addBottomObject(V33Button);
+		addBottomObject(V36Button);
+		first = false;
+	}
 
     waitAllKeysReleased();
     if (!bnConfig->isMode3 && !bnConfig->config->flags) noTimer = true;

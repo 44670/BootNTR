@@ -76,6 +76,7 @@ void    initSettingsMenu(void)
     sprite_t    *sprite;
     clearTopScreen();
     clearBottomScreen();
+	initMainMenu();
     newSpriteFromPNG(&pressBackSprite, "romfs:/sprites/textSprites/pressBBack.png");
     newSpriteFromPNG(&desiredChoiceSprite, "romfs:/sprites/textSprites/touchDesiredChoice.png");
     setSpritePos(desiredChoiceSprite, 34.0f, 6.0f);
@@ -409,7 +410,6 @@ void firstLaunch(void)
 {
     u32         status;
 
-    updateUI();
     initSettingsMenu();
     appInfoDisableAutoUpdate();
     p_globalPath = bnConfig->config->binariesPath;
@@ -422,7 +422,6 @@ again:
     useSecondButton->show(useSecondButton);
     createCustomButton->show(createCustomButton);
     changeBottomFooter(NULL);
-    updateUI();
     while (!(status & e_EXIT))
     {
         updateUI();
