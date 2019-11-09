@@ -100,7 +100,7 @@ int     mainMenu(void)
     bool        noTimer;
 
 	static bool first = true;
-	if (first) {
+	if (first && !bnConfig->isMode3) {
 		V32Button->show(V32Button);
 		V33Button->show(V33Button);
 		V36Button->show(V36Button);

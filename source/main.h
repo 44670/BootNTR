@@ -87,7 +87,7 @@ static const char * const s_error[] =
     "USER_ABORT",
     "FILE_COPY_ERROR",
     "LOAD_AND_EXECUTE",
-    "NTR is already running"
+    "NTR is already running",
 	"CUSTOM_PM_PATCH_FAIL"
 };
 

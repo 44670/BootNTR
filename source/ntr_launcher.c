@@ -53,12 +53,12 @@ u32			findCustomPMsvcRunPattern(u32* outaddr)
 	{
 		return res;
 	}
-	res = svcMapProcessMemoryEx(prochand, 0x0B000000, (u32)addr, (u32)info); //map PM process memory into this process @ 0x08000000
+	res = svcMapProcessMemoryEx(prochand, 0x28000000, (u32)addr, (u32)info); //map PM process memory into this process @ 0x08000000
 	if (res)
 	{
 		return res;
 	}
-	addr = (u32*)0x0B000000;
+	addr = (u32*)0x28000000;
 	u32* endAddr = (u32*)((u32)addr + (u32)info);
 	while (addr < endAddr)
 	{
@@ -68,7 +68,7 @@ u32			findCustomPMsvcRunPattern(u32* outaddr)
 			while (*addr2 != 0xE92D0030 && (u32)addr - (u32)addr2 < 0x100) addr2--; // Find start of the svc function
 			if ((u32)addr - (u32)addr2 < 0x100)
 			{
-				*outaddr = ((u32)addr2 - 0x0B000000) + textStart;
+				*outaddr = ((u32)addr2 - 0x28000000) + textStart;
 			}
 			else res = -1;
 			break;
@@ -76,9 +76,24 @@ u32			findCustomPMsvcRunPattern(u32* outaddr)
 		addr++;
 	}
 	if (addr >= endAddr) res = -1;
-	svcUnmapProcessMemoryEx(prochand, 0x0B000000, (u32)info);
+	svcUnmapProcessMemoryEx(CURRENT_PROCESS_HANDLE, 0x28000000, (u32)info);
 	svcCloseHandle(prochand);
 	return res;
+}
+
+Result		bnPatchCustomPM() { // If cfw is Luma3DS 10 and higher, patch custom PM sysmodule
+	Result ret = 0;
+	s64 out;
+	if (R_SUCCEEDED(ret = svcGetSystemInfo(&out, 0x10000, 0))
+		&& GET_VERSION_MAJOR((u32)out) >= 10)
+	{
+		u32 patchAddr;
+		check_prim(ret = findCustomPMsvcRunPattern(&patchAddr), CUSTOM_PM_PATCH_FAIL);
+		ntrConfig->PMSvcRunAddr = patchAddr;
+	}
+	else ret = 0;
+error:
+	return ret;
 }
 
 Result      bnPatchAccessCheck(void)
@@ -98,21 +113,10 @@ Result      bnPatchAccessCheck(void)
     ret = patchRemoteProcess(bnConfig->FSPid, bnConfig->FSPatchAddr, (u8 *)&fsPatchValue, 4);
     check_sec(ret, FSPATCH_FAILURE);
 
-	// If cfw is Luma3DS 10 and higher, let NTR handle the PM patch
-	if (R_SUCCEEDED(ret = svcGetSystemInfo(&out, 0x10000, 0))
-		&& GET_VERSION_MAJOR((u32)out) >= 10)
-	{
-		u32 patchAddr;
-		u32 patchAddrRes = findCustomPMsvcRunPattern(&patchAddr);
-		check_sec(patchAddrRes, CUSTOM_PM_PATCH_FAIL);
-		ntrConfig->PMSvcRunAddr = patchAddr;
-	}
-	
     // If cfw is Luma3DS 9 and higher, skip sm patch
-    if (R_SUCCEEDED(ret) && GET_VERSION_MAJOR((u32)out) >= 9)
+    if (R_SUCCEEDED(ret = svcGetSystemInfo(&out, 0x10000, 0)) && GET_VERSION_MAJOR((u32)out) >= 9)
         return (0);
 	
-
     ret = patchRemoteProcess(bnConfig->SMPid, bnConfig->SMPatchAddr, smPatchBuf, 8);
     check_sec(ret, SMPATCH_FAILURE);
     return (0);
@@ -226,6 +230,9 @@ Result      bnBootNTR(void)
     // Patch services
     ret = bnPatchAccessCheck();
 	check_prim(ret, ACCESSPATCH_FAILURE);
+	// Patch custom PM
+	ret = bnPatchCustomPM();
+	check_prim(ret, CUSTOM_PM_PATCH_FAIL);
     
     // Init home menu params
     check_sec(bnInitParamsByHomeMenu(), UNKNOWN_HOMEMENU);
