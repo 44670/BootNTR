@@ -63,6 +63,14 @@ SVC_BEGIN svcMapProcessMemoryEx
     bx lr
 SVC_END
 
+SVC_BEGIN svcMapProcessMemoryExPluginLoader
+    str r4, [sp, #-4]!
+    ldr r4, [sp, #4]
+    svc 0xA0
+    ldr r4, [sp], #4
+    bx lr
+SVC_END
+
 SVC_BEGIN svcUnmapProcessMemoryEx
     svc 0xA1
     bx lr

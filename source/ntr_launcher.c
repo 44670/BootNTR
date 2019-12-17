@@ -29,9 +29,20 @@ error:
     return (RESULT_ERROR);
 }
 
+bool        isPluginLoaderLuma() {
+	Handle tmpHandle;
+	Result res = svcConnectToPort(&tmpHandle, "plg:ldr");
+	if (!res) {
+		svcCloseHandle(tmpHandle);
+		return true;
+	}
+	return false;
+}
+
 u32			findCustomPMsvcRunPattern(u32* outaddr)
 {
 	Handle prochand;
+	bool isPlgLoader = isPluginLoaderLuma();
 	u32 textStart = 0;
 	*outaddr = 0;
 	u32 res = 0;
@@ -53,7 +64,8 @@ u32			findCustomPMsvcRunPattern(u32* outaddr)
 	{
 		return res;
 	}
-	res = svcMapProcessMemoryEx(prochand, 0x28000000, (u32)addr, (u32)info); //map PM process memory into this process @ 0x08000000
+	if (isPlgLoader) res = svcMapProcessMemoryExPluginLoader(CURRENT_PROCESS_HANDLE, 0x28000000, prochand, (u32)addr, (u32)info);
+	else res = svcMapProcessMemoryEx(prochand, 0x28000000, (u32)addr, (u32)info); //map PM process memory into this process @ 0x08000000
 	if (res)
 	{
 		return res;
