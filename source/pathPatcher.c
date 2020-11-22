@@ -171,7 +171,7 @@ Result  loadAndPatch(version_t version)
     memset(mem, 0, newSize);
     fread(mem, size, 1, ntr);
     fclose(ntr);
-    svcFlushProcessDataCache(CURRENT_PROCESS_HANDLE, mem, newSize);
+    svcFlushProcessDataCache(CURRENT_PROCESS_HANDLE, (u32)mem, newSize);
     if (version != V32)
         patchBinary(mem, size);
     ntr = fopen(outPath, "wb");

@@ -147,3 +147,30 @@ Result svcCopyHandle(Handle *out, Handle outProcess, Handle in, Handle inProcess
 */
 Result svcTranslateHandle(u32 *outKAddr, char *outClassName, Handle in);
 ///@}
+
+/// Operations for svcControlProcess
+typedef enum ProcessOp
+{
+    PROCESSOP_GET_ALL_HANDLES,  ///< List all handles of the process, varg3 can be either 0 to fetch all handles, or token of the type to fetch
+                                ///< s32 count = svcControlProcess(handle, PROCESSOP_GET_ALL_HANDLES, (u32)&outBuf, 0)
+                                ///< Returns how many handles were found
+
+    PROCESSOP_SET_MMU_TO_RWX,   ///< Set the whole memory of the process with rwx access (in the mmu table only)
+                                                            ///< svcControlProcess(handle, PROCESSOP_SET_MMU_TO_RWX, 0, 0)
+
+    PROCESSOP_GET_ON_MEMORY_CHANGE_EVENT, ///< Get the handle of an event which will be signaled each time the memory layout of this process changes
+                                ///< svcControlProcess(handle, PROCESSOP_GET_ON_MEMORY_CHANGE_EVENT, &eventHandleOut, 0)
+
+    PROCESSOP_SIGNAL_ON_EXIT,   ///< Set a flag to be signaled when the process will be exited
+                                ///< svcControlProcess(handle, PROCESSOP_SIGNAL_ON_EXIT, 0, 0)
+    PROCESSOP_GET_PA_FROM_VA,   ///< Get the physical address of the VAddr within the process
+                                ///< svcControlProcess(handle, PROCESSOP_GET_PA_FROM_VA, (u32)&PAOut, VAddr)
+
+    PROCESSOP_SCHEDULE_THREADS, ///< Lock / Unlock the process's threads
+                                ///< svcControlProcess(handle, PROCESSOP_SCHEDULE_THREADS, lock, threadPredicate)
+                                ///< lock: 0 to unlock threads, any other value to lock threads
+                                ///< threadPredicate: can be NULL or a funcptr to a predicate (typedef bool (*ThreadPredicate)(KThread *thread);)
+                                ///< The predicate must return true to operate on the thread
+} ProcessOp;
+
+Result  svcControlProcess(Handle process, ProcessOp op, u32 varg2, u32 varg3);

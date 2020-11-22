@@ -74,7 +74,6 @@ void        addObjectToScreen(drawableScreen_t *screen, void *object);
 void        *removeLastObjectFromScreen(drawableScreen_t *screen);
 void        clearObjectListFromScreen(drawableScreen_t *screen);
 
-image_t     *newImage(sprite_t *sprite);
 bool        drawImage(void *self);
 
 window_t    *newWindow(sprite_t *background, sprite_t *title, \

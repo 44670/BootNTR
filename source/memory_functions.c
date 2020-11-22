@@ -1,9 +1,13 @@
 #include "main.h"
 #include "config.h"
+#include "csvc.h"
 
 extern char         *g_primary_error;
 extern char         *g_secondary_error;
 extern ntrConfig_t  *ntrConfig;
+
+#define LOCAL_MAP_ADDR_SRC 0x24000000
+#define LOCAL_MAP_ADDR_DST 0x25000000
 
 u32     protectRemoteMemory(Handle hProcess, u32 addr, u32 size)
 {
@@ -12,68 +16,44 @@ u32     protectRemoteMemory(Handle hProcess, u32 addr, u32 size)
 
 u32     copyRemoteMemory(Handle hDst, u32 ptrDst, Handle hSrc, u32 ptrSrc, u32 size)
 {
-    u32     dmaConfig[20] = { 0 };
-    u32     hdma = 0;
-    u32     state;
-    u32     i;
-    u32     result;
-    bool    firstError = true;
+    bool isPlgLoader = isPluginLoaderLuma();
+    ntrConfig->InterProcessDmaFinishState = DMASTATE_STARTING;
+    Result res = 0;
+    u32 pageSrc = ptrSrc & ~0xFFF, pageDst = ptrDst & ~0xFFF;
+    u32 offsetSrc = ptrSrc - pageSrc, offsetDst = ptrDst - pageDst;
+    u32 pageSize = ((size + ((offsetSrc > offsetDst) ? offsetSrc : offsetDst)) & ~0xFFF) + 0x1000;
 
-    if ((result = svcFlushProcessDataCache(hSrc, (void *)ptrSrc, size)) != 0)
-        goto error;
-    if ((result = svcFlushProcessDataCache(hDst, (void *)ptrDst, size)) != 0)
-        goto error;
-again:
-    if ((result = svcStartInterProcessDma(&hdma, hDst, (void *)ptrDst, hSrc, (void *)ptrSrc, size, dmaConfig)) != 0)
-        goto error;
-    state = 0;
-    if (ntrConfig->InterProcessDmaFinishState == 0)
-    {
-        while (1)
-        {
-            svc_getDmaState(&state, hdma);
-            svcSleepThread(10000);
-            result = state;
-            svcGetDmaState(&state, hdma);
-            if (result == state)
-                break;
-        }
-        ntrConfig->InterProcessDmaFinishState = state;
+    if (isPlgLoader) res = svcMapProcessMemoryExPluginLoader(CUR_PROCESS_HANDLE, LOCAL_MAP_ADDR_SRC, hSrc, pageSrc, pageSize);
+    else res = svcMapProcessMemoryEx(hSrc, LOCAL_MAP_ADDR_SRC, pageSrc, pageSize);
+
+    if (R_FAILED(res))
+        return RESULT_ERROR;
+
+    if (isPlgLoader) res = svcMapProcessMemoryExPluginLoader(CUR_PROCESS_HANDLE, LOCAL_MAP_ADDR_DST, hDst, pageDst, pageSize);
+    else res = svcMapProcessMemoryEx(hDst, LOCAL_MAP_ADDR_DST, pageDst, pageSize);
+
+    if (R_FAILED(res)) {
+        svcUnmapProcessMemoryEx(CUR_PROCESS_HANDLE, LOCAL_MAP_ADDR_SRC, pageSize);
+        return RESULT_ERROR;
     }
-    else
-    {
-        for (i = 0; i < 1000000; i++)
-        {           
-            result = svcGetDmaState(&state, hdma);
-            if (state == ntrConfig->InterProcessDmaFinishState)
-                break;
-            svc_sleepThread(10000);
-        }
-        if (i >= 1000000)
-        {
-            g_primary_error = READREMOTEMEMORY_TIMEOUT;
-            svcCloseHandle(hdma);
-            if (firstError)
-            {
-                newAppStatus(DEFAULT_COLOR, TINY | CENTER, "An error occurred");
-                newAppStatus(DEFAULT_COLOR, TINY | CENTER, "Retry in 2 seconds");
-                updateUI();
-                svcSleepThread(2000000000);
-                firstError = false;
-                removeAppStatus();
-                removeAppStatus();
-                updateUI();
-                goto again;
-            }
-            goto error;
-        }
-    }
-    svcCloseHandle(hdma);
-    if ((result = svcInvalidateProcessDataCache(hDst, (void *)ptrDst, size)) != 0)
-        goto error;
-    return (0);
-error:
-    return (RESULT_ERROR);
+    ntrConfig->InterProcessDmaFinishState = DMASTATE_RUNNING;
+
+    u32 currID = 0, remoteID = 0;
+    svcGetProcessId(&currID, hDst);
+    svcGetProcessId(&remoteID, CURRENT_PROCESS_HANDLE);
+
+    if (isPlgLoader && currID != remoteID) svcControlProcess(hDst, PROCESSOP_SCHEDULE_THREADS, 1, 0); // More stable in 3GX Loader luma builds
+    memcpy((u8*)(LOCAL_MAP_ADDR_DST + offsetDst), (u8*)(LOCAL_MAP_ADDR_SRC + offsetSrc), size);
+    svcUnmapProcessMemoryEx(CUR_PROCESS_HANDLE, LOCAL_MAP_ADDR_DST, pageSize);
+    svcInvalidateProcessDataCache(hDst, (u32)ptrDst, size);
+    svcInvalidateEntireInstructionCache();
+    if (isPlgLoader && currID != remoteID) svcControlProcess(hDst, PROCESSOP_SCHEDULE_THREADS, 0, 0);
+
+    svcUnmapProcessMemoryEx(CUR_PROCESS_HANDLE, LOCAL_MAP_ADDR_SRC, pageSize);
+    
+    svcSleepThread(10 * 1000 * 1000);
+    ntrConfig->InterProcessDmaFinishState = DMASTATE_DONE;
+    return 0;
 }
 
 u32     patchRemoteProcess(u32 pid, u32 addr, u8 *buf, u32 len)
@@ -87,7 +67,7 @@ u32     patchRemoteProcess(u32 pid, u32 addr, u8 *buf, u32 len)
     check_prim(ret, OPENPROCESS_FAILURE);
     ret = protectRemoteMemory(hProcess, ((addr / 0x1000) * 0x1000), 0x1000);
     check_prim(ret, PROTECTMEMORY_FAILURE);
-    ret = copyRemoteMemory(hProcess, addr, 0xffff8001, (u32)buf, len);
+    ret = copyRemoteMemory(hProcess, addr, CURRENT_PROCESS_HANDLE, (u32)buf, len);
     check_sec(ret, REMOTECOPY_FAILURE);
     if (hProcess)
         svcCloseHandle(hProcess);

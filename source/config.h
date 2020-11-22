@@ -1,3 +1,4 @@
+
 #ifndef CONFIG_H
 #define CONFIG_H
 
@@ -16,13 +17,13 @@
 #define SECONDS_IN_HOUR     3600
 #define SECONDS_IN_MINUTE   60
 
-enum
+enum configFlags
 {
     LV32 = BIT(0),
     LV33 = BIT(1),
     LV36 = BIT(2),
     CUSTOM_PLUGIN_PATH = BIT(3)
-}configFlags;
+};
 
 typedef struct  config_s
 {

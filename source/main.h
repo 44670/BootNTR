@@ -153,6 +153,7 @@ void    debug(char *str, int seconds);
 /*
 ** ntr_launcher.c
 */
+bool        isPluginLoaderLuma();
 Result      bnPatchAccessCheck(void);
 Result      bnLoadAndExecuteNTR(void);
 Result      bnBootNTR(void);

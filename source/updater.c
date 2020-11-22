@@ -340,7 +340,7 @@ static Result parseResponseData(const char *jsonText, u32 size, bool *hasUpdate)
                     }
                     if (url != NULL)
                     {
-                        strncpy(updateData->url, url, URL_MAX);
+                        strncpy(updateData->url, url, URL_MAX - 1);
                         *hasUpdate = true;
                         removeAppTop();
                         if (!APP_VERSION_REVISION)

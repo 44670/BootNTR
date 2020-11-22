@@ -29,14 +29,19 @@ error:
     return (RESULT_ERROR);
 }
 
-bool        isPluginLoaderLuma() {
-	Handle tmpHandle;
-	Result res = svcConnectToPort(&tmpHandle, "plg:ldr");
-	if (!res) {
-		svcCloseHandle(tmpHandle);
-		return true;
-	}
-	return false;
+bool        isPluginLoaderLuma()
+{
+    static u32 state = 0;
+    if (state == 0) {
+        Handle tmpHandle;
+        Result res = svcConnectToPort(&tmpHandle, "plg:ldr");
+        if (R_SUCCEEDED(res)) {
+            svcCloseHandle(tmpHandle);
+            state = 2;
+        }
+        else state = 1;
+    }
+	return state == 2;
 }
 
 u32			findCustomPMsvcRunPattern(u32* outaddr)
@@ -186,12 +191,12 @@ u32 loadNTRBin(void)
     u8 *temp = (u8 *)calloc(1, alignedSize);
     fread(temp, size, 1, ntr);
     fclose(ntr);
-    svcFlushProcessDataCache(getCurrentProcessHandle(), temp, alignedSize);
+    svcFlushProcessDataCache(getCurrentProcessHandle(), (u32)temp, alignedSize);
 
-    svcInvalidateProcessDataCache(getCurrentProcessHandle(), mem, alignedSize * 2);
+    svcInvalidateProcessDataCache(getCurrentProcessHandle(), (u32)mem, alignedSize * 2);
     memcpy(mem, temp, size);
     memcpy(mem + alignedSize, temp, size);
-    svcFlushProcessDataCache(getCurrentProcessHandle(), mem, alignedSize *2);
+    svcFlushProcessDataCache(getCurrentProcessHandle(), (u32)mem, alignedSize *2);
     free(temp);
     return ((u32)mem);
 error:

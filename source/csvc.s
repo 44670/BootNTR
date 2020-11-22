@@ -107,3 +107,8 @@ SVC_BEGIN svcTranslateHandle
     str r1, [r2]
     bx lr
 SVC_END
+
+SVC_BEGIN svcControlProcess
+    svc 0xB3
+    bx lr
+SVC_END

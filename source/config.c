@@ -80,10 +80,10 @@ error:
 
 void    resetConfig(void)
 {
-    char        path[0x100];
+    //char        path[0x100];
     config_t    *config = NULL;
     //bool        binPath = false;
-    u32         keys;
+    //u32         keys;
     //u32         size;
 
     if (!fileExists(configPath)) goto exit;

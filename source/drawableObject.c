@@ -118,18 +118,6 @@ error:
     return;
 }
 
-image_t     *newImage(sprite_t *sprite)
-{
-    image_t *ret;
-
-    if (!sprite) goto error;
-    ret->sprite = sprite;
-    ret->draw = drawImage;
-    return (ret);
-error:
-    return (NULL);
-}
-
 bool        drawImage(void *self)
 {
     image_t *img;
