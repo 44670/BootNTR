@@ -19,6 +19,7 @@ u32     copyRemoteMemory(Handle hDst, u32 ptrDst, Handle hSrc, u32 ptrSrc, u32 s
     bool isPlgLoader = isPluginLoaderLuma();
     ntrConfig->InterProcessDmaFinishState = DMASTATE_STARTING;
     Result res = 0;
+    Handle tmpHandle;
     u32 pageSrc = ptrSrc & ~0xFFF, pageDst = ptrDst & ~0xFFF;
     u32 offsetSrc = ptrSrc - pageSrc, offsetDst = ptrDst - pageDst;
     u32 pageSize = ((size + ((offsetSrc > offsetDst) ? offsetSrc : offsetDst)) & ~0xFFF) + 0x1000;
@@ -33,7 +34,8 @@ u32     copyRemoteMemory(Handle hDst, u32 ptrDst, Handle hSrc, u32 ptrSrc, u32 s
     else res = svcMapProcessMemoryEx(hDst, LOCAL_MAP_ADDR_DST, pageDst, pageSize);
 
     if (R_FAILED(res)) {
-        svcUnmapProcessMemoryEx(CUR_PROCESS_HANDLE, LOCAL_MAP_ADDR_SRC, pageSize);
+        tmpHandle = isPlgLoader ? CUR_PROCESS_HANDLE : hSrc;
+        svcUnmapProcessMemoryEx(tmpHandle, LOCAL_MAP_ADDR_SRC, pageSize);
         return RESULT_ERROR;
     }
     ntrConfig->InterProcessDmaFinishState = DMASTATE_RUNNING;
@@ -44,12 +46,16 @@ u32     copyRemoteMemory(Handle hDst, u32 ptrDst, Handle hSrc, u32 ptrSrc, u32 s
 
     if (isPlgLoader && currID != remoteID) svcControlProcess(hDst, PROCESSOP_SCHEDULE_THREADS, 1, 0); // More stable in 3GX Loader luma builds
     memcpy((u8*)(LOCAL_MAP_ADDR_DST + offsetDst), (u8*)(LOCAL_MAP_ADDR_SRC + offsetSrc), size);
-    svcUnmapProcessMemoryEx(CUR_PROCESS_HANDLE, LOCAL_MAP_ADDR_DST, pageSize);
+
+    tmpHandle = isPlgLoader ? CUR_PROCESS_HANDLE : hDst;
+    svcUnmapProcessMemoryEx(tmpHandle, LOCAL_MAP_ADDR_DST, pageSize);
+
     svcInvalidateProcessDataCache(hDst, (u32)ptrDst, size);
     svcInvalidateEntireInstructionCache();
     if (isPlgLoader && currID != remoteID) svcControlProcess(hDst, PROCESSOP_SCHEDULE_THREADS, 0, 0);
 
-    svcUnmapProcessMemoryEx(CUR_PROCESS_HANDLE, LOCAL_MAP_ADDR_SRC, pageSize);
+    tmpHandle = isPlgLoader ? CUR_PROCESS_HANDLE : hSrc;
+    svcUnmapProcessMemoryEx(tmpHandle, LOCAL_MAP_ADDR_SRC, pageSize);
     
     svcSleepThread(10 * 1000 * 1000);
     ntrConfig->InterProcessDmaFinishState = DMASTATE_DONE;
